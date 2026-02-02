@@ -47,7 +47,7 @@ function App() {
         marginBottom: '24px', padding: '0 8px', height: 'var(--header-height)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="/logo.svg" alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px', boxShadow: '0 4px 10px rgba(4, 96, 167, 0.2)' }} />
+          <img src="./logo.svg" alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px', boxShadow: '0 4px 10px rgba(4, 96, 167, 0.2)' }} />
           <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.5px' }}>
             Juku Salary
           </h1>
