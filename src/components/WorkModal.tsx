@@ -1,0 +1,379 @@
+import React, { useState, useEffect } from 'react';
+import type { WorkEntry, WorkBlock, Location, UserSettings, Campus } from '../types';
+import { X, Clock, Train, Trash2, MapPin } from 'lucide-react';
+
+interface WorkModalProps {
+    isOpen: boolean;
+    date: Date | null;
+    entry: WorkEntry | undefined;
+    onClose: () => void;
+    onSave: (date: string, data: Partial<WorkEntry>) => void;
+    onDelete: (date: string) => void;
+    settings: UserSettings;
+}
+
+const BLOCKS: WorkBlock[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+const CAMPUSES: Campus[] = ['平岡', '新札幌', '月寒', '円山', '北大前'];
+
+export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClose, onSave, onDelete, settings }) => {
+    if (!isOpen || !date) return null;
+
+    const [dateStr, setDateStr] = useState('');
+    const [selectedBlocks, setSelectedBlocks] = useState<WorkBlock[]>([]);
+
+    const [supportMinutes, setSupportMinutes] = useState(0);
+    const [allowance, setAllowance] = useState(0);
+    const [hasTransport, setHasTransport] = useState(true);
+
+    // Derived state, but stored for history
+    const [campus, setCampus] = useState<Campus>('平岡');
+    const [location, setLocation] = useState<Location>('hiraoka');
+    const [transportCost, setTransportCost] = useState(0);
+
+    const [leaderBlocks, setLeaderBlocks] = useState<WorkBlock[]>([]);
+    const [subLeaderBlocks, setSubLeaderBlocks] = useState<WorkBlock[]>([]);
+    const [isRoleExpanded, setIsRoleExpanded] = useState(false);
+
+    useEffect(() => {
+        if (date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const da = String(date.getDate()).padStart(2, '0');
+            setDateStr(`${y}-${m}-${da}`);
+
+            if (entry) {
+                setSelectedBlocks(entry.selectedBlocks || []);
+                setLeaderBlocks(entry.leaderBlocks || []);
+                setSubLeaderBlocks(entry.subLeaderBlocks || []);
+
+                setSupportMinutes(entry.supportMinutes);
+                setAllowance(entry.allowanceAmount);
+                setHasTransport(entry.hasTransport);
+                setCampus(entry.campus || '平岡');
+                setLocation(entry.location || 'hiraoka');
+                setTransportCost(entry.transportCost !== undefined ? entry.transportCost : settings.transportCost);
+            } else {
+                setSelectedBlocks([]);
+                setLeaderBlocks([]);
+                setSubLeaderBlocks([]);
+
+                setSupportMinutes(0);
+                setAllowance(0);
+                setHasTransport(true);
+
+                const defCampus = settings.defaultCampus || '平岡';
+                setCampus(defCampus);
+
+                // Auto-set Location Type based on default campus
+                setLocation(defCampus === '平岡' ? 'hiraoka' : 'other');
+
+                // Default transport cost for default Campus
+                setTransportCost(settings.campusTransportRates?.[defCampus] ?? settings.transportCost);
+            }
+        }
+    }, [date, entry, isOpen, settings]);
+
+    // Cleanup: Remove Leader/Sub tags if block is unselected from main
+    useEffect(() => {
+        setLeaderBlocks(prev => prev.filter(b => selectedBlocks.includes(b)));
+        setSubLeaderBlocks(prev => prev.filter(b => selectedBlocks.includes(b)));
+    }, [selectedBlocks]);
+
+    const handleCampusChange = (newCampus: Campus) => {
+        setCampus(newCampus);
+
+        // Auto-set Location Type
+        const newLocation: Location = newCampus === '平岡' ? 'hiraoka' : 'other';
+        setLocation(newLocation);
+
+        // Auto-set Transport Cost from Settings
+        const cost = settings.campusTransportRates?.[newCampus] ?? settings.transportCost;
+        setTransportCost(cost);
+    };
+
+    const handleSave = () => {
+        onSave(dateStr, {
+            selectedBlocks,
+            leaderBlocks,
+            subLeaderBlocks,
+            supportMinutes,
+            allowanceAmount: allowance,
+            hasTransport,
+            transportCost: hasTransport ? transportCost : undefined,
+            location,
+            campus
+        });
+        onClose();
+    };
+
+    const toggleBlock = (block: WorkBlock) => {
+        setSelectedBlocks(prev => {
+            if (prev.includes(block)) {
+                return prev.filter(b => b !== block);
+            } else {
+                return [...prev, block].sort();
+            }
+        });
+    };
+
+    const toggleLeader = (block: WorkBlock) => {
+        setLeaderBlocks(prev => {
+            if (prev.includes(block)) return prev.filter(b => b !== block);
+            return [...prev, block];
+        });
+        // Remove from SubLeader if present
+        setSubLeaderBlocks(prev => prev.filter(b => b !== block));
+        // Auto-select in main blocks? Maybe safer to require user to select main first
+        // But for UX, let's auto-select main block if user clicks Leader
+        if (!selectedBlocks.includes(block)) {
+            toggleBlock(block);
+        }
+    };
+
+    const toggleSubLeader = (block: WorkBlock) => {
+        setSubLeaderBlocks(prev => {
+            if (prev.includes(block)) return prev.filter(b => b !== block);
+            return [...prev, block];
+        });
+        // Remove from Leader if present
+        setLeaderBlocks(prev => prev.filter(b => b !== block));
+        // Auto-select in main blocks
+        if (!selectedBlocks.includes(block)) {
+            toggleBlock(block);
+        }
+    };
+
+    const handleDelete = () => {
+        if (window.confirm('この日の記録を削除しますか？')) {
+            onDelete(dateStr);
+            onClose();
+        }
+    };
+
+    return (
+        <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000, animation: 'fadeIn 0.2s'
+        }} onClick={onClose}>
+            <div style={{
+                background: 'white',
+                width: '90%', maxWidth: '360px',
+                borderRadius: '24px',
+                padding: '24px',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                display: 'flex', flexDirection: 'column', gap: '20px',
+                maxHeight: '90vh', overflowY: 'auto'
+            }} onClick={e => e.stopPropagation()}>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ fontSize: '18px' }}>{date?.toLocaleDateString()} の編集</h3>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <X size={24} color="#64748b" />
+                    </button>
+                </div>
+
+                {/* Campus Selection - New! */}
+                <div className="input-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
+                        <MapPin size={16} /> 勤務校舎
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                        {CAMPUSES.map(c => (
+                            <button
+                                key={c}
+                                onClick={() => handleCampusChange(c)}
+                                style={{
+                                    padding: '8px 4px', fontSize: '12px', borderRadius: '8px',
+                                    border: '1px solid',
+                                    borderColor: campus === c ? 'var(--primary)' : '#e2e8f0',
+                                    background: campus === c ? 'var(--primary-light)' : '#f8fafc',
+                                    color: campus === c ? 'white' : '#64748b',
+                                    fontWeight: campus === c ? 700 : 500,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {c}
+                            </button>
+                        ))}
+                    </div>
+                    {/* Display Location Allowance Info */}
+                    <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', textAlign: 'right' }}>
+                        勤務給: {location === 'hiraoka' ? '+800円' : '+400円'}
+                    </div>
+                </div>
+
+                {/* Block Selection */}
+                <div className="input-group">
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>担当コマ (A-G)</label>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {BLOCKS.map(block => {
+                            const isSelected = selectedBlocks.includes(block);
+                            let bg = isSelected ? 'var(--primary)' : '#f1f5f9';
+                            if (leaderBlocks.includes(block)) bg = '#7c3aed'; // Purple for Leader
+                            if (subLeaderBlocks.includes(block)) bg = '#059669'; // Green for SubLeader
+
+                            return (
+                                <button
+                                    key={block}
+                                    onClick={() => toggleBlock(block)}
+                                    style={{
+                                        width: '40px', height: '40px',
+                                        borderRadius: '50%',
+                                        border: 'none',
+                                        background: bg,
+                                        color: isSelected ? 'white' : '#64748b',
+                                        fontWeight: 700,
+                                        cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        transition: 'all 0.2s',
+                                        boxShadow: (leaderBlocks.includes(block) || subLeaderBlocks.includes(block)) ? '0 2px 4px rgba(0,0,0,0.2)' : 'none'
+                                    }}
+                                >
+                                    {block}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Role Pay Collapsible */}
+                <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden', flexShrink: 0 }}>
+                    <button
+                        type="button"
+                        onClick={() => setIsRoleExpanded(!isRoleExpanded)}
+                        style={{
+                            width: '100%', padding: '12px 16px', background: '#f8fafc', border: 'none',
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            fontSize: '13px', fontWeight: 600, color: '#475569', cursor: 'pointer',
+                            minHeight: '48px'
+                        }}
+                    >
+                        <span>役職給設定 (リーダー・サブリーダー)</span>
+                        <span style={{ transform: isRoleExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</span>
+                    </button>
+
+                    {isRoleExpanded && (
+                        <div style={{ padding: '16px', borderTop: '1px solid #e2e8f0', background: 'white' }}>
+                            {/* Leader Row */}
+                            <div style={{ marginBottom: '12px' }}>
+                                <label style={{ display: 'block', fontSize: '12px', color: '#7c3aed', fontWeight: 700, marginBottom: '6px' }}>
+                                    リーダー (2000円)
+                                </label>
+                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                    {BLOCKS.map(block => (
+                                        <button
+                                            key={block}
+                                            onClick={() => toggleLeader(block)}
+                                            style={{
+                                                width: '32px', height: '32px', borderRadius: '6px',
+                                                border: '1px solid',
+                                                borderColor: leaderBlocks.includes(block) ? '#7c3aed' : '#e2e8f0',
+                                                background: leaderBlocks.includes(block) ? '#7c3aed' : 'white',
+                                                color: leaderBlocks.includes(block) ? 'white' : '#64748b',
+                                                fontSize: '12px', fontWeight: 600, cursor: 'pointer'
+                                            }}
+                                        >
+                                            {block}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* SubLeader Row */}
+                            <div>
+                                <label style={{ display: 'block', fontSize: '12px', color: '#059669', fontWeight: 700, marginBottom: '6px' }}>
+                                    サブリーダー (1500円)
+                                </label>
+                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                    {BLOCKS.map(block => (
+                                        <button
+                                            key={block}
+                                            onClick={() => toggleSubLeader(block)}
+                                            style={{
+                                                width: '32px', height: '32px', borderRadius: '6px',
+                                                border: '1px solid',
+                                                borderColor: subLeaderBlocks.includes(block) ? '#059669' : '#e2e8f0',
+                                                background: subLeaderBlocks.includes(block) ? '#059669' : 'white',
+                                                color: subLeaderBlocks.includes(block) ? 'white' : '#64748b',
+                                                fontSize: '12px', fontWeight: 600, cursor: 'pointer'
+                                            }}
+                                        >
+                                            {block}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Support Section */}
+                <div className="input-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
+                        <Clock size={16} /> 追加業務・残業 (分)
+                    </label>
+                    <input
+                        type="number"
+                        value={supportMinutes}
+                        onChange={e => setSupportMinutes(Number(e.target.value))}
+                        step={15}
+                        style={{ width: '100%' }}
+                        placeholder="事務作業など"
+                    />
+                </div>
+
+                {/* Allowance */}
+                <div className="input-group">
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>手当給 (円)</label>
+                    <input
+                        type="number"
+                        value={allowance}
+                        onChange={e => setAllowance(Number(e.target.value))}
+                        placeholder="例: 1000"
+                    />
+                </div>
+
+                {/* Transport */}
+                <div className="input-group" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '12px', borderRadius: '12px' }}>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, cursor: 'pointer' }}>
+                            <Train size={18} /> 交通費支給
+                            <input
+                                type="checkbox"
+                                checked={hasTransport}
+                                onChange={e => setHasTransport(e.target.checked)}
+                                style={{ width: '20px', height: '20px', margin: 0 }}
+                            />
+                        </label>
+                    </div>
+                    {hasTransport && (
+                        <div style={{ width: '100px' }}>
+                            <input
+                                type="number"
+                                value={transportCost}
+                                onChange={e => setTransportCost(Number(e.target.value))}
+                                style={{ textAlign: 'right' }}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '8px' }}>
+                    <button onClick={handleDelete} style={{
+                        padding: '12px', borderRadius: '12px', border: 'none',
+                        background: '#fee2e2', color: '#ef4444',
+                        fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                    }}>
+                        <Trash2 size={18} /> 削除
+                    </button>
+                    <button className="glass-btn" onClick={handleSave} style={{ width: '100%', margin: 0, background: 'var(--primary)', color: 'white' }}>
+                        保存
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    );
+};
