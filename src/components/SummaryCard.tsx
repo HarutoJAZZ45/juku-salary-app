@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import type { UserSettings, WorkEntry } from '../types';
 import { calculateDailyTotal, formatCurrency, getPeriodRange } from '../utils/calculator';
 import { useTranslation } from '../contexts/LanguageContext';
-import { getStreakBadge, getEarningsBadge, Badge } from '../utils/badges';
+import { getStreakBadge, getEarningsBadge } from '../utils/badges';
+import type { Badge } from '../utils/badges';
 import { BadgeDisplay } from './BadgeDisplay';
 
 interface SummaryCardProps {
