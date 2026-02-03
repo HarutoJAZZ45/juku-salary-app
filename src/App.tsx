@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSalaryData } from './hooks/useSalaryData';
+import { Analytics } from "@vercel/analytics/react";
 import { CalendarGrid } from './components/CalendarGrid';
 import { SummaryCard } from './components/SummaryCard';
 import { WorkModal } from './components/WorkModal';
@@ -342,6 +343,7 @@ function App() {
         isOpen={isAnalyticsOpen}
         onClose={() => setIsAnalyticsOpen(false)}
       />
+      <Analytics />
     </>
   );
 }
