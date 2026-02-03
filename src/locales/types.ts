@@ -69,6 +69,8 @@ export interface Translation {
         editButton: string;
         newsTitle: string;
         newsEmpty: string;
+        newsFilterAll: string;
+        newsFilterImportant: string;
     };
     badges: {
         streakBronze: string;

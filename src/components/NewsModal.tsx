@@ -10,7 +10,14 @@ interface NewsModalProps {
 
 export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
     const { t, language } = useTranslation();
+    const [filter, setFilter] = React.useState<'all' | 'important'>('all');
+
     if (!isOpen) return null;
+
+    const filteredItems = NEWS_ITEMS.filter(item => {
+        if (filter === 'important') return item.important;
+        return true;
+    });
 
     return (
         <div style={{
@@ -32,22 +39,56 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                 <div style={{
                     padding: '16px 24px',
                     borderBottom: '1px solid #e2e8f0',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    display: 'flex', flexDirection: 'column', gap: '12px',
                     background: '#f8fafc'
                 }}>
-                    <h3 style={{ margin: 0, fontSize: '18px', color: '#334155' }}>{t.app.newsTitle} 🔔</h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-                        <X size={24} color="#64748b" />
-                    </button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 style={{ margin: 0, fontSize: '18px', color: '#334155' }}>{t.app.newsTitle} 🔔</h3>
+                        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+                            <X size={24} color="#64748b" />
+                        </button>
+                    </div>
+
+                    {/* Filter Tabs */}
+                    <div style={{ display: 'flex', gap: '8px', padding: '4px', background: '#e2e8f0', borderRadius: '12px', width: 'fit-content' }}>
+                        <button
+                            onClick={() => setFilter('all')}
+                            style={{
+                                border: 'none',
+                                background: filter === 'all' ? 'white' : 'transparent',
+                                color: filter === 'all' ? '#0f172a' : '#64748b',
+                                padding: '6px 16px', borderRadius: '8px',
+                                fontSize: '13px', fontWeight: 600,
+                                cursor: 'pointer', transition: 'all 0.2s',
+                                boxShadow: filter === 'all' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                            }}
+                        >
+                            {t.app.newsFilterAll}
+                        </button>
+                        <button
+                            onClick={() => setFilter('important')}
+                            style={{
+                                border: 'none',
+                                background: filter === 'important' ? 'white' : 'transparent',
+                                color: filter === 'important' ? '#e11d48' : '#64748b',
+                                padding: '6px 16px', borderRadius: '8px',
+                                fontSize: '13px', fontWeight: 600,
+                                cursor: 'pointer', transition: 'all 0.2s',
+                                boxShadow: filter === 'important' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                            }}
+                        >
+                            {t.app.newsFilterImportant}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Content List */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-                    {NEWS_ITEMS.length === 0 ? (
+                    {filteredItems.length === 0 ? (
                         <p style={{ textAlign: 'center', color: '#64748b', marginTop: '32px' }}>{t.app.newsEmpty}</p>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            {NEWS_ITEMS.map((item) => (
+                            {filteredItems.map((item) => (
                                 <div key={item.id} style={{
                                     border: '1px solid #e2e8f0',
                                     borderRadius: '16px',

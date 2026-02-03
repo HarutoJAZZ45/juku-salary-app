@@ -69,6 +69,8 @@ export const ja: Translation = {
         editButton: 'まとめて編集',
         newsTitle: 'お知らせ',
         newsEmpty: 'お知らせはありません',
+        newsFilterAll: 'すべて',
+        newsFilterImportant: '重要のみ',
     },
     badges: {
         streakBronze: '3連勤',

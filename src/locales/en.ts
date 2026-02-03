@@ -69,6 +69,8 @@ export const en: Translation = {
         editButton: 'Batch Edit',
         newsTitle: 'News',
         newsEmpty: 'No news available',
+        newsFilterAll: 'All',
+        newsFilterImportant: 'Important',
     },
     badges: {
         streakBronze: '3-Day Streak',

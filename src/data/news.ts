@@ -10,6 +10,48 @@ export interface NewsItem {
 
 export const NEWS_ITEMS: NewsItem[] = [
     {
+        id: '20260203-05',
+        date: '2026-02-03',
+        title: {
+            ja: 'バッジ機能を追加しました！🏆',
+            en: 'Achievements (Badges) Added! 🏆',
+            es: '¡Logros (Insignias) Añadidos! 🏆'
+        },
+        content: {
+            ja: `頑張りが形になる「バッジ機能」を追加しました！
+連勤日数や月間給与額に応じて、素敵な条件付きバッジを獲得できます。
+
+**獲得できるバッジ**:
+* 🔥 **連勤バッジ**: 3連勤、4連勤、5連勤
+* 🏆 **給与バッジ**: 月収7万〜16万の各ランク（ブロンズ〜プラチナ）
+
+獲得したバッジは給与カードに表示されます。
+バッジをクリック・タップすると、すべてのバッジ一覧と獲得条件を確認できます。
+今月のレジェンドを目指して頑張りましょう！`,
+            en: `We've added an "Achievements" feature to visualize your hard work!
+You can earn badges based on your consecutive working days and monthly earnings.
+
+**Available Badges**:
+* 🔥 **Streak Badges**: 3, 4, and 5 consecutive days
+* 🏆 **Earnings Badges**: Bronze to Platinum ranks based on monthly income
+
+Earned badges will appear on your Salary Summary card.
+Click/Tap a badge to see the full list and requirements.
+Aim for Platinum!`,
+            es: `¡Hemos añadido una función de "Logros" para visualizar tu esfuerzo!
+Puedes ganar insignias basadas en tus días de trabajo consecutivos y tus ingresos mensuales.
+
+**Insignias Disponibles**:
+* 🔥 **Insignias de Racha**: 3, 4 y 5 días consecutivos
+* 🏆 **Insignias de Ingresos**: Rangos de Bronce a Platino basados en ingresos mensuales
+
+Las insignias ganadas aparecerán en tu tarjeta de Resumen de Salario.
+Haz clic/toca una insignia para ver la lista completa y los requisitos.
+¡Apunta al Platino!`
+        },
+        important: false,
+    },
+    {
         id: '20260203-04',
         date: '2026-02-03',
         title: {
