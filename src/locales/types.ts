@@ -74,9 +74,16 @@ export interface Translation {
         streakBronze: string;
         streakSilver: string;
         streakGold: string;
+        streakDesc: string; // Generic description for streak
         earnBronze: string;
         earnSilver: string;
         earnGold: string;
         earnPlatinum: string;
+        earnBronzeDesc: string;
+        earnSilverDesc: string;
+        earnGoldDesc: string;
+        earnPlatinumDesc: string;
+        modalTitle: string;
+        modalDesc: string;
     };
 }

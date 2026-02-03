@@ -73,10 +73,17 @@ export const es: Translation = {
     badges: {
         streakBronze: 'Racha de 3 días',
         streakSilver: 'Racha de 4 días',
-        streakGold: 'Maestro de 5 días',
-        earnBronze: 'Leyenda de Bronce',
-        earnSilver: 'Leyenda de Plata',
-        earnGold: 'Leyenda de Oro',
-        earnPlatinum: 'Leyenda de Platino',
+        streakGold: 'Racha de 5 días',
+        streakDesc: 'Otorgado en función de los días consecutivos de trabajo.',
+        earnBronze: 'Bronce',
+        earnSilver: 'Plata',
+        earnGold: 'Oro',
+        earnPlatinum: 'Platino',
+        earnBronzeDesc: '¡Ganó más de 70.000 yenes!',
+        earnSilverDesc: '¡Ganó más de 100.000 yenes!',
+        earnGoldDesc: '¡Ganó más de 130.000 yenes!',
+        earnPlatinumDesc: '¡Ganó más de 160.000 yenes! ¡Felicidades!',
+        modalTitle: 'Insignias Ganadas',
+        modalDesc: 'Se muestran las insignias ganadas este mes.',
     }
 };

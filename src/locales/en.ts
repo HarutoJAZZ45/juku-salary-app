@@ -73,10 +73,17 @@ export const en: Translation = {
     badges: {
         streakBronze: '3-Day Streak',
         streakSilver: '4-Day Streak',
-        streakGold: '5-Day Master',
-        earnBronze: 'Bronze Legend',
-        earnSilver: 'Silver Legend',
-        earnGold: 'Gold Legend',
-        earnPlatinum: 'Platinum Legend',
+        streakGold: '5-Day Streak',
+        streakDesc: 'Awarded based on consecutive working days.',
+        earnBronze: 'Bronze',
+        earnSilver: 'Silver',
+        earnGold: 'Gold',
+        earnPlatinum: 'Platinum',
+        earnBronzeDesc: 'Earned over 70,000 yen!',
+        earnSilverDesc: 'Earned over 100,000 yen!',
+        earnGoldDesc: 'Earned over 130,000 yen!',
+        earnPlatinumDesc: 'Earned over 160,000 yen! Congratulations!',
+        modalTitle: 'Badges Earned',
+        modalDesc: 'Badges earned for this month are displayed.',
     }
 };

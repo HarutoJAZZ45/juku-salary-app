@@ -6,6 +6,7 @@ import { WorkModal } from './components/WorkModal';
 import { FeedbackModal } from './components/FeedbackModal';
 import { SettingsModal } from './components/SettingsModal';
 import { NewsModal } from './components/NewsModal';
+import { BadgeHelpModal } from './components/BadgeHelpModal';
 import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
@@ -25,6 +26,7 @@ function App() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isNewsOpen, setIsNewsOpen] = useState(false);
+  const [isBadgeHelpOpen, setIsBadgeHelpOpen] = useState(false);
 
   // Batch Edit State
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -148,6 +150,7 @@ function App() {
         entries={entries}
         settings={settings}
         currentDate={currentViewDate}
+        onBadgeClick={() => setIsBadgeHelpOpen(true)}
       />
 
       {/* Month Navigation & Batch Toggle */}
@@ -248,6 +251,11 @@ function App() {
       <NewsModal
         isOpen={isNewsOpen}
         onClose={() => setIsNewsOpen(false)}
+      />
+
+      <BadgeHelpModal
+        isOpen={isBadgeHelpOpen}
+        onClose={() => setIsBadgeHelpOpen(false)}
       />
     </>
   );

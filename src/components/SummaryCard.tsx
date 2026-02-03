@@ -10,9 +10,10 @@ interface SummaryCardProps {
     entries: Record<string, WorkEntry>;
     settings: UserSettings;
     currentDate: Date;
+    onBadgeClick?: () => void;
 }
 
-export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, currentDate }) => {
+export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, currentDate, onBadgeClick }) => {
     const { t } = useTranslation();
     const period = useMemo(() => getPeriodRange(currentDate, settings.closingDay), [currentDate, settings.closingDay]);
 
@@ -71,7 +72,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
                     </div>
                 </div>
                 <div>
-                    <BadgeDisplay badges={badges} />
+                    <BadgeDisplay badges={badges} onClick={onBadgeClick} />
                 </div>
             </div>
 
