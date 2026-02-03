@@ -72,6 +72,8 @@ export interface Translation {
         newsFilterAll: string;
         newsFilterImportant: string;
         newsFilterUpdate: string;
+        paydayTitle: string;
+        paydayContent: string;
     };
     badges: {
         streakBronze: string;

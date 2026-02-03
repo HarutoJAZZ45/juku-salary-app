@@ -72,6 +72,8 @@ export const es: Translation = {
         newsFilterAll: 'Todo',
         newsFilterImportant: 'Importante',
         newsFilterUpdate: 'Actualizaciones',
+        paydayTitle: '¡Hoy es día de pago (fin de mes)! 💰',
+        paydayContent: '¡Buen trabajo este mes!\nRevisa tu nómina y date un capricho ✨',
     },
     badges: {
         streakBronze: 'Racha de 3 días',

@@ -14,7 +14,25 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
 
     if (!isOpen) return null;
 
-    const filteredItems = NEWS_ITEMS.filter(item => {
+    // Check if today is the last day of the month
+    const today = new Date();
+    const isPayday = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate() === today.getDate();
+
+    const allItems = [...NEWS_ITEMS];
+
+    // Prepend Payday notification if applicable
+    if (isPayday) {
+        allItems.unshift({
+            id: `payday-${today.toISOString().split('T')[0]}`,
+            date: today.toLocaleDateString('ja-JP').replace(/\//g, '-'),
+            title: { ja: t.app.paydayTitle, en: t.app.paydayTitle, es: t.app.paydayTitle },
+            content: { ja: t.app.paydayContent, en: t.app.paydayContent, es: t.app.paydayContent },
+            category: 'notice',
+            important: true,
+        });
+    }
+
+    const filteredItems = allItems.filter(item => {
         if (filter === 'important') return item.important;
         if (filter === 'update') return item.category === 'update';
         return true;
