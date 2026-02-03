@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 import type { UserSettings, WorkEntry } from '../types';
 import { calculateDailyTotal, formatCurrency, getPeriodRange } from '../utils/calculator';
-import { Wallet } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
+import { getStreakBadge, getEarningsBadge, Badge } from '../utils/badges';
+import { BadgeDisplay } from './BadgeDisplay';
 
 interface SummaryCardProps {
     entries: Record<string, WorkEntry>;
@@ -18,6 +19,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
         let total = 0;
         let komaCount = 0;
         let supportHours = 0;
+        const periodEntries: WorkEntry[] = [];
 
         Object.values(entries).forEach(entry => {
             const entryDate = new Date(entry.date);
@@ -32,11 +34,24 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
                 }
 
                 supportHours += mins / 60;
+                periodEntries.push(entry);
             }
         });
 
-        return { total, komaCount, supportHours };
+        return { total, komaCount, supportHours, periodEntries };
     }, [entries, period, settings]);
+
+    const badges = useMemo(() => {
+        const earnedBadges: Badge[] = [];
+
+        const streakBadge = getStreakBadge(stats.periodEntries, period.start, period.end);
+        if (streakBadge) earnedBadges.push(streakBadge);
+
+        const earnedBadge = getEarningsBadge(stats.total);
+        if (earnedBadge) earnedBadges.push(earnedBadge);
+
+        return earnedBadges;
+    }, [stats.total, stats.periodEntries, period]);
 
     return (
         <div className="glass-panel" style={{
@@ -54,8 +69,8 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
                         {formatCurrency(stats.total)}
                     </div>
                 </div>
-                <div style={{ background: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '50%', backdropFilter: 'blur(4px)' }}>
-                    <Wallet color="white" size={32} />
+                <div>
+                    <BadgeDisplay badges={badges} />
                 </div>
             </div>
 

@@ -69,5 +69,14 @@ export const en: Translation = {
         editButton: 'Batch Edit',
         newsTitle: 'News',
         newsEmpty: 'No news available',
+    },
+    badges: {
+        streakBronze: '3-Day Streak',
+        streakSilver: '4-Day Streak',
+        streakGold: '5-Day Master',
+        earnBronze: 'Bronze Legend',
+        earnSilver: 'Silver Legend',
+        earnGold: 'Gold Legend',
+        earnPlatinum: 'Platinum Legend',
     }
 };

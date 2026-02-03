@@ -69,5 +69,14 @@ export const ja: Translation = {
         editButton: 'まとめて編集',
         newsTitle: 'お知らせ',
         newsEmpty: 'お知らせはありません',
+    },
+    badges: {
+        streakBronze: '3連勤賞',
+        streakSilver: '4連勤賞',
+        streakGold: '5連勤マスター',
+        earnBronze: 'ブロンズレジェンド',
+        earnSilver: 'シルバーレジェンド',
+        earnGold: 'ゴールドレジェンド',
+        earnPlatinum: 'プラチナレジェンド',
     }
 };

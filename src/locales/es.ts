@@ -70,4 +70,13 @@ export const es: Translation = {
         newsTitle: 'Noticias',
         newsEmpty: 'No hay noticias disponibles',
     },
+    badges: {
+        streakBronze: 'Racha de 3 días',
+        streakSilver: 'Racha de 4 días',
+        streakGold: 'Maestro de 5 días',
+        earnBronze: 'Leyenda de Bronce',
+        earnSilver: 'Leyenda de Plata',
+        earnGold: 'Leyenda de Oro',
+        earnPlatinum: 'Leyenda de Platino',
+    }
 };

@@ -70,4 +70,13 @@ export interface Translation {
         newsTitle: string;
         newsEmpty: string;
     };
+    badges: {
+        streakBronze: string;
+        streakSilver: string;
+        streakGold: string;
+        earnBronze: string;
+        earnSilver: string;
+        earnGold: string;
+        earnPlatinum: string;
+    };
 }
