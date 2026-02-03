@@ -10,6 +10,45 @@ export interface NewsItem {
 
 export const NEWS_ITEMS: NewsItem[] = [
     {
+        id: '20260203-04',
+        date: '2026-02-03',
+        title: {
+            ja: '日英西の3言語に対応しました！🌍',
+            en: 'Multi-language Support Added (JP/EN/ES)! 🌍',
+            es: '¡Soporte multilingüe añadido (JP/EN/ES)! 🌍'
+        },
+        content: {
+            ja: `アプリが日本語・英語・スペイン語の3言語に対応しました！
+設定ボタン（⚙️）の一番下にある言語切り替えボタンから、お好きな言語を選択できます。
+
+**変更手順**:
+1. 右上の設定ボタン（⚙️）をタップ
+2. メニューの一番下までスクロール
+3. 「日本語 / English / Español」から選択して保存
+
+ぜひ使いやすい言語でご利用ください！`,
+            en: `The app now supports 3 languages: Japanese, English, and Spanish!
+You can select your preferred language from the language toggle button at the bottom of the Settings (⚙️) menu.
+
+**How to change**:
+1. Tap the Settings button (⚙️) at the top right
+2. Scroll to the bottom of the menu
+3. Select from "日本語 / English / Español" and Save
+
+Please use the app in your preferred language!`,
+            es: `¡La aplicación ahora soporta 3 idiomas: japonés, inglés y español!
+Puede seleccionar su idioma preferido desde el botón de cambio de idioma en la parte inferior del menú de Configuración (⚙️).
+
+**Cómo cambiar**:
+1. Toque el botón de Configuración (⚙️) en la parte superior derecha
+2. Desplácese hasta la parte inferior del menú
+3. Seleccione entre "日本語 / English / Español" y Guardar
+
+¡Utilice la aplicación en su idioma preferido!`
+        },
+        important: false,
+    },
+    {
         id: '20260203-03',
         date: '2026-02-03',
         title: {
