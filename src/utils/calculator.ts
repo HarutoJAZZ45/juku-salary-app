@@ -130,3 +130,34 @@ export const getPeriodRange = (currentDate: Date, closingDay: number = 15) => {
 export const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(amount);
 };
+
+export const getPaymentDate = (workDate: Date, closingDay: number = 15, lagMonths: number = 1): Date => {
+    const year = workDate.getFullYear();
+    const month = workDate.getMonth();
+    const day = workDate.getDate();
+
+    let workMonth = month;
+    let workYear = year;
+
+    // If day is after closing day, it belongs to the next month's work period
+    if (day > closingDay) {
+        workMonth++;
+        if (workMonth > 11) {
+            workMonth = 0;
+            workYear++;
+        }
+    }
+
+    // Add lag to determine payment month
+    // Example: Dec Work (Month 11) + 1 Lag = Jan Payment (Month 0, Year++)
+    let payMonth = workMonth + lagMonths;
+    let payYear = workYear;
+
+    while (payMonth > 11) {
+        payMonth -= 12;
+        payYear++;
+    }
+
+    // Return the payment date (approximate as 25th of payment month)
+    return new Date(payYear, payMonth, 25);
+};

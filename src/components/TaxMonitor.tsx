@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from '../contexts/LanguageContext';
 import { useSalaryData } from '../hooks/useSalaryData';
-import { calculateDailyTotal } from '../utils/calculator';
+import { calculateDailyTotal, getPaymentDate } from '../utils/calculator';
 import { AlertCircle } from 'lucide-react';
 
 export const TaxMonitor: React.FC = () => {
@@ -11,16 +11,13 @@ export const TaxMonitor: React.FC = () => {
     const today = new Date();
     const currentYear = today.getFullYear();
 
-    // Calculate annual income (Jan 1 - Dec 31)
-    // Note: This matches the "paid date" logic usually, but for simplicity we'll sum up entries by date
-    // STRICTLY SPEAKING: 103man wall is based on "Payment Date".
-    // However, users might want to know based on work date.
-    // Let's assume work date for now as it's easier to track visually.
-
+    // Calculate annual income based on PAYMENT DATE (Jan 1 - Dec 31)
     let totalIncome = 0;
     Object.values(entries).forEach(entry => {
-        const date = new Date(entry.date);
-        if (date.getFullYear() === currentYear) {
+        const workDate = new Date(entry.date);
+        const payDate = getPaymentDate(workDate, settings.closingDay, 1); // Fixed 1 month lag
+
+        if (payDate.getFullYear() === currentYear) {
             totalIncome += calculateDailyTotal(entry, settings);
         }
     });
