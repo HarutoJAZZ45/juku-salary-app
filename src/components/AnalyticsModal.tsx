@@ -12,10 +12,19 @@ interface AnalyticsModalProps {
 }
 
 export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose }) => {
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
     const { entries, settings } = useSalaryData();
 
     if (!isOpen) return null;
+
+    // ... (rest of the file until the chart) ...
+
+    const formatYAxis = (val: number) => {
+        if (language === 'ja') {
+            return `${val / 10000}万円`;
+        }
+        return `¥${val / 1000}k`;
+    };
 
     // Aggregate data by month
     const monthlyData: Record<string, { month: string; income: number; hours: number; classes: number }> = {};
@@ -88,7 +97,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose 
                                 <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                     <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                                    <YAxis tick={{ fontSize: 12 }} tickFormatter={(val) => `¥${val / 1000}k`} />
+                                    <YAxis tick={{ fontSize: 12 }} tickFormatter={formatYAxis} width={60} />
                                     <Tooltip />
                                     <Bar dataKey="income" fill="#3b82f6" name={t.analytics?.monthlyIncome} />
                                 </BarChart>
