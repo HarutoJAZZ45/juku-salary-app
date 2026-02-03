@@ -11,9 +11,11 @@ interface CalendarGridProps {
     entries: Record<string, WorkEntry>;
     settings: UserSettings;
     onDayClick: (date: Date) => void;
+    isSelectionMode: boolean;
+    selectedDates: Date[];
 }
 
-export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entries, settings, onDayClick }) => {
+export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entries, settings, onDayClick, isSelectionMode, selectedDates }) => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
     const startDate = startOfWeek(monthStart, { weekStartsOn: 0 }); // Sunday start
@@ -55,6 +57,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entrie
                     const isCurrentMonth = isSameMonth(day, monthStart);
                     const isTodayDate = isToday(day);
 
+                    const isSelected = selectedDates.some(d => format(d, 'yyyy-MM-dd') === formattedDate);
+
                     return (
                         <div
                             key={day.toString()}
@@ -63,12 +67,20 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entrie
                                 minHeight: '80px',
                                 borderRight: '1px solid rgba(255,255,255,0.2)',
                                 borderBottom: '1px solid rgba(255,255,255,0.2)',
-                                background: isTodayDate ? 'rgba(255,255,255,0.6)' : isCurrentMonth ? 'transparent' : 'rgba(0,0,0,0.02)',
+                                background: isSelected
+                                    ? 'rgba(4, 96, 167, 0.15)'
+                                    : isTodayDate
+                                        ? 'rgba(255,255,255,0.6)'
+                                        : isCurrentMonth
+                                            ? 'transparent'
+                                            : 'rgba(0,0,0,0.02)',
                                 color: isCurrentMonth ? 'inherit' : 'rgba(0,0,0,0.2)',
                                 padding: '4px',
                                 cursor: 'pointer',
                                 position: 'relative',
-                                transition: 'background 0.2s'
+                                transition: 'background 0.2s',
+                                border: isSelected ? '2px solid var(--primary)' : undefined,
+                                zIndex: isSelected ? 1 : 0
                             }}
                             className="calendar-cell"
                         >
@@ -101,6 +113,19 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entrie
                                             ¥{dayTotal.toLocaleString()}
                                         </div>
                                     )}
+                                </div>
+                            )}
+
+                            {/* Selection Checkmark */}
+                            {isSelected && (
+                                <div style={{
+                                    position: 'absolute', top: '2px', right: '2px',
+                                    width: '16px', height: '16px',
+                                    background: 'var(--primary)', borderRadius: '50%',
+                                    color: 'white', fontSize: '10px',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    ✓
                                 </div>
                             )}
                         </div>

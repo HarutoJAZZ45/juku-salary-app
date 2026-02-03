@@ -4,7 +4,7 @@ import { X, Clock, Train, Trash2, MapPin } from 'lucide-react';
 
 interface WorkModalProps {
     isOpen: boolean;
-    date: Date | null;
+    date: Date | Date[] | null;
     entry: WorkEntry | undefined;
     onClose: () => void;
     onSave: (date: string, data: Partial<WorkEntry>) => void;
@@ -15,8 +15,16 @@ interface WorkModalProps {
 const BLOCKS: WorkBlock[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 const CAMPUSES: Campus[] = ['平岡', '新札幌', '月寒', '円山', '北大前'];
 
+import { format } from 'date-fns';
+
 export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClose, onSave, onDelete, settings }) => {
     if (!isOpen || !date) return null;
+
+    const isBatchMode = Array.isArray(date);
+    const dateList = isBatchMode ? (date as Date[]) : [date as Date];
+    const displayDate = isBatchMode
+        ? `${dateList.length}日分を一括編集`
+        : (date as Date).toLocaleDateString();
 
     const [dateStr, setDateStr] = useState('');
     const [selectedBlocks, setSelectedBlocks] = useState<WorkBlock[]>([]);
@@ -35,7 +43,8 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
     const [isRoleExpanded, setIsRoleExpanded] = useState(false);
 
     useEffect(() => {
-        if (date) {
+        if (!isBatchMode && date && !Array.isArray(date)) {
+            // Single Mode
             const y = date.getFullYear();
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const da = String(date.getDate()).padStart(2, '0');
@@ -53,25 +62,32 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                 setLocation(entry.location || 'hiraoka');
                 setTransportCost(entry.transportCost !== undefined ? entry.transportCost : settings.transportCost);
             } else {
-                setSelectedBlocks([]);
-                setLeaderBlocks([]);
-                setSubLeaderBlocks([]);
-
-                setSupportMinutes(0);
-                setAllowance(0);
-                setHasTransport(true);
-
-                const defCampus = settings.defaultCampus || '平岡';
-                setCampus(defCampus);
-
-                // Auto-set Location Type based on default campus
-                setLocation(defCampus === '平岡' ? 'hiraoka' : 'other');
-
-                // Default transport cost for default Campus
-                setTransportCost(settings.campusTransportRates?.[defCampus] ?? settings.transportCost);
+                resetForm();
             }
+        } else if (isBatchMode) {
+            // Batch Mode - Always reset to default for safety
+            resetForm();
         }
-    }, [date, entry, isOpen, settings]);
+    }, [date, entry, isOpen, settings, isBatchMode]);
+
+    const resetForm = () => {
+        setSelectedBlocks([]);
+        setLeaderBlocks([]);
+        setSubLeaderBlocks([]);
+
+        setSupportMinutes(0);
+        setAllowance(0);
+        setHasTransport(true);
+
+        const defCampus = settings.defaultCampus || '平岡';
+        setCampus(defCampus);
+
+        // Auto-set Location Type based on default campus
+        setLocation(defCampus === '平岡' ? 'hiraoka' : 'other');
+
+        // Default transport cost for default Campus
+        setTransportCost(settings.campusTransportRates?.[defCampus] ?? settings.transportCost);
+    };
 
     // Cleanup: Remove Leader/Sub tags if block is unselected from main
     useEffect(() => {
@@ -92,7 +108,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
     };
 
     const handleSave = () => {
-        onSave(dateStr, {
+        const dataToSave = {
             selectedBlocks,
             leaderBlocks,
             subLeaderBlocks,
@@ -102,9 +118,21 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
             transportCost: hasTransport ? transportCost : undefined,
             location,
             campus
+        };
+
+        // Batch save
+        dateList.forEach(d => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const da = String(d.getDate()).padStart(2, '0');
+            const dStr = `${y}-${m}-${da}`;
+            onSave(dStr, dataToSave);
         });
+
         onClose();
     };
+
+    // ... (keeps toggles same)
 
     const toggleBlock = (block: WorkBlock) => {
         setSelectedBlocks(prev => {
@@ -123,8 +151,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
         });
         // Remove from SubLeader if present
         setSubLeaderBlocks(prev => prev.filter(b => b !== block));
-        // Auto-select in main blocks? Maybe safer to require user to select main first
-        // But for UX, let's auto-select main block if user clicks Leader
+        // Auto-select in main blocks
         if (!selectedBlocks.includes(block)) {
             toggleBlock(block);
         }
@@ -144,9 +171,19 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
     };
 
     const handleDelete = () => {
-        if (window.confirm('この日の記録を削除しますか？')) {
-            onDelete(dateStr);
-            onClose();
+        if (isBatchMode) {
+            if (window.confirm(`${dateList.length}日分の記録を全て削除しますか？`)) {
+                dateList.forEach(d => {
+                    const dStr = format(d, 'yyyy-MM-dd');
+                    onDelete(dStr);
+                });
+                onClose();
+            }
+        } else {
+            if (window.confirm('この日の記録を削除しますか？')) {
+                onDelete(dateStr);
+                onClose();
+            }
         }
     };
 
@@ -168,7 +205,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
             }} onClick={e => e.stopPropagation()}>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ fontSize: '18px' }}>{date?.toLocaleDateString()} の編集</h3>
+                    <h3 style={{ fontSize: '18px' }}>{displayDate}</h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                         <X size={24} color="#64748b" />
                     </button>

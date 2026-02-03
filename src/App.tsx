@@ -17,12 +17,16 @@ function App() {
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
 
   // Modal States
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | Date[] | null>(null);
   const [isWorkModalOpen, setIsWorkModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isNewsOpen, setIsNewsOpen] = useState(false);
+
+  // Batch Edit State
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
 
   // Badge Logic
   const [hasUnreadNews, setHasUnreadNews] = useState(false);
@@ -47,8 +51,30 @@ function App() {
   if (!isLoaded) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'gray' }}>Loading...</div>;
 
   const handleDayClick = (day: Date) => {
-    setSelectedDate(day);
+    if (isSelectionMode) {
+      // Toggle selection
+      const exists = selectedDates.some(d => format(d, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'));
+      if (exists) {
+        setSelectedDates(prev => prev.filter(d => format(d, 'yyyy-MM-dd') !== format(day, 'yyyy-MM-dd')));
+      } else {
+        setSelectedDates(prev => [...prev, day]);
+      }
+    } else {
+      // Normal open
+      setSelectedDate(day);
+      setIsWorkModalOpen(true);
+    }
+  };
+
+  const handleBatchEdit = () => {
+    if (selectedDates.length === 0) return;
+    setSelectedDate(selectedDates); // Pass array
     setIsWorkModalOpen(true);
+  };
+
+  const toggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    setSelectedDates([]); // Reset selection when toggling
   };
 
   const handleSavework = (dateStr: string, data: Partial<WorkEntry>) => {
@@ -107,6 +133,9 @@ function App() {
           3. 上部のカードに今月（15日締め翌月末払い）の給与見込みが表示されます。<br />
           4. 設定ボタン（右上の歯車）から単価を変更できます。<br />
           <br />
+          <strong>まとめて入力:</strong><br />
+          カレンダー上の「複数選択」ボタンを押すと、日付を複数選んで一気に入力できます。<br />
+          <br />
           <strong>データの保存について:</strong><br />
           データはお使いの端末（ブラウザ）に自動保存されます。サーバーには送信されないため安心ですが、ブラウザのキャッシュ削除や機種変更では消えてしまうのでご注意ください。
         </div>
@@ -120,32 +149,77 @@ function App() {
         currentDate={currentViewDate}
       />
 
-      {/* Month Navigation */}
+      {/* Month Navigation & Batch Toggle */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', padding: '0 8px' }}>
         <button onClick={() => handleMonthNav('prev')} style={{ background: 'none', border: 'none', padding: '8px', cursor: 'pointer' }}>
           <ChevronLeft size={24} color="#64748b" />
         </button>
-        <span style={{ fontSize: '16px', fontWeight: 700, color: '#334155' }}>
-          {format(currentViewDate, 'yyyy年 M月')}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '16px', fontWeight: 700, color: '#334155' }}>
+            {format(currentViewDate, 'yyyy年 M月')}
+          </span>
+          <button
+            onClick={toggleSelectionMode}
+            style={{
+              padding: '4px 10px', fontSize: '12px', borderRadius: '12px',
+              border: isSelectionMode ? '1px solid var(--primary)' : '1px solid #e2e8f0',
+              background: isSelectionMode ? 'var(--primary-light)' : 'white',
+              color: isSelectionMode ? 'white' : '#64748b',
+              fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
+            }}
+          >
+            {isSelectionMode ? '選択中' : '複数選択'}
+          </button>
+        </div>
         <button onClick={() => handleMonthNav('next')} style={{ background: 'none', border: 'none', padding: '8px', cursor: 'pointer' }}>
           <ChevronRight size={24} color="#64748b" />
         </button>
       </div>
 
       {/* Calendar */}
-      <CalendarGrid
-        currentMonth={currentViewDate}
-        entries={entries}
-        settings={settings}
-        onDayClick={handleDayClick}
-      />
+      <div style={{ paddingBottom: isSelectionMode ? '80px' : '0' }}>
+        <CalendarGrid
+          currentMonth={currentViewDate}
+          entries={entries}
+          settings={settings}
+          onDayClick={handleDayClick}
+          isSelectionMode={isSelectionMode}
+          selectedDates={selectedDates}
+        />
+      </div>
+
+      {/* Batch Edit Footer */}
+      {isSelectionMode && (
+        <div style={{
+          position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
+          width: '90%', maxWidth: '360px',
+          background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)',
+          borderRadius: '16px', padding: '12px 20px',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          zIndex: 100
+        }}>
+          <span style={{ fontWeight: 600, color: '#334155' }}>{selectedDates.length}日を選択中</span>
+          <button
+            onClick={handleBatchEdit}
+            disabled={selectedDates.length === 0}
+            style={{
+              background: 'var(--primary)', color: 'white', border: 'none',
+              padding: '8px 16px', borderRadius: '8px', fontWeight: 600,
+              cursor: selectedDates.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: selectedDates.length === 0 ? 0.5 : 1
+            }}
+          >
+            編集する
+          </button>
+        </div>
+      )}
 
       {/* Modals */}
       <WorkModal
         isOpen={isWorkModalOpen}
         date={selectedDate}
-        entry={selectedDate ? entries[format(selectedDate, 'yyyy-MM-dd')] : undefined}
+        entry={!Array.isArray(selectedDate) && selectedDate ? entries[format(selectedDate, 'yyyy-MM-dd')] : undefined}
         onClose={() => setIsWorkModalOpen(false)}
         onSave={handleSavework}
         onDelete={handleDeleteEntry}
