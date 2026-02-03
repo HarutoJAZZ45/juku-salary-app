@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Calendar } from 'lucide-react';
 import { NEWS_ITEMS } from '../data/news';
+import { useTranslation } from '../contexts/LanguageContext';
 
 interface NewsModalProps {
     isOpen: boolean;
@@ -8,6 +9,7 @@ interface NewsModalProps {
 }
 
 export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
+    const { t, language } = useTranslation();
     if (!isOpen) return null;
 
     return (
@@ -33,7 +35,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     background: '#f8fafc'
                 }}>
-                    <h3 style={{ margin: 0, fontSize: '18px', color: '#334155' }}>お知らせ 🔔</h3>
+                    <h3 style={{ margin: 0, fontSize: '18px', color: '#334155' }}>{t.app.newsTitle} 🔔</h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
                         <X size={24} color="#64748b" />
                     </button>
@@ -42,7 +44,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                 {/* Content List */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
                     {NEWS_ITEMS.length === 0 ? (
-                        <p style={{ textAlign: 'center', color: '#64748b', marginTop: '32px' }}>お知らせはありません</p>
+                        <p style={{ textAlign: 'center', color: '#64748b', marginTop: '32px' }}>{t.app.newsEmpty}</p>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             {NEWS_ITEMS.map((item) => (
@@ -59,7 +61,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                                                 background: '#e11d48', color: 'white', fontSize: '11px', fontWeight: 700,
                                                 padding: '2px 8px', borderRadius: '999px'
                                             }}>
-                                                重要
+                                                Important
                                             </span>
                                         )}
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#64748b' }}>
@@ -67,12 +69,12 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                                             {item.date}
                                         </div>
                                     </div>
-                                    <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1e293b' }}>{item.title}</h4>
+                                    <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1e293b' }}>{item.title[language]}</h4>
                                     <div style={{
                                         margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#475569',
                                         whiteSpace: 'pre-wrap' // Preserve newlines
                                     }}>
-                                        {item.content.split(/(\*\*.*?\*\*)/).map((part, i) => {
+                                        {item.content[language].split(/(\*\*.*?\*\*)/).map((part, i) => {
                                             if (part.startsWith('**') && part.endsWith('**')) {
                                                 return <strong key={i} style={{ color: '#1e293b' }}>{part.slice(2, -2)}</strong>;
                                             }

@@ -65,32 +65,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                     </button>
                 </div>
 
-                {/* Language Selector */}
-                <div className="input-group">
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>
-                        <Globe size={16} /> {t.settings.language}
-                    </label>
-                    <div style={{ display: 'flex', background: '#f8fafc', padding: '4px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        {(['ja', 'en', 'es'] as Language[]).map(lang => (
-                            <button
-                                key={lang}
-                                onClick={() => setLanguage(lang)}
-                                style={{
-                                    flex: 1, padding: '8px', borderRadius: '6px', border: 'none',
-                                    background: language === lang ? 'white' : 'transparent',
-                                    color: language === lang ? 'var(--primary)' : '#64748b',
-                                    fontWeight: language === lang ? 600 : 400,
-                                    boxShadow: language === lang ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                                    cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                            >
-                                {lang === 'ja' ? '日本語' : lang === 'en' ? 'English' : 'Español'}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <hr style={{ border: 'none', height: '1px', background: '#e2e8f0', margin: '0' }} />
+                {/* Language Selector Removed from here */}
+                {/* <div className="input-group">...</div> <hr /> */}
 
                 {/* 1. Home Campus */}
                 <div className="input-group">
@@ -153,7 +129,34 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                     <input type="number" value={formData.closingDay} onChange={e => handleChange('closingDay', Number(e.target.value))} />
                 </div>
 
-                <button className="glass-btn" onClick={handleSave} style={{ width: '100%', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <hr style={{ border: 'none', height: '1px', background: '#e2e8f0', margin: '16px 0' }} />
+
+                {/* Language Selector - Moved to Bottom */}
+                <div className="input-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>
+                        <Globe size={16} /> {t.settings.language}
+                    </label>
+                    <div style={{ display: 'flex', background: '#f8fafc', padding: '4px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        {(['ja', 'en', 'es'] as Language[]).map(lang => (
+                            <button
+                                key={lang}
+                                onClick={() => setLanguage(lang)}
+                                style={{
+                                    flex: 1, padding: '8px', borderRadius: '6px', border: 'none',
+                                    background: language === lang ? 'white' : 'transparent',
+                                    color: language === lang ? 'var(--primary)' : '#64748b',
+                                    fontWeight: language === lang ? 600 : 400,
+                                    boxShadow: language === lang ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                                    cursor: 'pointer', transition: 'all 0.2s'
+                                }}
+                            >
+                                {lang === 'ja' ? '日本語' : lang === 'en' ? 'English' : 'Español'}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <button className="glass-btn" onClick={handleSave} style={{ width: '100%', marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                     <Save size={18} /> {t.settings.saveButton}
                 </button>
             </div>

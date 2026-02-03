@@ -130,48 +130,18 @@ function App() {
         <div className="glass-panel" style={{ padding: '16px', marginBottom: '24px', fontSize: '13px', lineHeight: '1.6', position: 'relative' }}>
           <button onClick={() => setIsHelpOpen(false)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none' }}><Info size={16} color="gray" /></button>
           <strong>{t.app.helpUsage}</strong><br />
-          1. {t.app.helpTitle}<br />
-          {/* Detailed steps are still hardcoded in dictionaries but simplified here or we need more keys. 
-              The dictionary I created has simplified keys. I will stick to the keys I defined.
-              The defined keys were: helpUsage, helpTitle, helpSave, helpBatch.
-              Wait, the dictionary defined:
-               helpTitle: '使い方' (Usage) -> Actually 'helpTitle' was 'Help' or 'Usage' locally?
-               Let's check `types.ts` content I wrote.
-               
-               helpTitle: string; "使い方"
-               helpUsage: string; "使い方:" 
-               helpSave: string; "データの保存について:"
-               helpBatch: string; "まとめて入力:"
-
-               I don't have the *body* text in the dictionary yet.
-               I should probably just leave the body text hardcoded or expand the dictionary. 
-               Given the user asked for *Language Support*, leaving the Help body in Japanese but changing headers is incomplete.
-               However, expanding the dictionary now requires editing types and 3 language files. 
-               
-               Let's try to map what I have.
-               Help Title -> t.app.helpTitle
-               "Usage:" -> t.app.helpUsage
-               "Batch Edit:" -> t.app.helpBatch
-               "Data Persistence:" -> t.app.helpSave
-          */}
-          <strong>{t.app.helpUsage}</strong><br />
-          {/* For now I will keep the body text as is because my dictionary didn't include the full body text. 
-              I will come back to this if the user complains or if I decide to expand the dictionary.
-              Actually, I can just use the headers for now to show progress.
-          */}
-          1. カレンダーの日付をタップして勤務を入力します。<br />
-          2. コマ数、事務時間、手当などを入力して保存。<br />
-          3. 上部のカードに今月（15日締め翌月末払い）の給与見込みが表示されます。<br />
-          4. 設定ボタン（右上の歯車）から単価を変更できます。<br />
+          1. {t.app.helpStep1}<br />
+          2. {t.app.helpStep2}<br />
+          3. {t.app.helpStep3}<br />
+          4. {t.app.helpStep4}<br />
           <br />
           <strong>{t.app.helpBatch}</strong><br />
-          カレンダー上の「複数選択」ボタンを押すと、日付を複数選んで一気に入力できます。<br />
+          {t.app.helpBatchBody}<br />
           <br />
           <strong>{t.app.helpSave}</strong><br />
-          データはお使いの端末（ブラウザ）に自動保存されます。サーバーには送信されないため安心ですが、ブラウザのキャッシュ削除や機種変更では消えてしまうのでご注意ください。
+          {t.app.helpSaveBody}
         </div>
-      )
-      }
+      )}
 
       {/* Summary Section */}
       <SummaryCard

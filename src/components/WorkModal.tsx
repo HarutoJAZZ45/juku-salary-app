@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { WorkEntry, WorkBlock, Location, UserSettings, Campus } from '../types';
 import { X, Clock, Train, Trash2, MapPin } from 'lucide-react';
+import { useTranslation } from '../contexts/LanguageContext';
+import { format } from 'date-fns';
 
 interface WorkModalProps {
     isOpen: boolean;
@@ -16,16 +18,16 @@ interface WorkModalProps {
 const BLOCKS: WorkBlock[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 const CAMPUSES: Campus[] = ['平岡', '新札幌', '月寒', '円山', '北大前'];
 
-import { format } from 'date-fns';
 
 export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClose, onSave, onDelete, settings, onSaveComplete }) => {
+    const { t } = useTranslation();
     if (!isOpen || !date) return null;
 
     const isBatchMode = Array.isArray(date);
     const dateList = isBatchMode ? (date as Date[]) : [date as Date];
     const displayDate = isBatchMode
-        ? `${dateList.length}日分を一括編集`
-        : (date as Date).toLocaleDateString();
+        ? `${dateList.length}${t.workModal.batchTitle}`
+        : `${(date as Date).toLocaleDateString()} ${t.workModal.editTitle}`;
 
     const [dateStr, setDateStr] = useState('');
     const [selectedBlocks, setSelectedBlocks] = useState<WorkBlock[]>([]);
@@ -189,7 +191,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
 
     const handleDelete = () => {
         if (isBatchMode) {
-            if (window.confirm(`${dateList.length}日分の記録を全て削除しますか？`)) {
+            if (window.confirm(`${dateList.length}${t.workModal.batchDeleteConfirm}`)) {
                 dateList.forEach(d => {
                     const dStr = format(d, 'yyyy-MM-dd');
                     onDelete(dStr);
@@ -197,7 +199,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                 onClose();
             }
         } else {
-            if (window.confirm('この日の記録を削除しますか？')) {
+            if (window.confirm(t.workModal.deleteConfirm)) {
                 onDelete(dateStr);
                 onClose();
             }
@@ -231,7 +233,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                 {/* Campus Selection - New! */}
                 <div className="input-group">
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
-                        <MapPin size={16} /> 勤務校舎
+                        <MapPin size={16} /> {t.workModal.campus}
                     </label>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                         {CAMPUSES.map(c => (
@@ -254,13 +256,13 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                     </div>
                     {/* Display Location Allowance Info */}
                     <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', textAlign: 'right' }}>
-                        勤務給: {location === 'hiraoka' ? '+800円' : '+400円'}
+                        {t.workModal.locationAllowance.replace('{amount}', location === 'hiraoka' ? '800' : '400')}
                     </div>
                 </div>
 
                 {/* Block Selection */}
                 <div className="input-group">
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>担当コマ (A-G)</label>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>{t.workModal.koma}</label>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                         {BLOCKS.map(block => {
                             const isSelected = selectedBlocks.includes(block);
@@ -304,7 +306,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                             minHeight: '48px'
                         }}
                     >
-                        <span>役職給設定 (リーダー・サブリーダー)</span>
+                        <span>{t.workModal.rolePay}</span>
                         <span style={{ transform: isRoleExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▼</span>
                     </button>
 
@@ -313,7 +315,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                             {/* Leader Row */}
                             <div style={{ marginBottom: '12px' }}>
                                 <label style={{ display: 'block', fontSize: '12px', color: '#7c3aed', fontWeight: 700, marginBottom: '6px' }}>
-                                    リーダー (2000円)
+                                    {t.workModal.leader} (2000円)
                                 </label>
                                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                                     {BLOCKS.map(block => (
@@ -338,7 +340,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                             {/* SubLeader Row */}
                             <div>
                                 <label style={{ display: 'block', fontSize: '12px', color: '#059669', fontWeight: 700, marginBottom: '6px' }}>
-                                    サブリーダー (1500円)
+                                    {t.workModal.subLeader} (1500円)
                                 </label>
                                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                                     {BLOCKS.map(block => (
@@ -366,7 +368,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                 {/* Support Section */}
                 <div className="input-group">
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
-                        <Clock size={16} /> 追加業務・残業 (分)
+                        <Clock size={16} /> {t.workModal.supportWork}
                     </label>
                     <input
                         type="number"
@@ -374,18 +376,18 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                         onChange={e => setSupportMinutes(Number(e.target.value))}
                         step={15}
                         style={{ width: '100%' }}
-                        placeholder="事務作業など"
+                        placeholder="0"
                     />
                 </div>
 
                 {/* Allowance */}
                 <div className="input-group">
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>手当給 (円)</label>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>{t.workModal.allowanceLabel}</label>
                     <input
                         type="number"
                         value={allowance}
                         onChange={e => setAllowance(Number(e.target.value))}
-                        placeholder="例: 1000"
+                        placeholder="0"
                     />
                 </div>
 
@@ -393,7 +395,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                 <div className="input-group" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '12px', borderRadius: '12px' }}>
                     <div style={{ flex: 1 }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, cursor: 'pointer' }}>
-                            <Train size={18} /> 交通費支給
+                            <Train size={18} /> {t.workModal.transportLabel}
                             <input
                                 type="checkbox"
                                 checked={hasTransport}
@@ -420,10 +422,10 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                         background: '#fee2e2', color: '#ef4444',
                         fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                     }}>
-                        <Trash2 size={18} /> 削除
+                        <Trash2 size={18} /> {t.common.delete}
                     </button>
                     <button className="glass-btn" onClick={handleSave} style={{ width: '100%', margin: 0, background: 'var(--primary)', color: 'white' }}>
-                        保存
+                        {t.common.save}
                     </button>
                 </div>
 

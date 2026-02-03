@@ -56,10 +56,18 @@ export interface Translation {
         helpUsage: string;
         helpSave: string;
         helpBatch: string;
+        helpStep1: string;
+        helpStep2: string;
+        helpStep3: string;
+        helpStep4: string;
+        helpBatchBody: string;
+        helpSaveBody: string;
         batchMode: string;
         selecting: string; // "選択中"
         selectMult: string; // "複数選択"
         selected: string; // "{count}日を選択中"
         editButton: string;
+        newsTitle: string;
+        newsEmpty: string;
     };
 }
