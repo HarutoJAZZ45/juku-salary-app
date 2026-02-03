@@ -70,7 +70,7 @@ export const ja: Translation = {
         newsTitle: 'お知らせ',
         newsEmpty: 'お知らせはありません',
         newsFilterAll: 'すべて',
-        newsFilterImportant: '重要のみ',
+        newsFilterImportant: '重要',
         newsFilterUpdate: 'アップデート',
     },
     badges: {

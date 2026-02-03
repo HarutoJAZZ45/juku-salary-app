@@ -114,10 +114,20 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                                         {item.important && (
                                             <span style={{
-                                                background: '#e11d48', color: 'white', fontSize: '11px', fontWeight: 700,
-                                                padding: '2px 8px', borderRadius: '999px'
+                                                background: '#e11d48', color: 'white', fontSize: '10px', fontWeight: 700,
+                                                padding: '2px 8px', borderRadius: '999px',
+                                                textTransform: 'uppercase'
                                             }}>
-                                                Important
+                                                {t.app.newsFilterImportant}
+                                            </span>
+                                        )}
+                                        {item.category === 'update' && (
+                                            <span style={{
+                                                background: '#3b82f6', color: 'white', fontSize: '10px', fontWeight: 700,
+                                                padding: '2px 8px', borderRadius: '999px',
+                                                textTransform: 'uppercase'
+                                            }}>
+                                                {t.app.newsFilterUpdate}
                                             </span>
                                         )}
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#64748b' }}>
