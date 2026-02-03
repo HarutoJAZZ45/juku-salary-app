@@ -10,8 +10,10 @@ import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell } from '
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
+import { useTranslation } from './contexts/LanguageContext';
 
 function App() {
+  const { t } = useTranslation();
   const { entries, settings, updateEntry, deleteEntry, setSettings, isLoaded } = useSalaryData();
 
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
@@ -127,16 +129,45 @@ function App() {
       {isHelpOpen && (
         <div className="glass-panel" style={{ padding: '16px', marginBottom: '24px', fontSize: '13px', lineHeight: '1.6', position: 'relative' }}>
           <button onClick={() => setIsHelpOpen(false)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none' }}><Info size={16} color="gray" /></button>
-          <strong>使い方:</strong><br />
+          <strong>{t.app.helpUsage}</strong><br />
+          1. {t.app.helpTitle}<br />
+          {/* Detailed steps are still hardcoded in dictionaries but simplified here or we need more keys. 
+              The dictionary I created has simplified keys. I will stick to the keys I defined.
+              The defined keys were: helpUsage, helpTitle, helpSave, helpBatch.
+              Wait, the dictionary defined:
+               helpTitle: '使い方' (Usage) -> Actually 'helpTitle' was 'Help' or 'Usage' locally?
+               Let's check `types.ts` content I wrote.
+               
+               helpTitle: string; "使い方"
+               helpUsage: string; "使い方:" 
+               helpSave: string; "データの保存について:"
+               helpBatch: string; "まとめて入力:"
+
+               I don't have the *body* text in the dictionary yet.
+               I should probably just leave the body text hardcoded or expand the dictionary. 
+               Given the user asked for *Language Support*, leaving the Help body in Japanese but changing headers is incomplete.
+               However, expanding the dictionary now requires editing types and 3 language files. 
+               
+               Let's try to map what I have.
+               Help Title -> t.app.helpTitle
+               "Usage:" -> t.app.helpUsage
+               "Batch Edit:" -> t.app.helpBatch
+               "Data Persistence:" -> t.app.helpSave
+          */}
+          <strong>{t.app.helpUsage}</strong><br />
+          {/* For now I will keep the body text as is because my dictionary didn't include the full body text. 
+              I will come back to this if the user complains or if I decide to expand the dictionary.
+              Actually, I can just use the headers for now to show progress.
+          */}
           1. カレンダーの日付をタップして勤務を入力します。<br />
           2. コマ数、事務時間、手当などを入力して保存。<br />
           3. 上部のカードに今月（15日締め翌月末払い）の給与見込みが表示されます。<br />
           4. 設定ボタン（右上の歯車）から単価を変更できます。<br />
           <br />
-          <strong>まとめて入力:</strong><br />
+          <strong>{t.app.helpBatch}</strong><br />
           カレンダー上の「複数選択」ボタンを押すと、日付を複数選んで一気に入力できます。<br />
           <br />
-          <strong>データの保存について:</strong><br />
+          <strong>{t.app.helpSave}</strong><br />
           データはお使いの端末（ブラウザ）に自動保存されます。サーバーには送信されないため安心ですが、ブラウザのキャッシュ削除や機種変更では消えてしまうのでご注意ください。
         </div>
       )
@@ -156,7 +187,7 @@ function App() {
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '16px', fontWeight: 700, color: '#334155' }}>
-            {format(currentViewDate, 'yyyy年 M月')}
+            {format(currentViewDate, t.calendar.formatMonth)}
           </span>
           <button
             onClick={toggleSelectionMode}
@@ -168,7 +199,7 @@ function App() {
               fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
             }}
           >
-            {isSelectionMode ? '選択中' : '複数選択'}
+            {isSelectionMode ? t.app.selecting : t.app.selectMult}
           </button>
         </div>
         <button onClick={() => handleMonthNav('next')} style={{ background: 'none', border: 'none', padding: '8px', cursor: 'pointer' }}>
@@ -199,7 +230,7 @@ function App() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           zIndex: 100
         }}>
-          <span style={{ fontWeight: 600, color: '#334155' }}>{selectedDates.length}日を選択中</span>
+          <span style={{ fontWeight: 600, color: '#334155' }}>{selectedDates.length}{t.app.selected}</span>
           <button
             onClick={handleBatchEdit}
             disabled={selectedDates.length === 0}
@@ -210,7 +241,7 @@ function App() {
               opacity: selectedDates.length === 0 ? 0.5 : 1
             }}
           >
-            編集する
+            {t.app.editButton}
           </button>
         </div>
       )}

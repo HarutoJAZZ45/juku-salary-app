@@ -5,6 +5,7 @@ import {
 } from 'date-fns';
 import type { WorkEntry, UserSettings } from '../types';
 import { calculateDailyTotal } from '../utils/calculator';
+import { useTranslation } from '../contexts/LanguageContext';
 
 interface CalendarGridProps {
     currentMonth: Date;
@@ -16,6 +17,7 @@ interface CalendarGridProps {
 }
 
 export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entries, settings, onDayClick, isSelectionMode, selectedDates }) => {
+    const { t } = useTranslation();
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
     const startDate = startOfWeek(monthStart, { weekStartsOn: 0 }); // Sunday start
@@ -28,7 +30,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entrie
         end: endDate,
     });
 
-    const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
+    const weekDays = t.calendar.weekDays;
 
     return (
         <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>

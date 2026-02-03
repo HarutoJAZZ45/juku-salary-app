@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import type { UserSettings, Campus } from '../types';
-import { X, Save, Settings, Info } from 'lucide-react';
+import { X, Save, Settings, Info, Globe } from 'lucide-react';
+import { useTranslation } from '../contexts/LanguageContext';
+import type { Language } from '../locales/types';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -12,6 +14,8 @@ interface SettingsModalProps {
 const CAMPUSES: Campus[] = ['平岡', '新札幌', '月寒', '円山', '北大前'];
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, onClose, onSave }) => {
+    const { t, language, setLanguage } = useTranslation();
+
     if (!isOpen) return null;
 
     const [formData, setFormData] = useState<UserSettings>(settings);
@@ -54,16 +58,43 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Settings size={20} /> 給与設定 <span style={{ fontSize: '10px', background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#64748b' }}>v2.4</span>
+                        <Settings size={20} /> {t.settings.title} <span style={{ fontSize: '10px', background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#64748b' }}>v2.5</span>
                     </h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                         <X size={24} color="#64748b" />
                     </button>
                 </div>
 
+                {/* Language Selector */}
+                <div className="input-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>
+                        <Globe size={16} /> {t.settings.language}
+                    </label>
+                    <div style={{ display: 'flex', background: '#f8fafc', padding: '4px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                        {(['ja', 'en', 'es'] as Language[]).map(lang => (
+                            <button
+                                key={lang}
+                                onClick={() => setLanguage(lang)}
+                                style={{
+                                    flex: 1, padding: '8px', borderRadius: '6px', border: 'none',
+                                    background: language === lang ? 'white' : 'transparent',
+                                    color: language === lang ? 'var(--primary)' : '#64748b',
+                                    fontWeight: language === lang ? 600 : 400,
+                                    boxShadow: language === lang ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                                    cursor: 'pointer', transition: 'all 0.2s'
+                                }}
+                            >
+                                {lang === 'ja' ? '日本語' : lang === 'en' ? 'English' : 'Español'}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <hr style={{ border: 'none', height: '1px', background: '#e2e8f0', margin: '0' }} />
+
                 {/* 1. Home Campus */}
                 <div className="input-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>所属校舎 (ホーム)</label>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>{t.settings.homeCampus}</label>
                     <select
                         value={formData.defaultCampus || '平岡'}
                         onChange={e => setFormData(prev => ({ ...prev, defaultCampus: e.target.value as Campus }))}
@@ -78,7 +109,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                 {/* 2. Rates */}
                 <div className="input-group">
                     <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>
-                        授業通常給 (業務通常給)
+                        {t.settings.teachingRate}
                     </label>
                     <input type="number" value={formData.teachingHourlyRate} onChange={e => handleChange('teachingHourlyRate', Number(e.target.value))} />
 
@@ -86,20 +117,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                     <div style={{ display: 'flex', gap: '8px', marginTop: '8px', padding: '10px', background: '#f0f9ff', borderRadius: '8px', alignItems: 'center' }}>
                         <Info size={16} color="#0284c7" style={{ flexShrink: 0 }} />
                         <div style={{ fontSize: '11px', color: '#334155', lineHeight: '1.5' }}>
-                            所属校舎での時給を入力してください。
+                            {t.settings.teachingRateHelper}
                         </div>
                     </div>
                 </div>
 
                 <div className="input-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>生徒対応給 (時給)</label>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>{t.settings.hourlyRate}</label>
                     <input type="number" value={formData.hourlyRate} onChange={e => handleChange('hourlyRate', Number(e.target.value))} />
                 </div>
 
                 {/* 3. Transport Settings (No longer hidden) */}
                 <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
                     <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        交通費設定 (校舎別)
+                        {t.settings.transportSettings}
                     </h4>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -118,12 +149,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                 </div>
 
                 <div className="input-group">
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>締め日 (日)</label>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>{t.settings.closingDay}</label>
                     <input type="number" value={formData.closingDay} onChange={e => handleChange('closingDay', Number(e.target.value))} />
                 </div>
 
                 <button className="glass-btn" onClick={handleSave} style={{ width: '100%', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <Save size={18} /> 設定を保存
+                    <Save size={18} /> {t.settings.saveButton}
                 </button>
             </div>
         </div>
