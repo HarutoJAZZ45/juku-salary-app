@@ -224,6 +224,12 @@ function App() {
         onSave={handleSavework}
         onDelete={handleDeleteEntry}
         settings={settings}
+        onSaveComplete={() => {
+          if (isSelectionMode) {
+            setIsSelectionMode(false);
+            setSelectedDates([]);
+          }
+        }}
       />
 
       <SettingsModal

@@ -10,6 +10,7 @@ interface WorkModalProps {
     onSave: (date: string, data: Partial<WorkEntry>) => void;
     onDelete: (date: string) => void;
     settings: UserSettings;
+    onSaveComplete?: () => void;
 }
 
 const BLOCKS: WorkBlock[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
@@ -17,7 +18,7 @@ const CAMPUSES: Campus[] = ['平岡', '新札幌', '月寒', '円山', '北大�
 
 import { format } from 'date-fns';
 
-export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClose, onSave, onDelete, settings }) => {
+export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClose, onSave, onDelete, settings, onSaveComplete }) => {
     if (!isOpen || !date) return null;
 
     const isBatchMode = Array.isArray(date);
@@ -62,7 +63,22 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                 setLocation(entry.location || 'hiraoka');
                 setTransportCost(entry.transportCost !== undefined ? entry.transportCost : settings.transportCost);
             } else {
-                resetForm();
+                setSelectedBlocks([]);
+                setLeaderBlocks([]);
+                setSubLeaderBlocks([]);
+
+                setSupportMinutes(0);
+                setAllowance(0);
+                setHasTransport(true);
+
+                const defCampus = settings.defaultCampus || '平岡';
+                setCampus(defCampus);
+
+                // Auto-set Location Type based on default campus
+                setLocation(defCampus === '平岡' ? 'hiraoka' : 'other');
+
+                // Default transport cost for default Campus
+                setTransportCost(settings.campusTransportRates?.[defCampus] ?? settings.transportCost);
             }
         } else if (isBatchMode) {
             // Batch Mode - Always reset to default for safety
@@ -130,6 +146,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
         });
 
         onClose();
+        if (onSaveComplete) onSaveComplete();
     };
 
     // ... (keeps toggles same)
