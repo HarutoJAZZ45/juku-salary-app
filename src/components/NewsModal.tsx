@@ -10,12 +10,13 @@ interface NewsModalProps {
 
 export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
     const { t, language } = useTranslation();
-    const [filter, setFilter] = React.useState<'all' | 'important'>('all');
+    const [filter, setFilter] = React.useState<'all' | 'important' | 'update'>('all');
 
     if (!isOpen) return null;
 
     const filteredItems = NEWS_ITEMS.filter(item => {
         if (filter === 'important') return item.important;
+        if (filter === 'update') return item.category === 'update';
         return true;
     });
 
@@ -64,6 +65,20 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                             }}
                         >
                             {t.app.newsFilterAll}
+                        </button>
+                        <button
+                            onClick={() => setFilter('update')}
+                            style={{
+                                border: 'none',
+                                background: filter === 'update' ? 'white' : 'transparent',
+                                color: filter === 'update' ? '#0f172a' : '#64748b',
+                                padding: '6px 16px', borderRadius: '8px',
+                                fontSize: '13px', fontWeight: 600,
+                                cursor: 'pointer', transition: 'all 0.2s',
+                                boxShadow: filter === 'update' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                            }}
+                        >
+                            {t.app.newsFilterUpdate}
                         </button>
                         <button
                             onClick={() => setFilter('important')}

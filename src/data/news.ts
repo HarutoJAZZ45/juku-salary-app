@@ -5,6 +5,7 @@ export interface NewsItem {
     date: string;
     title: Record<Language, string>;
     content: Record<Language, string>;
+    category: 'notice' | 'update';
     important?: boolean;
 }
 
@@ -49,6 +50,7 @@ Las insignias ganadas aparecerán en tu tarjeta de Resumen de Salario.
 Haz clic/toca una insignia para ver la lista completa y los requisitos.
 ¡Apunta al Platino!`
         },
+        category: 'update',
         important: false,
     },
     {
@@ -88,6 +90,7 @@ Puede seleccionar su idioma preferido desde el botón de cambio de idioma en la 
 
 ¡Utilice la aplicación en su idioma preferido!`
         },
+        category: 'update',
         important: false,
     },
     {
@@ -130,6 +133,7 @@ Presione el botón "Selección múltiple" en el calendario para seleccionar vari
 
 Hace que ingresar turnos fijos como Lun-Mié-Vie sea muy fácil. ¡Pruébelo! ✨`
         },
+        category: 'update',
         important: false,
     },
     {
@@ -157,6 +161,7 @@ Si aún no lo ha hecho, intente agregarlo a su pantalla de inicio y usarlo como 
 **Pasos**:
 Botón "Compartir" del menú inferior de Safari -> "Agregar a la pantalla de inicio"`
         },
+        category: 'update',
         important: false,
     },
     {
@@ -211,6 +216,7 @@ Seguiremos haciéndolo más conveniente basándonos en su voz.
 
 ¡Gracias por su continuo apoyo a la Juku Salary App!`
         },
+        category: 'notice',
         important: true,
     },
 ];

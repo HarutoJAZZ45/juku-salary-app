@@ -71,6 +71,7 @@ export const es: Translation = {
         newsEmpty: 'No hay noticias disponibles',
         newsFilterAll: 'Todo',
         newsFilterImportant: 'Importante',
+        newsFilterUpdate: 'Actualizaciones',
     },
     badges: {
         streakBronze: 'Racha de 3 días',

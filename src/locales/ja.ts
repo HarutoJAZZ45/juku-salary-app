@@ -71,6 +71,7 @@ export const ja: Translation = {
         newsEmpty: 'お知らせはありません',
         newsFilterAll: 'すべて',
         newsFilterImportant: '重要のみ',
+        newsFilterUpdate: 'アップデート',
     },
     badges: {
         streakBronze: '3連勤',
