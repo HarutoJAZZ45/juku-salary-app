@@ -72,7 +72,7 @@ export const ja: Translation = {
         newsFilterAll: 'すべて',
         newsFilterImportant: '重要',
         newsFilterUpdate: 'アップデート',
-        paydayTitle: '今日は給料日（月末）です！💰',
+        paydayTitle: '今日は給料日です！💰',
         paydayContent: '今月の勤務お疲れ様でした！\n給与明細を確認して、自分へのご褒美を検討しましょう✨',
     },
     badges: {

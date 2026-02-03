@@ -15,8 +15,10 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     // Check if today is the last day of the month
+    // Check if today is the last day of the month
     const today = new Date();
     const isPayday = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate() === today.getDate();
+    // const isPayday = true; // Debug: Force true for verification
 
     const allItems = [...NEWS_ITEMS];
 
@@ -121,52 +123,57 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                         <p style={{ textAlign: 'center', color: '#64748b', marginTop: '32px' }}>{t.app.newsEmpty}</p>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            {filteredItems.map((item) => (
-                                <div key={item.id} style={{
-                                    border: '1px solid #e2e8f0',
-                                    borderRadius: '16px',
-                                    padding: '16px',
-                                    background: item.important ? '#fff1f2' : 'white',
-                                    borderColor: item.important ? '#fecdd3' : '#e2e8f0'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                        {item.important && (
-                                            <span style={{
-                                                background: '#e11d48', color: 'white', fontSize: '10px', fontWeight: 700,
-                                                padding: '2px 8px', borderRadius: '999px',
-                                                textTransform: 'uppercase'
-                                            }}>
-                                                {t.app.newsFilterImportant}
-                                            </span>
-                                        )}
-                                        {item.category === 'update' && (
-                                            <span style={{
-                                                background: '#3b82f6', color: 'white', fontSize: '10px', fontWeight: 700,
-                                                padding: '2px 8px', borderRadius: '999px',
-                                                textTransform: 'uppercase'
-                                            }}>
-                                                {t.app.newsFilterUpdate}
-                                            </span>
-                                        )}
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#64748b' }}>
-                                            <Calendar size={12} />
-                                            {item.date}
+                            {filteredItems.map((item) => {
+                                const isPaydayItem = item.id.startsWith('payday-');
+                                return (
+                                    <div key={item.id} style={{
+                                        border: isPaydayItem ? '2px solid #f59e0b' : '1px solid #e2e8f0',
+                                        borderRadius: '16px',
+                                        padding: '16px',
+                                        background: isPaydayItem ? 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)' : (item.important ? '#fff1f2' : 'white'),
+                                        borderColor: isPaydayItem ? '#f59e0b' : (item.important ? '#fecdd3' : '#e2e8f0'),
+                                        boxShadow: isPaydayItem ? '0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06)' : 'none'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                            {item.important && !isPaydayItem && (
+                                                <span style={{
+                                                    background: '#e11d48', color: 'white', fontSize: '10px', fontWeight: 700,
+                                                    padding: '2px 8px', borderRadius: '999px',
+                                                    textTransform: 'uppercase'
+                                                }}>
+                                                    {t.app.newsFilterImportant}
+                                                </span>
+                                            )}
+
+                                            {item.category === 'update' && (
+                                                <span style={{
+                                                    background: '#3b82f6', color: 'white', fontSize: '10px', fontWeight: 700,
+                                                    padding: '2px 8px', borderRadius: '999px',
+                                                    textTransform: 'uppercase'
+                                                }}>
+                                                    {t.app.newsFilterUpdate}
+                                                </span>
+                                            )}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#64748b' }}>
+                                                <Calendar size={12} />
+                                                {item.date}
+                                            </div>
+                                        </div>
+                                        <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1e293b' }}>{item.title[language]}</h4>
+                                        <div style={{
+                                            margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#475569',
+                                            whiteSpace: 'pre-wrap' // Preserve newlines
+                                        }}>
+                                            {item.content[language].split(/(\*\*.*?\*\*)/).map((part, i) => {
+                                                if (part.startsWith('**') && part.endsWith('**')) {
+                                                    return <strong key={i} style={{ color: '#1e293b' }}>{part.slice(2, -2)}</strong>;
+                                                }
+                                                return part;
+                                            })}
                                         </div>
                                     </div>
-                                    <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1e293b' }}>{item.title[language]}</h4>
-                                    <div style={{
-                                        margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#475569',
-                                        whiteSpace: 'pre-wrap' // Preserve newlines
-                                    }}>
-                                        {item.content[language].split(/(\*\*.*?\*\*)/).map((part, i) => {
-                                            if (part.startsWith('**') && part.endsWith('**')) {
-                                                return <strong key={i} style={{ color: '#1e293b' }}>{part.slice(2, -2)}</strong>;
-                                            }
-                                            return part;
-                                        })}
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

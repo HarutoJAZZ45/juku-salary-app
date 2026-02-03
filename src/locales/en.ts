@@ -72,7 +72,7 @@ export const en: Translation = {
         newsFilterAll: 'All',
         newsFilterImportant: 'Important',
         newsFilterUpdate: 'Updates',
-        paydayTitle: 'Today is Payday (End of Month)! 💰',
+        paydayTitle: 'Today is Payday! 💰',
         paydayContent: 'Great work this month!\nCheck your salary slip and treat yourself to something nice ✨',
     },
     badges: {
