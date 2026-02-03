@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSalaryData } from './hooks/useSalaryData';
 import { CalendarGrid } from './components/CalendarGrid';
 import { SummaryCard } from './components/SummaryCard';
 import { WorkModal } from './components/WorkModal';
 import { FeedbackModal } from './components/FeedbackModal';
 import { SettingsModal } from './components/SettingsModal';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
+import { NewsModal } from './components/NewsModal';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
+import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
 
 function App() {
@@ -20,6 +22,27 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isNewsOpen, setIsNewsOpen] = useState(false);
+
+  // Badge Logic
+  const [hasUnreadNews, setHasUnreadNews] = useState(false);
+
+  useEffect(() => {
+    if (NEWS_ITEMS.length > 0) {
+      const lastReadId = localStorage.getItem('lastReadNewsId');
+      if (lastReadId !== NEWS_ITEMS[0].id) {
+        setHasUnreadNews(true);
+      }
+    }
+  }, []);
+
+  const handleOpenNews = () => {
+    setIsNewsOpen(true);
+    setHasUnreadNews(false);
+    if (NEWS_ITEMS.length > 0) {
+      localStorage.setItem('lastReadNewsId', NEWS_ITEMS[0].id);
+    }
+  };
 
   if (!isLoaded) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'gray' }}>Loading...</div>;
 
@@ -53,6 +76,16 @@ function App() {
           </h1>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={handleOpenNews} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>
+            <Bell size={20} />
+            {hasUnreadNews && (
+              <span style={{
+                position: 'absolute', top: '6px', right: '6px',
+                width: '8px', height: '8px', background: '#e11d48',
+                borderRadius: '50%', border: '1px solid white'
+              }} />
+            )}
+          </button>
           <button onClick={() => setIsFeedbackOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
             <MessageSquare size={20} />
           </button>
@@ -126,6 +159,11 @@ function App() {
       <FeedbackModal
         isOpen={isFeedbackOpen}
         onClose={() => setIsFeedbackOpen(false)}
+      />
+
+      <NewsModal
+        isOpen={isNewsOpen}
+        onClose={() => setIsNewsOpen(false)}
       />
     </>
   );
