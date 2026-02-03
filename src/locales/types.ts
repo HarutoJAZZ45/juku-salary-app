@@ -50,22 +50,21 @@ export interface Translation {
         closingDay: string;
         saveButton: string;
         language: string;
+        annualLimit: string;
     };
     app: {
         helpTitle: string;
         helpUsage: string;
         helpSave: string;
-        helpBatch: string;
+        helpSaveBody: string;
         helpStep1: string;
         helpStep2: string;
         helpStep3: string;
         helpStep4: string;
-        helpBatchBody: string;
-        helpSaveBody: string;
         batchMode: string;
-        selecting: string; // "選択中"
-        selectMult: string; // "複数選択"
-        selected: string; // "{count}日を選択中"
+        selecting: string;
+        selectMult: string;
+        selected: string;
         editButton: string;
         newsTitle: string;
         newsEmpty: string;
@@ -74,6 +73,20 @@ export interface Translation {
         newsFilterUpdate: string;
         paydayTitle: string;
         paydayContent: string;
+    };
+    tax: {
+        title: string;
+        annualIncome: string;
+        remaining: string;
+        safe: string;
+        warning: string;
+        danger: string;
+    };
+    analytics: {
+        title: string;
+        monthlyIncome: string;
+        workHours: string;
+        classCount: string;
     };
     badges: {
         streakBronze: string;

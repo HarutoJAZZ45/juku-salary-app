@@ -17,7 +17,8 @@ const DEFAULT_SETTINGS: UserSettings = {
     },
     defaultCampus: '平岡',
     closingDay: 15,
-    paymentMonthLag: 0
+    paymentMonthLag: 0,
+    annualLimit: 1030000
 };
 
 export const useSalaryData = () => {

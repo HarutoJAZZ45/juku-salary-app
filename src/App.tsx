@@ -7,7 +7,9 @@ import { FeedbackModal } from './components/FeedbackModal';
 import { SettingsModal } from './components/SettingsModal';
 import { NewsModal } from './components/NewsModal';
 import { BadgeHelpModal } from './components/BadgeHelpModal';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell } from 'lucide-react';
+import { TaxMonitor } from './components/TaxMonitor';
+import { AnalyticsModal } from './components/AnalyticsModal';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
@@ -26,7 +28,10 @@ function App() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isNewsOpen, setIsNewsOpen] = useState(false);
+
   const [isBadgeHelpOpen, setIsBadgeHelpOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Batch Edit State
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -95,6 +100,71 @@ function App() {
 
   return (
     <>
+      {/* Menu Overlay */}
+      {isMenuOpen && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 2000,
+            display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-start'
+          }}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          {/* Backdrop */}
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(2px)' }} />
+
+          {/* Menu Content */}
+          <div
+            style={{
+              position: 'relative',
+              width: '200px',
+              background: 'white',
+              borderRadius: '16px',
+              margin: '60px 16px 0 0',
+              padding: '8px',
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+              display: 'flex', flexDirection: 'column', gap: '4px',
+              animation: 'fadeIn 0.2s'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => { handleOpenNews(); setIsMenuOpen(false); }}
+              className="menu-item"
+              style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
+            >
+              <div style={{ position: 'relative' }}>
+                <Bell size={18} />
+                {hasUnreadNews && (
+                  <span style={{
+                    position: 'absolute', top: -2, right: -2,
+                    width: '8px', height: '8px', background: '#e11d48',
+                    borderRadius: '50%', border: '1px solid white'
+                  }} />
+                )}
+              </div>
+              {t.app.newsTitle}
+            </button>
+
+            <button
+              onClick={() => { setIsSettingsOpen(true); setIsMenuOpen(false); }}
+              className="menu-item"
+              style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
+            >
+              <Settings size={18} />
+              {t.settings.title}
+            </button>
+
+            <button
+              onClick={() => { setIsFeedbackOpen(true); setIsMenuOpen(false); }}
+              className="menu-item"
+              style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
+            >
+              <MessageSquare size={18} />
+              Feedback
+            </button>
+          </div>
+        </div>
+      )}
       <header style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: '24px', padding: '0 8px', height: 'var(--header-height)'
@@ -106,8 +176,26 @@ function App() {
           </h1>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={handleOpenNews} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>
-            <Bell size={20} />
+          <button onClick={() => setIsHelpOpen(!isHelpOpen)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
+            <Info size={20} />
+          </button>
+          <button onClick={() => setIsAnalyticsOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
+            <TrendingUp size={20} />
+          </button>
+
+          {/* Hamburger Menu Trigger */}
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="glass-btn"
+            style={{
+              padding: '8px',
+              background: 'rgba(255,255,255,0.5)',
+              color: 'var(--text-main)',
+              boxShadow: 'none',
+              position: 'relative'
+            }}
+          >
+            <Menu size={20} />
             {hasUnreadNews && (
               <span style={{
                 position: 'absolute', top: '6px', right: '6px',
@@ -115,15 +203,6 @@ function App() {
                 borderRadius: '50%', border: '1px solid white'
               }} />
             )}
-          </button>
-          <button onClick={() => setIsFeedbackOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
-            <MessageSquare size={20} />
-          </button>
-          <button onClick={() => setIsHelpOpen(!isHelpOpen)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
-            <Info size={20} />
-          </button>
-          <button onClick={() => setIsSettingsOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
-            <Settings size={20} />
           </button>
         </div>
       </header>
@@ -137,9 +216,6 @@ function App() {
           3. {t.app.helpStep3}<br />
           4. {t.app.helpStep4}<br />
           <br />
-          <strong>{t.app.helpBatch}</strong><br />
-          {t.app.helpBatchBody}<br />
-          <br />
           <strong>{t.app.helpSave}</strong><br />
           {t.app.helpSaveBody}
         </div>
@@ -152,6 +228,10 @@ function App() {
         currentDate={currentViewDate}
         onBadgeClick={() => setIsBadgeHelpOpen(true)}
       />
+
+      <div style={{ padding: '0 8px' }}>
+        <TaxMonitor />
+      </div>
 
       {/* Month Navigation & Batch Toggle */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', padding: '0 8px' }}>
@@ -256,6 +336,11 @@ function App() {
       <BadgeHelpModal
         isOpen={isBadgeHelpOpen}
         onClose={() => setIsBadgeHelpOpen(false)}
+      />
+
+      <AnalyticsModal
+        isOpen={isAnalyticsOpen}
+        onClose={() => setIsAnalyticsOpen(false)}
       />
     </>
   );

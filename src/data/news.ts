@@ -11,6 +11,49 @@ export interface NewsItem {
 
 export const NEWS_ITEMS: NewsItem[] = [
     {
+        id: '20260203-06',
+        date: '2026-02-03',
+        title: {
+            ja: '扶養管理機能と分析グラフを追加しました！📊',
+            en: 'Tax Monitor & Analytics Graph Added! 📊',
+            es: '¡Monitor de Impuestos y Gráfico de Análisis Añade! 📊'
+        },
+        content: {
+            ja: `便利な2つの新機能を追加しました！
+            
+**1. 扶養控除管理 (Tax Monitor)**
+設定した年収の壁（デフォルト103万円）までの残額をホーム画面でひと目で確認できるようになりました。
+上限額は、右上のメニュー（☰）→「設定」から自由に変更可能です。
+
+**2. 給与分析グラフ**
+画面右上のトレンドアイコン（📈）をタップすると、月ごとの「給与額」「コマ数」の推移をグラフで見ることができます。
+
+働き方の調整や振り返りにぜひご活用ください！`,
+            en: `Two new useful features have been added!
+
+**1. Tax Monitor**
+You can now check your remaining balance up to your annual income limit (default 1.03 million JPY) at a glance on the home screen.
+You can change the limit from the top right menu (☰) -> "Settings".
+
+**2. Analytics Graph**
+Tap the trend icon (📈) on the top right to view charts of your monthly income and class counts.
+
+Please use it to adjust your work style and look back on your progress!`,
+            es: `¡Se han añadido dos nuevas funciones útiles!
+
+**1. Monitor de Impuestos**
+Ahora puede verificar su saldo restante hasta su límite de ingresos anuales (predeterminado 1.03 millones JPY) de un vistazo en la pantalla de inicio.
+Puede cambiar el límite desde el menú superior derecho (☰) -> "Configuración".
+
+**2. Gráfico de Análisis**
+Toque el icono de tendencia (📈) en la parte superior derecha para ver gráficos de sus ingresos mensuales y conteo de clases.
+
+¡Úselo para ajustar su estilo de trabajo y recordar su progreso!`
+        },
+        category: 'update',
+        important: false,
+    },
+    {
         id: '20260203-05',
         date: '2026-02-03',
         title: {

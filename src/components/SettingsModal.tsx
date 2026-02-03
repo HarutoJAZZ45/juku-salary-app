@@ -129,6 +129,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                     <input type="number" value={formData.closingDay} onChange={e => handleChange('closingDay', Number(e.target.value))} />
                 </div>
 
+                <div className="input-group">
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>{t.settings.annualLimit}</label>
+                    <input type="number" value={formData.annualLimit} onChange={e => handleChange('annualLimit', Number(e.target.value))} />
+                </div>
+
                 <hr style={{ border: 'none', height: '1px', background: '#e2e8f0', margin: '16px 0' }} />
 
                 {/* Language Selector - Moved to Bottom */}

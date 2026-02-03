@@ -34,6 +34,9 @@ export interface UserSettings {
   // Cutoff configuration
   closingDay: number;     // Default 15
   paymentMonthLag: number; // Default 1 (Next month payment)
+
+  // Tax / Dependency
+  annualLimit: number; // Default 1,030,000
 }
 
 export interface DailySummary {
