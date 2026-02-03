@@ -28,7 +28,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
             title: { ja: t.app.paydayTitle, en: t.app.paydayTitle, es: t.app.paydayTitle },
             content: { ja: t.app.paydayContent, en: t.app.paydayContent, es: t.app.paydayContent },
             category: 'notice',
-            important: true,
+            important: false,
         });
     }
 
