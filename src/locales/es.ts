@@ -103,5 +103,13 @@ export const es: Translation = {
         earnPlatinumDesc: '¡Ganó más de 160.000 yenes! ¡Felicidades!',
         modalTitle: 'Insignias Ganadas',
         modalDesc: 'Se muestran las insignias ganadas este mes.',
+    },
+    dataManagement: {
+        title: 'Gestión de Datos',
+        export: 'Exportar Datos',
+        import: 'Importar Datos',
+        importWarning: 'La importación sobrescribirá los datos de las fechas existentes. ¿Continuar?',
+        success: 'Datos importados con éxito.',
+        error: 'Error al importar datos.',
     }
 };

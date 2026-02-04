@@ -10,7 +10,8 @@ import { NewsModal } from './components/NewsModal';
 import { BadgeHelpModal } from './components/BadgeHelpModal';
 import { TaxMonitor } from './components/TaxMonitor';
 import { AnalyticsModal } from './components/AnalyticsModal';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu } from 'lucide-react';
+import { DataManagementModal } from './components/DataManagementModal';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
@@ -32,6 +33,7 @@ function App() {
 
   const [isBadgeHelpOpen, setIsBadgeHelpOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Batch Edit State
@@ -153,6 +155,15 @@ function App() {
             >
               <Settings size={18} />
               {t.settings.title}
+            </button>
+
+            <button
+              onClick={() => { setIsDataManagementOpen(true); setIsMenuOpen(false); }}
+              className="menu-item"
+              style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
+            >
+              <Database size={18} />
+              {t.dataManagement.title}
             </button>
 
             <button
@@ -342,6 +353,11 @@ function App() {
       <AnalyticsModal
         isOpen={isAnalyticsOpen}
         onClose={() => setIsAnalyticsOpen(false)}
+      />
+
+      <DataManagementModal
+        isOpen={isDataManagementOpen}
+        onClose={() => setIsDataManagementOpen(false)}
       />
       <Analytics />
     </>

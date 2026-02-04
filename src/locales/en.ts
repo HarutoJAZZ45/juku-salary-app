@@ -101,7 +101,15 @@ export const en: Translation = {
         earnSilverDesc: 'Earned over 100,000 yen!',
         earnGoldDesc: 'Earned over 130,000 yen!',
         earnPlatinumDesc: 'Earned over 160,000 yen! Congratulations!',
-        modalTitle: 'Badges Earned',
-        modalDesc: 'Badges earned for this month are displayed.',
+        modalTitle: 'Earned Badges',
+        modalDesc: 'Badges earned this month are displayed.',
+    },
+    dataManagement: {
+        title: 'Data Management',
+        export: 'Export Data',
+        import: 'Import Data',
+        importWarning: 'Importing will overwrite data for existing dates. Continue?',
+        success: 'Data imported successfully.',
+        error: 'Failed to import data.',
     }
 };

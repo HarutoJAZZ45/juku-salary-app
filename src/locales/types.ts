@@ -104,4 +104,12 @@ export interface Translation {
         modalTitle: string;
         modalDesc: string;
     };
+    dataManagement: {
+        title: string;
+        export: string;
+        import: string;
+        importWarning: string;
+        success: string;
+        error: string;
+    };
 }

@@ -103,5 +103,13 @@ export const ja: Translation = {
         earnPlatinumDesc: '月収16万円達成！おめでとうございます！',
         modalTitle: '獲得バッジ一覧',
         modalDesc: 'その月に獲得したバッジが表示されます。',
+    },
+    dataManagement: {
+        title: 'データ管理 (バックアップ)',
+        export: 'データをエクスポート (保存)',
+        import: 'データをインポート (復元)',
+        importWarning: 'インポートすると、同じ日付のデータは上書きされます。よろしいですか？',
+        success: 'インポートが完了しました。',
+        error: 'インポートに失敗しました。ファイルを確認してください。',
     }
 };

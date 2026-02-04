@@ -11,6 +11,52 @@ export interface NewsItem {
 
 export const NEWS_ITEMS: NewsItem[] = [
     {
+        id: '20260204-07',
+        date: '2026-02-04',
+        title: {
+            ja: 'データのバックアップ機能を追加しました！💾',
+            en: 'Data Backup (Export/Import) Added! 💾',
+            es: '¡Copia de seguridad de datos añadida! 💾'
+        },
+        content: {
+            ja: `待望の「データ管理機能」を追加しました！
+機種変更や万が一のデータ消失に備えて、給与データを保存（エクスポート）し、復元（インポート）できるようになりました。
+
+**使い方**:
+1. 右上のメニュー（☰）を開く
+2. 「データ管理 (バックアップ)」を選択
+3. **エクスポート**: ボタンを押すと、データがファイルとしてダウンロードされます。
+4. **インポート**: 保存したファイルを読み込むと、データが復元されます。
+
+※インポート時は、同じ日付のデータは上書きされ、それ以外の日付のデータはそのまま残ります（マージ）。
+こまめなバックアップをおすすめします！`,
+            en: `We've added a highly requested "Data Management" feature!
+You can now export (save) and import (restore) your salary data to prepare for device changes or accidental data loss.
+
+**How to use**:
+1. Open the top right menu (☰)
+2. Select "Data Management"
+3. **Export**: Tap the button to download your data as a file.
+4. **Import**: Load the saved file to restore your data.
+
+*Note: When importing, data for the same dates will be overwritten, while data for other dates will remain (merged).
+We recommend backing up regularly!`,
+            es: `¡Hemos añadido una función de "Gestión de Datos" muy solicitada!
+Ahora puede exportar (guardar) e importar (restaurar) sus datos salariales para prepararse para cambios de dispositivo o pérdida accidental de datos.
+
+**Cómo usar**:
+1. Abra el menú superior derecho (☰)
+2. Seleccione "Gestión de Datos"
+3. **Exportar**: Toque el botón para descargar sus datos como un archivo.
+4. **Importar**: Cargue el archivo guardado para restaurar sus datos.
+
+*Nota: Al importar, los datos de las mismas fechas se sobrescribirán, mientras que los datos de otras fechas permanecerán (fusionados).
+¡Recomendamos hacer copias de seguridad regularmente!`
+        },
+        category: 'update',
+        important: true,
+    },
+    {
         id: '20260203-06',
         date: '2026-02-03',
         title: {

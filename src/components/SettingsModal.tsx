@@ -65,9 +65,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                     </button>
                 </div>
 
-                {/* Language Selector Removed from here */}
-                {/* <div className="input-group">...</div> <hr /> */}
-
                 {/* 1. Home Campus */}
                 <div className="input-group">
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>{t.settings.homeCampus}</label>
@@ -167,4 +164,5 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
             </div>
         </div>
     );
+
 };
