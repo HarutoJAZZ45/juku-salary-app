@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import type { UserSettings, WorkEntry } from '../types';
 import { calculateDailyTotal, formatCurrency, getPeriodRange } from '../utils/calculator';
 import { useTranslation } from '../contexts/LanguageContext';
-import { getStreakBadges, getEarningsBadge } from '../utils/badges';
+import { getStreakBadges, getEarningsBadge, getEventBadges } from '../utils/badges';
 import type { Badge } from '../utils/badges';
 import { BadgeDisplay } from './BadgeDisplay';
 
@@ -59,8 +59,18 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
         const earnedBadge = getEarningsBadge(stats.total);
         if (earnedBadge) earnedBadges.push(earnedBadge);
 
+        // イベントバッジ (期間内に該当する日付があるもの)
+        const eventBadges = getEventBadges(entries).filter(b => {
+            if (b.id === 'event-newyear-2026') {
+                const eventDate = new Date('2026-01-02');
+                return eventDate >= period.start && eventDate <= period.end;
+            }
+            return false;
+        });
+        earnedBadges.push(...eventBadges);
+
         return earnedBadges;
-    }, [stats.total, stats.periodEntries, period]);
+    }, [stats.total, stats.periodEntries, period, entries]);
 
     return (
         <div className="glass-panel" style={{

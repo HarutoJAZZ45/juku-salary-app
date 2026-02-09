@@ -104,8 +104,21 @@ export interface Translation {
         earnSilverDesc: string;
         earnGoldDesc: string;
         earnPlatinumDesc: string;
+        eventNewYear: string;
+        eventNewYearDesc: string;
         modalTitle: string;
         modalDesc: string;
+    };
+    titles: {
+        none: string;
+        gasho2026: string;
+        rookie: string;
+        rolePlayer: string;
+        starter: string;
+        allStar: string;
+        franchisePlayer: string;
+        superStar: string;
+        hallOfFamer: string;
     };
     dataManagement: {
         title: string;

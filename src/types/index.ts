@@ -64,9 +64,10 @@ export interface DailySummary {
  */
 export interface UserProfile {
   name: string;
-  title: string; // 称号 (e.g. "新人講師")
   avatarId: string; // 将来的な拡張用
   themeColor?: string; // 背景テーマカラー
+  activeTitle?: string; // 現在選択中の称号
+  unlockedTitles?: string[]; // 獲得した称号のリスト
 }
 
 /**

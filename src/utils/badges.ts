@@ -7,7 +7,7 @@ export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
 // バッジ定義インターフェース
 export interface Badge {
     id: string;
-    type: 'streak' | 'earnings'; // 連勤または給与
+    type: 'streak' | 'earnings' | 'event'; // 連勤、給与、またはイベント
     tier: BadgeTier;
     labelKey: string; // 翻訳キー
     descriptionKey: string; // 説明文の翻訳キー
@@ -66,13 +66,38 @@ export const getEarningsBadge = (totalEarnings: number): Badge | null => {
     return null;
 };
 
-// 全期間の獲得バッジ総数を計算する
-export const calculateTotalBadges = (entries: Record<string, WorkEntry>, settings: UserSettings): { streak: number, earnings: number } => {
+/**
+ * イベントバッジの判定
+ */
+export const getEventBadges = (entries: Record<string, WorkEntry>): Badge[] => {
+    const foundBadges: Badge[] = [];
+
+    // 正月特訓 2026-01-02, 2026-01-03
+    const hasNewYearTraining = Object.values(entries).some(e =>
+        e.date === '2026-01-02' || e.date === '2026-01-03'
+    );
+
+    if (hasNewYearTraining) {
+        foundBadges.push({
+            id: 'event-newyear-2026',
+            type: 'event',
+            tier: 'gold', // 特別にゴールド級
+            labelKey: 'badges.eventNewYear',
+            descriptionKey: 'badges.eventNewYearDesc',
+            icon: 'sun'
+        });
+    }
+
+    return foundBadges;
+};
+
+// 全期間の獲得バッジ数を計算する
+export const calculateTotalBadges = (entries: Record<string, WorkEntry>, settings: UserSettings): { streak: number, earnings: number, event: number } => {
     let streakCount = 0;
     let earningsCount = 0;
     const entryDates = Object.keys(entries).sort();
 
-    if (entryDates.length === 0) return { streak: 0, earnings: 0 };
+    if (entryDates.length === 0) return { streak: 0, earnings: 0, event: 0 };
 
     // 最初のエントリの日付から現在の翌月までを範囲とする（漏れがないように）
     const startDate = parseISO(entryDates[0]);
@@ -107,5 +132,8 @@ export const calculateTotalBadges = (entries: Record<string, WorkEntry>, setting
         current = addMonths(current, 1);
     }
 
-    return { streak: streakCount, earnings: earningsCount };
+    // イベントバッジは全期間で一度だけ判定（または日付固定なので別途集計）
+    const eventCount = getEventBadges(entries).length;
+
+    return { streak: streakCount, earnings: earningsCount, event: eventCount };
 };

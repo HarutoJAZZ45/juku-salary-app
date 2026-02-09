@@ -12,32 +12,36 @@ import { calculateDailyTotal } from './calculator';
 // Lv10: 8100
 // Lv20: 36100
 // Lv50: 240100
+// レベルごとの必要XP計算 (nレベルに到達するのに必要な累積XP)
+// 式: XP = 14 * (Level - 1)^2.2
+// Lv70で約150,000 XPになるように調整
 const getXpForLevel = (level: number): number => {
     if (level <= 1) return 0;
-    return 100 * Math.pow(level - 1, 2);
+    return Math.floor(14 * Math.pow(level - 1, 2.2));
 };
 
 const getLevelFromXp = (xp: number): number => {
     if (xp < 0) return 1;
-    return Math.floor(Math.sqrt(xp / 100)) + 1;
+    // 近似的に逆算
+    return Math.floor(Math.pow(xp / 14, 1 / 2.2)) + 1;
 };
 
 // 称号の定義
 export const TITLES = [
-    { level: 1, text: "新人講師" },
-    { level: 3, text: "駆け出し講師" },
-    { level: 5, text: "一人前講師" },
-    { level: 10, text: "ベテラン講師" },
-    { level: 20, text: "カリスマ講師" },
-    { level: 30, text: "教室長クラス" },
-    { level: 50, text: "伝説の講師" },
-    { level: 100, text: "塾の神様" }
+    { level: 10, id: "rookie", text: "ルーキー" },
+    { level: 20, id: "rolePlayer", text: "ロールプレイヤー" },
+    { level: 30, id: "starter", text: "スターター" },
+    { level: 40, id: "allStar", text: "オールスター" },
+    { level: 50, id: "franchisePlayer", text: "フランチャイズプレイヤー" },
+    { level: 60, id: "superStar", text: "スーパースター" },
+    { level: 70, id: "hallOfFamer", text: "殿堂入り" }
 ];
 
 export const getTitleForLevel = (level: number): string => {
     // 現在のレベル以下の最大のレベル条件を持つ称号を探す
     const match = [...TITLES].reverse().find(t => level >= t.level);
-    return match ? match.text : TITLES[0].text;
+    // デフォルト称号はなし、または最低レベルのもの
+    return match ? match.text : "新人";
 };
 
 export const calculateLevelData = (entries: Record<string, WorkEntry>, settings: UserSettings): LevelData => {

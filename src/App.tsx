@@ -17,6 +17,8 @@ import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
 import { useTranslation } from './contexts/LanguageContext';
+import { getEventBadges } from './utils/badges';
+import { calculateLevelData, TITLES } from './utils/levelSystem';
 
 // メインアプリケーションコンポーネント
 // 全体のレイアウトと状態管理を行う
@@ -48,6 +50,56 @@ function App() {
   // バッジと通知のロジック
   const [hasUnreadNews, setHasUnreadNews] = useState(false);
   const [showHelpHint, setShowHelpHint] = useState(false);
+
+  // 称号・バッジの獲得状況監視
+  useEffect(() => {
+    if (!isLoaded || !settings.profile) return;
+
+    // 1. イベント称号の判定
+    const earnedEventBadges = getEventBadges(entries);
+    const currentUnlocked = settings.profile.unlockedTitles || [];
+    let newUnlockedTitles = [...currentUnlocked];
+    let changed = false;
+
+    // 正月特訓 2026
+    const hasNewYear = earnedEventBadges.some(b => b.id === 'event-newyear-2026');
+    if (hasNewYear && !newUnlockedTitles.includes('gasho2026')) {
+      newUnlockedTitles.push('gasho2026');
+      changed = true;
+    } else if (!hasNewYear && newUnlockedTitles.includes('gasho2026')) {
+      newUnlockedTitles = newUnlockedTitles.filter(t => t !== 'gasho2026');
+      changed = true;
+    }
+
+    // 2. レベル称号の判定
+    const levelData = calculateLevelData(entries, settings);
+    const currentLevel = levelData.level;
+
+    TITLES.forEach(title => {
+      // レベル条件を満たしていて、かつまだ持っていない場合
+      if (currentLevel >= title.level && !newUnlockedTitles.includes(title.id)) {
+        newUnlockedTitles.push(title.id);
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      // もし現在セットしている称号が剥奪された場合（レベル称号は剥奪されないが汎用的に）
+      const activeTitle = settings.profile.activeTitle;
+      const updates: Partial<typeof settings.profile> = { unlockedTitles: newUnlockedTitles };
+      if (activeTitle && !newUnlockedTitles.includes(activeTitle)) {
+        updates.activeTitle = undefined;
+      }
+
+      setSettings({
+        ...settings,
+        profile: {
+          ...settings.profile,
+          ...updates
+        }
+      });
+    }
+  }, [entries, settings, isLoaded, setSettings]);
 
   useEffect(() => {
     // ヘルプの初回表示チェック
@@ -223,8 +275,20 @@ function App() {
           <button onClick={() => setIsAnalyticsOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
             <TrendingUp size={20} />
           </button>
-          <button onClick={() => setIsAccountOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
+          <button onClick={() => setIsAccountOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>
             <User size={20} />
+            {(() => {
+              const lastSeen = JSON.parse(localStorage.getItem('lastSeenTitles') || '[]');
+              const current = settings.profile?.unlockedTitles || [];
+              const hasNew = current.some((t: string) => !lastSeen.includes(t));
+              return hasNew && (
+                <span style={{
+                  position: 'absolute', top: '6px', right: '6px',
+                  width: '8px', height: '8px', background: '#e11d48',
+                  borderRadius: '50%', border: '1px solid white'
+                }} />
+              );
+            })()}
           </button>
 
           {/* Hamburger Menu Trigger */}

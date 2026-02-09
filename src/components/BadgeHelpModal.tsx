@@ -98,6 +98,23 @@ export const BadgeHelpModal: React.FC<BadgeHelpModalProps> = ({ isOpen, onClose 
                         ))}
                     </div>
 
+                    {/* Event Badge Message */}
+                    <div style={{
+                        marginTop: '32px',
+                        padding: '16px',
+                        background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                        borderRadius: '16px',
+                        border: '1px solid #bae6fd',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px'
+                    }}>
+                        <div style={{ fontSize: '24px' }}>🎁</div>
+                        <div style={{ fontSize: '13px', color: '#0369a1', lineHeight: '1.5', fontWeight: 500 }}>
+                            その他にイベントに応じてさまざまなバッジを獲得できます。季節限定のバッジをお楽しみに！
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

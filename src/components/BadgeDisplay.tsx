@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Trophy, Flame, Wallet } from 'lucide-react';
+import { Trophy, Flame, Wallet, Sparkles, Sun } from 'lucide-react';
 import type { Badge } from '../utils/badges';
 import { useTranslation } from '../contexts/LanguageContext';
 
@@ -14,7 +14,10 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ badges, onClick }) =
     const { t } = useTranslation();
 
     // ティアごとのスタイル定義（色、グラデーション、枠線）
-    const getBadgeStyle = (tier: string) => {
+    const getBadgeStyle = (tier: string, type?: string) => {
+        if (type === 'event') {
+            return { color: '#e11d48', bg: 'linear-gradient(135deg, #fff 0%, #ffe4e6 100%)', border: '#fb7185' };
+        }
         switch (tier) {
             case 'bronze': return { color: '#CD7F32', bg: 'linear-gradient(135deg, #FFF0E0 0%, #FFE0C0 100%)', border: '#ffcca0' };
             case 'silver': return { color: '#64748b', bg: 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)', border: '#cbd5e1' };
@@ -49,7 +52,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ badges, onClick }) =
     return (
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-start' }} onClick={onClick}>
             {groupedBadges.map(({ badge, count }: { badge: Badge, count: number }) => {
-                const style = getBadgeStyle(badge.tier);
+                const style = getBadgeStyle(badge.tier, badge.type);
                 const label = t.badges[badge.labelKey.split('.')[1] as keyof typeof t.badges];
 
                 return (
@@ -68,7 +71,11 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ badges, onClick }) =
                         onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
                         onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                         title={`${label}${count > 1 ? ` x${count}` : ''}`}>
-                        {badge.type === 'streak' ? (
+                        {badge.icon === 'sun' ? (
+                            <Sun color={style.color} size={20} fill={style.color} fillOpacity={0.2} />
+                        ) : badge.icon === 'sparkles' ? (
+                            <Sparkles color={style.color} size={20} fill={style.color} fillOpacity={0.2} />
+                        ) : badge.type === 'streak' ? (
                             <Flame color={style.color} size={20} fill={style.color} fillOpacity={0.2} />
                         ) : (
                             <Trophy color={style.color} size={20} fill={style.color} fillOpacity={0.2} />
