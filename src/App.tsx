@@ -11,7 +11,8 @@ import { BadgeHelpModal } from './components/BadgeHelpModal';
 import { TaxMonitor } from './components/TaxMonitor';
 import { AnalyticsModal } from './components/AnalyticsModal';
 import { DataManagementModal } from './components/DataManagementModal';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, Smartphone } from 'lucide-react';
+import { AccountModal } from './components/AccountModal';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, Smartphone, User } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
@@ -37,6 +38,7 @@ function App() {
   const [isBadgeHelpOpen, setIsBadgeHelpOpen] = useState(false);
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // 一括編集モードの状態管理
@@ -221,6 +223,9 @@ function App() {
           <button onClick={() => setIsAnalyticsOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
             <TrendingUp size={20} />
           </button>
+          <button onClick={() => setIsAccountOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
+            <User size={20} />
+          </button>
 
           {/* Hamburger Menu Trigger */}
           <button
@@ -398,6 +403,14 @@ function App() {
       <DataManagementModal
         isOpen={isDataManagementOpen}
         onClose={() => setIsDataManagementOpen(false)}
+      />
+
+      <AccountModal
+        isOpen={isAccountOpen}
+        onClose={() => setIsAccountOpen(false)}
+        entries={entries}
+        settings={settings}
+        onUpdateSettings={setSettings}
       />
       <Analytics />
     </>

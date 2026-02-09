@@ -11,6 +11,49 @@ export interface NewsItem {
 
 export const NEWS_ITEMS: NewsItem[] = [
     {
+        id: '20260209-01',
+        date: '2026-02-09',
+        title: {
+            ja: 'ユーザープロフィールとカスタマイズ機能を追加しました！👤🎨',
+            en: 'User Profile & Customization Added! 👤🎨',
+            es: '¡Perfil de usuario y personalización añadidas! 👤🎨'
+        },
+        content: {
+            ja: `待望の「ユーザー機能」が大幅にパワーアップしました！
+アプリ画面上のレベル表示やユーザーアイコンをタップすると、新しいプロフィール画面が開きます。
+
+**新しくなったポイント**:
+* 🎨 **テーマカスタマイズ**: お好みのグラデーションカラーを選んで、プロフィールを彩ることができます。
+* 👤 **アバター選択**: 豊富なアイコン（バスケットボール🏀など）から自分にぴったりのアバターを設定可能！
+* 📈 **レベルシステム**: 日々の勤務や給与に応じてXPが貯まり、レベルが上がっていくようになりました。
+* 🏅 **生涯バッジ記録**: 獲得したバッジが「連勤🔥」と「給与🏆」のカテゴリ別に集計され、これまでの頑張りがひと目でわかります。
+
+ぜひ自分好みにカスタマイズして、レベルアップを目指しましょう！`,
+            en: `The "User Features" have received a major update!
+Tap your level or user icon on the screen to open the new profile modal.
+
+**What's New**:
+* 🎨 **Theme Customization**: Choose your favorite gradient color to personalize your profile.
+* 👤 **Avatar Selection**: Pick from a wide variety of icons (including Basketball 🏀) to represent yourself!
+* 📈 **Level System**: Earn XP based on your work history and see your level grow.
+* 🏅 **Lifetime Badge Stats**: Your earned badges are now categorized into "Streaks 🔥" and "Earnings 🏆", showing your progress at a glance.
+
+Customize your profile and aim for the next level!`,
+            es: `¡Las "Funciones de Usuario" han recibido una actualización importante!
+Toque su nivel o el icono de usuario en la pantalla para abrir el nuevo modal de perfil.
+
+**Novedades**:
+* 🎨 **Personalización de Temas**: Elija su color de degradado favorito para personalizar su perfil.
+* 👤 **Selección de Avatar**: ¡Elija entre una gran variedad de iconos (incluyendo Baloncesto 🏀) para representarse a sí mismo!
+* 📈 **Sistema de Niveles**: Gane XP según su historial de trabajo y vea crecer su nivel.
+* 🏅 **Estadísticas de Insignias**: Sus insignias ganadas ahora se clasifican en "Rachas 🔥" e "Ingresos 🏆", mostrando su progreso de un vistazo.
+
+¡Personaliza tu perfil y apunta al siguiente nivel!`
+        },
+        category: 'update',
+        important: false,
+    },
+    {
         id: '20260204-07',
         date: '2026-02-04',
         title: {

@@ -39,6 +39,9 @@ export interface UserSettings {
   campusTransportRates: Record<Campus, number>; // 校舎ごとのデフォルト交通費
   defaultCampus: Campus;      // 所属校舎（ホームスクール）
 
+  // プロフィール設定 (v3.0)
+  profile?: UserProfile;
+
   // 締め日設定
   closingDay: number;      // 締め日（デフォルト: 15日）
   paymentMonthLag: number; // 支払月ラグ（0=当月払い、1=翌月払い）
@@ -54,4 +57,27 @@ export interface DailySummary {
   date: string;
   totalPay: number;
   entries: WorkEntry[];
+}
+
+/**
+ * ユーザープロフィール
+ */
+export interface UserProfile {
+  name: string;
+  title: string; // 称号 (e.g. "新人講師")
+  avatarId: string; // 将来的な拡張用
+  themeColor?: string; // 背景テーマカラー
+}
+
+/**
+ * レベル・経験値データ
+ */
+export interface LevelData {
+  level: number;
+  xp: number;
+  nextLevelXp: number;
+  progress: number; // 0-100%
+  totalEarnings: number;
+  totalClasses: number;
+  totalWorkDays: number;
 }

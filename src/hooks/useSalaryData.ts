@@ -19,7 +19,12 @@ const DEFAULT_SETTINGS: UserSettings = {
     defaultCampus: '平岡',   // 所属校舎
     closingDay: 15,          // 締め日
     paymentMonthLag: 0,      // 支払月ラグ（0=当月、1=翌月）
-    annualLimit: 1030000     // 扶養控除の壁（年収）
+    annualLimit: 1030000,    // 扶養控除の壁（年収）
+    profile: {
+        name: 'ゲスト講師',
+        title: '新人講師',
+        avatarId: 'default'
+    }
 };
 
 /**
@@ -49,6 +54,10 @@ export const useSalaryData = () => {
                     campusTransportRates: {
                         ...DEFAULT_SETTINGS.campusTransportRates,
                         ...(loaded.campusTransportRates || {})
+                    },
+                    profile: {
+                        ...DEFAULT_SETTINGS.profile!,
+                        ...(loaded.profile || {})
                     }
                 });
             }

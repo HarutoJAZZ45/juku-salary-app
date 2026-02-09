@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import type { UserSettings, WorkEntry } from '../types';
 import { calculateDailyTotal, formatCurrency, getPeriodRange } from '../utils/calculator';
 import { useTranslation } from '../contexts/LanguageContext';
-import { getStreakBadge, getEarningsBadge } from '../utils/badges';
+import { getStreakBadges, getEarningsBadge } from '../utils/badges';
 import type { Badge } from '../utils/badges';
 import { BadgeDisplay } from './BadgeDisplay';
 
@@ -51,9 +51,9 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
     const badges = useMemo(() => {
         const earnedBadges: Badge[] = [];
 
-        // 連続勤務バッジ
-        const streakBadge = getStreakBadge(stats.periodEntries, period.start, period.end);
-        if (streakBadge) earnedBadges.push(streakBadge);
+        // 連続勤務バッジ (複数獲得可能)
+        const streakBadges = getStreakBadges(stats.periodEntries, period.start, period.end);
+        earnedBadges.push(...streakBadges);
 
         // 収入バッジ
         const earnedBadge = getEarningsBadge(stats.total);
@@ -69,7 +69,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
             color: 'white',
             boxShadow: '0 10px 25px -5px rgba(4, 96, 167, 0.4)'
         }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px' }}>
                 <div>
                     <h2 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.9 }}>
                         {t.summary.paymentEstimate} <span style={{ fontSize: '10px', opacity: 0.8 }}>({period.start.getMonth() + 1}/{period.start.getDate()} - {period.end.getMonth() + 1}/{period.end.getDate()})</span>
@@ -78,9 +78,11 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
                         {formatCurrency(stats.total)}
                     </div>
                 </div>
-                <div>
-                    <BadgeDisplay badges={badges} onClick={onBadgeClick} />
-                </div>
+                {badges.length > 0 && (
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '12px' }}>
+                        <BadgeDisplay badges={badges} onClick={onBadgeClick} />
+                    </div>
+                )}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
