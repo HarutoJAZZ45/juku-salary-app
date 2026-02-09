@@ -22,7 +22,8 @@ const DEFAULT_SETTINGS: UserSettings = {
     annualLimit: 1030000,    // 扶養控除の壁（年収）
     profile: {
         name: 'ゲスト講師',
-        title: '新人講師',
+        activeTitle: 'rookie',
+        unlockedTitles: ['rookie'],
         avatarId: 'default'
     }
 };
