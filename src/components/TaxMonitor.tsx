@@ -13,17 +13,31 @@ interface TaxMonitorProps {
 // 年収（1月～12月の支給ベース）を計算し、103万円の壁に対する進捗を表示する
 export const TaxMonitor: React.FC<TaxMonitorProps> = ({ entries, settings }) => {
     const { t } = useTranslation();
+    const currentYear = new Date().getFullYear();
+    const [selectedYear, setSelectedYear] = React.useState(currentYear);
 
-    const today = new Date();
-    const currentYear = today.getFullYear();
+    // データから存在する給料年のリストを作成
+    const availableYears = React.useMemo(() => {
+        const years = new Set<number>();
+        years.add(currentYear); // 現在の年は必ず含める
+
+        Object.values(entries).forEach(entry => {
+            const workDate = new Date(entry.date);
+            // ユーザー設定のラグを使用 (デフォルト1)
+            const payDate = getPaymentDate(workDate, settings.closingDay, settings.paymentMonthLag ?? 1);
+            years.add(payDate.getFullYear());
+        });
+
+        return Array.from(years).sort((a, b) => b - a); // 降順
+    }, [entries, settings.closingDay, settings.paymentMonthLag, currentYear]);
 
     // Calculate annual income based on PAYMENT DATE (Jan 1 - Dec 31)
     let totalIncome = 0;
     Object.values(entries).forEach(entry => {
         const workDate = new Date(entry.date);
-        const payDate = getPaymentDate(workDate, settings.closingDay, 1); // Fixed 1 month lag
+        const payDate = getPaymentDate(workDate, settings.closingDay, settings.paymentMonthLag ?? 1);
 
-        if (payDate.getFullYear() === currentYear) {
+        if (payDate.getFullYear() === selectedYear) {
             totalIncome += calculateDailyTotal(entry, settings);
         }
     });
@@ -46,10 +60,30 @@ export const TaxMonitor: React.FC<TaxMonitorProps> = ({ entries, settings }) => 
             border: '1px solid #e2e8f0'
         }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {t.tax?.title || 'Tax Monitor'}
-                    {progress > 90 && <AlertCircle size={16} color="#ef4444" />}
-                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#334155', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {t.tax?.title || 'Tax Monitor'}
+                        {progress > 90 && <AlertCircle size={16} color="#ef4444" />}
+                    </h3>
+                    <select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                        style={{
+                            padding: '2px 8px',
+                            borderRadius: '6px',
+                            border: '1px solid #cbd5e1',
+                            fontSize: '12px',
+                            color: '#475569',
+                            outline: 'none',
+                            background: '#f8fafc',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {availableYears.map(year => (
+                            <option key={year} value={year}>{year}年</option>
+                        ))}
+                    </select>
+                </div>
                 <span style={{ fontSize: '12px', color: '#64748b' }}>
                     {t.tax?.remaining || 'Remaining'}: ¥{remaining.toLocaleString()}
                 </span>
