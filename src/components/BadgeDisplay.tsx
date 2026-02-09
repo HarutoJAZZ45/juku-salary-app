@@ -8,9 +8,12 @@ interface BadgeDisplayProps {
     onClick?: () => void;
 }
 
+// バッジ表示コンポーネント
+// 獲得したバッジのリストを表示する
 export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ badges, onClick }) => {
     const { t } = useTranslation();
 
+    // ティアごとのスタイル定義（色、グラデーション、枠線）
     const getBadgeStyle = (tier: string) => {
         switch (tier) {
             case 'bronze': return { color: '#CD7F32', bg: 'linear-gradient(135deg, #FFF0E0 0%, #FFE0C0 100%)', border: '#ffcca0' };
@@ -33,7 +36,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ badges, onClick }) =
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }} onClick={onClick}>
             {badges.map(badge => {
                 const style = getBadgeStyle(badge.tier);
-                // Type safety for translation key
+                // 翻訳キーの型安全性確保
                 const label = t.badges[badge.labelKey.split('.')[1] as keyof typeof t.badges];
 
                 return (

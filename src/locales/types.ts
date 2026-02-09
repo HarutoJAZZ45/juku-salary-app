@@ -1,5 +1,7 @@
+// サポートされている言語コードの型定義
 export type Language = 'ja' | 'en' | 'es';
 
+// 翻訳データの型定義（すべての言語ファイルがこのインターフェースに従う必要がある）
 export interface Translation {
     common: {
         save: string;
@@ -61,6 +63,7 @@ export interface Translation {
         helpStep2: string;
         helpStep3: string;
         helpStep4: string;
+        helpPWA: string;
         batchMode: string;
         selecting: string;
         selectMult: string;

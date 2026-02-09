@@ -11,19 +11,22 @@ import { BadgeHelpModal } from './components/BadgeHelpModal';
 import { TaxMonitor } from './components/TaxMonitor';
 import { AnalyticsModal } from './components/AnalyticsModal';
 import { DataManagementModal } from './components/DataManagementModal';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database } from 'lucide-react';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, Smartphone } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
 import { useTranslation } from './contexts/LanguageContext';
 
+// メインアプリケーションコンポーネント
+// 全体のレイアウトと状態管理を行う
 function App() {
   const { t } = useTranslation();
+  // 給与データのカスタムフック（読み込み、更新、削除、設定）
   const { entries, settings, updateEntry, deleteEntry, setSettings, isLoaded } = useSalaryData();
 
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
 
-  // Modal States
+  // モーダル（ポップアップ）の表示状態管理
   const [selectedDate, setSelectedDate] = useState<Date | Date[] | null>(null);
   const [isWorkModalOpen, setIsWorkModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -36,14 +39,23 @@ function App() {
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Batch Edit State
+  // 一括編集モードの状態管理
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
 
-  // Badge Logic
+  // バッジと通知のロジック
   const [hasUnreadNews, setHasUnreadNews] = useState(false);
+  const [showHelpHint, setShowHelpHint] = useState(false);
 
   useEffect(() => {
+    // ヘルプの初回表示チェック
+    // 初めてアプリアクセスしたユーザーにはヒントを表示する
+    const hasSeenHelp = localStorage.getItem('hasSeenHelp');
+    if (!hasSeenHelp) {
+      setShowHelpHint(true);
+    }
+
+    // 未読ニュースの確認
     if (NEWS_ITEMS.length > 0) {
       const lastReadId = localStorage.getItem('lastReadNewsId');
       if (lastReadId !== NEWS_ITEMS[0].id) {
@@ -60,11 +72,13 @@ function App() {
     }
   };
 
+  // データの読み込み完了までローディング表示
   if (!isLoaded) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'gray' }}>Loading...</div>;
 
+  // カレンダーの日付クリック時の処理
   const handleDayClick = (day: Date) => {
     if (isSelectionMode) {
-      // Toggle selection
+      // 選択モード時: 日付の選択・解除を切り替える
       const exists = selectedDates.some(d => format(d, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'));
       if (exists) {
         setSelectedDates(prev => prev.filter(d => format(d, 'yyyy-MM-dd') !== format(day, 'yyyy-MM-dd')));
@@ -72,38 +86,43 @@ function App() {
         setSelectedDates(prev => [...prev, day]);
       }
     } else {
-      // Normal open
+      // 通常時: 編集モーダルを開く
       setSelectedDate(day);
       setIsWorkModalOpen(true);
     }
   };
 
+  // 選択された日付を一括編集する
   const handleBatchEdit = () => {
     if (selectedDates.length === 0) return;
     setSelectedDate(selectedDates); // Pass array
     setIsWorkModalOpen(true);
   };
 
+  // 選択モードの切り替え
   const toggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
-    setSelectedDates([]); // Reset selection when toggling
+    setSelectedDates([]); // 切り替え時に選択をリセット
   };
 
+  // 勤務データの保存処理
   const handleSavework = (dateStr: string, data: Partial<WorkEntry>) => {
     updateEntry(dateStr, data);
   };
 
+  // 勤務データの削除処理
   const handleDeleteEntry = (dateStr: string) => {
     deleteEntry(dateStr);
   };
 
+  // 月の移動処理
   const handleMonthNav = (dir: 'prev' | 'next') => {
     setCurrentViewDate(d => dir === 'prev' ? subMonths(d, 1) : addMonths(d, 1));
   };
 
   return (
     <>
-      {/* Menu Overlay */}
+      {/* メニューオーバーレイ（右上のハンバーガーメニュー） */}
       {isMenuOpen && (
         <div
           style={{
@@ -188,7 +207,15 @@ function App() {
           </h1>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={() => setIsHelpOpen(!isHelpOpen)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
+          <button
+            onClick={() => {
+              setIsHelpOpen(!isHelpOpen);
+              setShowHelpHint(false);
+              localStorage.setItem('hasSeenHelp', 'true');
+            }}
+            className={`glass-btn ${showHelpHint ? 'pulse-hint' : ''}`}
+            style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}
+          >
             <Info size={20} />
           </button>
           <button onClick={() => setIsAnalyticsOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
@@ -222,6 +249,7 @@ function App() {
       {isHelpOpen && (
         <div className="glass-panel" style={{ padding: '16px', marginBottom: '24px', fontSize: '13px', lineHeight: '1.6', position: 'relative' }}>
           <button onClick={() => setIsHelpOpen(false)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none' }}><Info size={16} color="gray" /></button>
+
           <strong>{t.app.helpUsage}</strong><br />
           1. {t.app.helpStep1}<br />
           2. {t.app.helpStep2}<br />
@@ -230,10 +258,22 @@ function App() {
           <br />
           <strong>{t.app.helpSave}</strong><br />
           {t.app.helpSaveBody}
+          <div style={{
+            color: 'var(--primary)',
+            marginTop: '8px',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontWeight: 500
+          }}>
+            <Smartphone size={14} />
+            <span>{t.app.helpPWA}</span>
+          </div>
         </div>
       )}
 
-      {/* Summary Section */}
+      {/* サマリーカード（給与見込み等の表示） */}
       <SummaryCard
         entries={entries}
         settings={settings}
@@ -242,10 +282,10 @@ function App() {
       />
 
       <div style={{ padding: '0 8px' }}>
-        <TaxMonitor />
+        <TaxMonitor entries={entries} settings={settings} />
       </div>
 
-      {/* Month Navigation & Batch Toggle */}
+      {/* 月移動ナビゲーションと一括選択切り替えボタン */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', padding: '0 8px' }}>
         <button onClick={() => handleMonthNav('prev')} style={{ background: 'none', border: 'none', padding: '8px', cursor: 'pointer' }}>
           <ChevronLeft size={24} color="#64748b" />
@@ -272,7 +312,7 @@ function App() {
         </button>
       </div>
 
-      {/* Calendar */}
+      {/* カレンダーグリッド表示 */}
       <div style={{ paddingBottom: isSelectionMode ? '80px' : '0' }}>
         <CalendarGrid
           currentMonth={currentViewDate}
@@ -284,7 +324,7 @@ function App() {
         />
       </div>
 
-      {/* Batch Edit Footer */}
+      {/* 一括編集時の下部フローティングアクションバー */}
       {isSelectionMode && (
         <div style={{
           position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
@@ -311,7 +351,7 @@ function App() {
         </div>
       )}
 
-      {/* Modals */}
+      {/* 各種モーダルコンポーネント */}
       <WorkModal
         isOpen={isWorkModalOpen}
         date={selectedDate}

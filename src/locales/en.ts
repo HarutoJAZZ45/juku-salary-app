@@ -1,5 +1,6 @@
 import type { Translation } from './types';
 
+// 英語の翻訳データ
 export const en: Translation = {
     common: {
         save: 'Save',
@@ -35,7 +36,7 @@ export const en: Translation = {
         leader: 'Leader',
         subLeader: 'Sub-Leader',
         supportWork: 'Support Work (min)',
-        allowanceLabel: 'Allowance (Yen)',
+        allowanceLabel: 'Other (Yen)',
         transportLabel: 'Transport Paid',
         deleteConfirm: 'Are you sure you want to delete this entry?',
         batchDeleteConfirm: 'Are you sure you want to delete all entries?',
@@ -75,6 +76,7 @@ export const en: Translation = {
         helpStep3: 'View your estimated salary for the current month.',
         helpStep4: 'Open "Settings" from the top-right menu (☰) to adjust rates and transport costs.',
         helpSaveBody: 'Data is auto-saved to your device (browser). It is safe as it is not sent to any server, but please note it will be lost if you clear browser cache.',
+        helpPWA: 'Data is saved per browser, so we recommend adding this app to your home screen.',
         batchMode: 'Batch Edit Mode',
         selecting: 'Selecting',
         selectMult: 'Select Multiple',

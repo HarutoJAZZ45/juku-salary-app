@@ -1,44 +1,55 @@
+// 基本的な型定義
+
+// 勤務タイプ、勤務時間帯、場所、校舎の型定義
 export type WorkType = 'koma' | 'support' | 'allowance';
 export type WorkBlock = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 
 export type Location = 'hiraoka' | 'other';
 export type Campus = '平岡' | '新札幌' | '月寒' | '円山' | '北大前';
 
+/**
+ * 1日分の勤務データ
+ */
 export interface WorkEntry {
-  id: string;
+  id: string;               // 一意のID
   date: string; // YYYY-MM-DD
 
-  // Specific inputs
-  selectedBlocks: WorkBlock[];
-  supportMinutes: number; // Manual extra minutes
-  allowanceAmount: number; // Manual extra pay
+  // 具体的な入力データ
+  selectedBlocks: WorkBlock[]; // 担当コマ (A-G)
+  supportMinutes: number;      // 手入力の追加業務時間（分）
+  allowanceAmount: number;     // その他手当金額（円）
 
-  location?: Location;      // Legacy/Derived for logic
-  campus?: Campus;          // Specific campus
-  hasTransport: boolean;   // Whether transport is paid this day
-  transportCost?: number; // Override default if set
+  location?: Location;      // 勤務地種別（hiraoka=800円支給対象、other=400円）
+  campus?: Campus;          // 実際に勤務した校舎
+  hasTransport: boolean;    // 交通費支給の有無
+  transportCost?: number;   // 交通費の上書き設定（設定値以外を使う場合）
 
-  // Special Roles
-  leaderBlocks?: WorkBlock[];     // 2000 JPY
-  subLeaderBlocks?: WorkBlock[];  // 1500 JPY
+  // 特別役職フラグ
+  leaderBlocks?: WorkBlock[];     // リーダー業務を行ったコマ (時給単価アップ)
+  subLeaderBlocks?: WorkBlock[];  // サブリーダー業務を行ったコマ
 }
 
+/**
+ * ユーザー設定
+ */
 export interface UserSettings {
-  teachingHourlyRate: number; // New: Hourly rate for class (1.5x for 90min)
-  hourlyRate: number;     // JPY per hour (Support)
-  transportCost: number;  // Default Fallback
-  campusTransportRates: Record<Campus, number>; // Per-campus default
-  defaultCampus: Campus; // New: Home campus
+  teachingHourlyRate: number; // 授業時給（基本単価）※90分換算で1.5倍される
+  hourlyRate: number;         // 事務時給
+  transportCost: number;      // デフォルト交通費
+  campusTransportRates: Record<Campus, number>; // 校舎ごとのデフォルト交通費
+  defaultCampus: Campus;      // 所属校舎（ホームスクール）
 
+  // 締め日設定
+  closingDay: number;      // 締め日（デフォルト: 15日）
+  paymentMonthLag: number; // 支払月ラグ（0=当月払い、1=翌月払い）
 
-  // Cutoff configuration
-  closingDay: number;     // Default 15
-  paymentMonthLag: number; // Default 1 (Next month payment)
-
-  // Tax / Dependency
-  annualLimit: number; // Default 1,030,000
+  // 税金・扶養管理
+  annualLimit: number; // 年収の壁（デフォルト: 103万）
 }
 
+/**
+ * 日次サマリー（計算用）
+ */
 export interface DailySummary {
   date: string;
   totalPay: number;

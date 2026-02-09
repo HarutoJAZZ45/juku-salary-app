@@ -3,10 +3,10 @@ import type { Language } from '../locales/types';
 export interface NewsItem {
     id: string;
     date: string;
-    title: Record<Language, string>;
-    content: Record<Language, string>;
-    category: 'notice' | 'update';
-    important?: boolean;
+    title: Record<Language, string>; // 言語ごとのタイトル
+    content: Record<Language, string>; // 言語ごとの本文
+    category: 'notice' | 'update'; // お知らせ または アップデート
+    important?: boolean; // 重要フラグ
 }
 
 export const NEWS_ITEMS: NewsItem[] = [

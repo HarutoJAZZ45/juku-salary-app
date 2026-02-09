@@ -19,16 +19,20 @@ const BLOCKS: WorkBlock[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 const CAMPUSES: Campus[] = ['平岡', '新札幌', '月寒', '円山', '北大前'];
 
 
+// 勤務入力・編集モーダル
+// コマ、業務、手当などの詳細な勤務内容を入力する
 export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClose, onSave, onDelete, settings, onSaveComplete }) => {
     const { t } = useTranslation();
     if (!isOpen || !date) return null;
 
+    // 一括編集モード（複数日が選択されている場合）の判定
     const isBatchMode = Array.isArray(date);
     const dateList = isBatchMode ? (date as Date[]) : [date as Date];
     const displayDate = isBatchMode
         ? `${dateList.length}${t.workModal.batchTitle}`
         : `${(date as Date).toLocaleDateString()} ${t.workModal.editTitle}`;
 
+    // 状態管理（フォーム入力値）
     const [dateStr, setDateStr] = useState('');
     const [selectedBlocks, setSelectedBlocks] = useState<WorkBlock[]>([]);
 
@@ -36,15 +40,17 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
     const [allowance, setAllowance] = useState(0);
     const [hasTransport, setHasTransport] = useState(true);
 
-    // Derived state, but stored for history
+    // 勤務地・校舎・交通費（デフォルト設定から自動入力もされる）
     const [campus, setCampus] = useState<Campus>('平岡');
     const [location, setLocation] = useState<Location>('hiraoka');
     const [transportCost, setTransportCost] = useState(0);
 
+    // 役職手当（リーダー・サブリーダー）の状態
     const [leaderBlocks, setLeaderBlocks] = useState<WorkBlock[]>([]);
     const [subLeaderBlocks, setSubLeaderBlocks] = useState<WorkBlock[]>([]);
     const [isRoleExpanded, setIsRoleExpanded] = useState(false);
 
+    // モーダルが開かれたときの初期化処理
     useEffect(() => {
         if (!isBatchMode && date && !Array.isArray(date)) {
             // Single Mode
@@ -83,7 +89,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                 setTransportCost(settings.campusTransportRates?.[defCampus] ?? settings.transportCost);
             }
         } else if (isBatchMode) {
-            // Batch Mode - Always reset to default for safety
+            // 一括編集モード時は、常にフォームをリセット（既存データは表示しない）
             resetForm();
         }
     }, [date, entry, isOpen, settings, isBatchMode]);
@@ -107,20 +113,21 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
         setTransportCost(settings.campusTransportRates?.[defCampus] ?? settings.transportCost);
     };
 
-    // Cleanup: Remove Leader/Sub tags if block is unselected from main
+    // コマ選択が解除された場合、対応するリーダー・サブリーダー選択も解除する
     useEffect(() => {
         setLeaderBlocks(prev => prev.filter(b => selectedBlocks.includes(b)));
         setSubLeaderBlocks(prev => prev.filter(b => selectedBlocks.includes(b)));
     }, [selectedBlocks]);
 
+    // 校舎変更時の処理（勤務地タイプと交通費を自動更新）
     const handleCampusChange = (newCampus: Campus) => {
         setCampus(newCampus);
 
-        // Auto-set Location Type
+        // 平岡かそれ以外かで勤務地手当（800円/400円）が切り替わる
         const newLocation: Location = newCampus === '平岡' ? 'hiraoka' : 'other';
         setLocation(newLocation);
 
-        // Auto-set Transport Cost from Settings
+        // 設定値から交通費を取得
         const cost = settings.campusTransportRates?.[newCampus] ?? settings.transportCost;
         setTransportCost(cost);
     };
@@ -138,7 +145,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
             campus
         };
 
-        // Batch save
+        // 保存処理（一括または単一）
         dateList.forEach(d => {
             const y = d.getFullYear();
             const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -176,14 +183,15 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
         }
     };
 
+    // サブリーダーの切り替えロジック
     const toggleSubLeader = (block: WorkBlock) => {
         setSubLeaderBlocks(prev => {
             if (prev.includes(block)) return prev.filter(b => b !== block);
             return [...prev, block];
         });
-        // Remove from Leader if present
+        // リーダーからは除外（重複不可）
         setLeaderBlocks(prev => prev.filter(b => b !== block));
-        // Auto-select in main blocks
+        // メインのコマも自動選択
         if (!selectedBlocks.includes(block)) {
             toggleBlock(block);
         }
@@ -197,11 +205,13 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                     onDelete(dStr);
                 });
                 onClose();
+                if (onSaveComplete) onSaveComplete();
             }
         } else {
             if (window.confirm(t.workModal.deleteConfirm)) {
                 onDelete(dateStr);
                 onClose();
+                if (onSaveComplete) onSaveComplete();
             }
         }
     };
@@ -230,7 +240,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                     </button>
                 </div>
 
-                {/* Campus Selection - New! */}
+                {/* 校舎選択 (v2.5で追加) */}
                 <div className="input-group">
                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>
                         <MapPin size={16} /> {t.workModal.campus}
@@ -260,7 +270,7 @@ export const WorkModal: React.FC<WorkModalProps> = ({ isOpen, date, entry, onClo
                     </div>
                 </div>
 
-                {/* Block Selection */}
+                {/* コマ選択 */}
                 <div className="input-group">
                     <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>{t.workModal.koma}</label>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

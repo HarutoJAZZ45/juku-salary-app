@@ -1,5 +1,6 @@
 import type { Translation } from './types';
 
+// スペイン語の翻訳データ
 export const es: Translation = {
     common: {
         save: 'Guardar',
@@ -35,7 +36,7 @@ export const es: Translation = {
         leader: 'Líder',
         subLeader: 'Sub-Líder',
         supportWork: 'Trabajo de Apoyo (min)',
-        allowanceLabel: 'Bono (Yenes)',
+        allowanceLabel: 'Otro (Yenes)',
         transportLabel: 'Transporte Pagado',
         deleteConfirm: '¿Estás seguro de que quieres borrar esta entrada?',
         batchDeleteConfirm: '¿Estás seguro de que quieres borrar todas las entradas?',
@@ -75,6 +76,7 @@ export const es: Translation = {
         helpStep3: 'Vea su salario estimado para el mes actual.',
         helpStep4: 'Abra "Configuración" desde el menú superior derecho (☰) para ajustar tarifas y costos de transporte.',
         helpSaveBody: 'Los datos se guardan automáticamente en su dispositivo. Es seguro ya que no se envía a ningún servidor, pero tenga en cuenta que se perderá si borra la caché del navegador.',
+        helpPWA: 'Los datos se guardan por navegador, por lo que recomendamos añadir esta aplicación a su pantalla de inicio.',
         batchMode: 'Modo de edición por lotes',
         selecting: 'Seleccionando',
         selectMult: 'Selección múltiple',

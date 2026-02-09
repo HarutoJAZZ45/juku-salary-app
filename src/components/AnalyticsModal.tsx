@@ -11,6 +11,8 @@ interface AnalyticsModalProps {
     onClose: () => void;
 }
 
+// 分析モーダルコンポーネント
+// 月ごとの給与推移や勤務時間をグラフで表示する
 export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose }) => {
     const { t, language } = useTranslation();
     const { entries, settings } = useSalaryData();
@@ -19,6 +21,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose 
 
     // ... (rest of the file until the chart) ...
 
+    // Y軸の数値を「万円」または「k」単位でフォーマット
     const formatYAxis = (val: number) => {
         if (language === 'ja') {
             return `${val / 10000}万円`;
@@ -26,12 +29,12 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose 
         return `¥${val / 1000}k`;
     };
 
-    // Aggregate data by month
+    // 月ごとのデータを集計するための初期化
     const monthlyData: Record<string, { month: string; income: number; hours: number; classes: number }> = {};
     const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
     const currentYear = new Date().getFullYear();
 
-    // Initialize months
+    // 1月から12月までの枠を作成
     months.forEach((m) => {
         const key = `${currentYear}-${m}`;
         monthlyData[key] = {
@@ -42,6 +45,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose 
         };
     });
 
+    // 勤務データを走査し、月ごとに集計
     Object.values(entries).forEach(entry => {
         const date = new Date(entry.date);
         if (date.getFullYear() === currentYear) {
@@ -49,7 +53,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose 
             if (monthlyData[key]) {
                 const income = calculateDailyTotal(entry, settings);
                 const classCount = entry.selectedBlocks.length;
-                const hours = (entry.supportMinutes / 60) + (classCount * 1.5); // Estimate 90min per class
+                const hours = (entry.supportMinutes / 60) + (classCount * 1.5); // 1コマ90分として概算換算
 
                 monthlyData[key].income += income;
                 monthlyData[key].classes += classCount;

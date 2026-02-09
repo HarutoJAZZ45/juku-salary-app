@@ -13,10 +13,13 @@ interface SummaryCardProps {
     onBadgeClick?: () => void;
 }
 
+// サマリーカードコンポーネント
+// 指定された期間の給与予測、勤務統計、獲得バッジを表示する
 export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, currentDate, onBadgeClick }) => {
     const { t } = useTranslation();
     const period = useMemo(() => getPeriodRange(currentDate, settings.closingDay), [currentDate, settings.closingDay]);
 
+    // 期間内の統計情報を計算（給与総額、コマ数、事務時間）
     const stats = useMemo(() => {
         let total = 0;
         let komaCount = 0;
@@ -25,12 +28,13 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
 
         Object.values(entries).forEach(entry => {
             const entryDate = new Date(entry.date);
-            // Check if entry is in period
+            // 期間内のエントリのみ対象
             if (entryDate >= period.start && entryDate <= period.end) {
                 total += calculateDailyTotal(entry, settings);
                 komaCount += entry.selectedBlocks ? entry.selectedBlocks.length : 0;
 
                 let mins = entry.supportMinutes;
+                // コマ内休憩（5分/コマ）も事務時間に含める
                 if (entry.selectedBlocks) {
                     mins += entry.selectedBlocks.length * 5;
                 }
@@ -43,12 +47,15 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
         return { total, komaCount, supportHours, periodEntries };
     }, [entries, period, settings]);
 
+    // バッジ獲得状況の判定
     const badges = useMemo(() => {
         const earnedBadges: Badge[] = [];
 
+        // 連続勤務バッジ
         const streakBadge = getStreakBadge(stats.periodEntries, period.start, period.end);
         if (streakBadge) earnedBadges.push(streakBadge);
 
+        // 収入バッジ
         const earnedBadge = getEarningsBadge(stats.total);
         if (earnedBadge) earnedBadges.push(earnedBadge);
 

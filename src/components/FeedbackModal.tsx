@@ -10,6 +10,8 @@ interface FeedbackModalProps {
 // 例: "https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform?embedded=true"
 const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc6jhYJI8qr-zAa4pSursUM1nvsjTYtmnj3ghAarDV0hOeKxg/viewform?embedded=true";
 
+// フィードバックモーダル
+// Googleフォームを埋め込んでユーザーからの意見を受け付ける
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 

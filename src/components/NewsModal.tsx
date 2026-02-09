@@ -8,6 +8,8 @@ interface NewsModalProps {
     onClose: () => void;
 }
 
+// ニュースモーダル
+// アプリからのお知らせや更新情報を表示する
 export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
     const { t, language } = useTranslation();
     const [filter, setFilter] = React.useState<'all' | 'important' | 'update'>('all');
@@ -15,14 +17,13 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     // Check if today is the last day of the month
-    // Check if today is the last day of the month
+    // 月末日かどうかを判定（給与支給日のお知らせ用）
     const today = new Date();
     const isPayday = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate() === today.getDate();
-    // const isPayday = true; // Debug: Force true for verification
 
     const allItems = [...NEWS_ITEMS];
 
-    // Prepend Payday notification if applicable
+    // 支給日の場合、自動的に支給日通知をリストの先頭に追加
     if (isPayday) {
         allItems.unshift({
             id: `payday-${today.toISOString().split('T')[0]}`,
@@ -34,6 +35,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
         });
     }
 
+    // フィルタリング処理（重要のみ、アップデートのみ、すべて）
     const filteredItems = allItems.filter(item => {
         if (filter === 'important') return item.important;
         if (filter === 'update') return item.category === 'update';

@@ -7,12 +7,15 @@ interface DataManagementModalProps {
     onClose: () => void;
 }
 
+// データ管理モーダル
+// 給与データのエクスポート（バックアップ）とインポート（復元）を行う
 export const DataManagementModal: React.FC<DataManagementModalProps> = ({ isOpen, onClose }) => {
     const { t } = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     if (!isOpen) return null;
 
+    // 現在のデータをJSONファイルとしてダウンロード
     const handleExport = () => {
         const entries = localStorage.getItem('juku_salary_entries');
         const config = localStorage.getItem('juku_salary_config');
@@ -31,6 +34,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({ isOpen
         URL.revokeObjectURL(url);
     };
 
+    // JSONファイルを読み込んでデータを復元
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;

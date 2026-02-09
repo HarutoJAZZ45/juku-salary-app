@@ -1,12 +1,18 @@
 import React from 'react';
 import { useTranslation } from '../contexts/LanguageContext';
-import { useSalaryData } from '../hooks/useSalaryData';
+import type { WorkEntry, UserSettings } from '../types';
 import { calculateDailyTotal, getPaymentDate } from '../utils/calculator';
 import { AlertCircle } from 'lucide-react';
 
-export const TaxMonitor: React.FC = () => {
+interface TaxMonitorProps {
+    entries: Record<string, WorkEntry>;
+    settings: UserSettings;
+}
+
+// 扶養控除モニター
+// 年収（1月～12月の支給ベース）を計算し、103万円の壁に対する進捗を表示する
+export const TaxMonitor: React.FC<TaxMonitorProps> = ({ entries, settings }) => {
     const { t } = useTranslation();
-    const { entries, settings } = useSalaryData();
 
     const today = new Date();
     const currentYear = today.getFullYear();

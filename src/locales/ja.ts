@@ -1,5 +1,6 @@
 import type { Translation } from './types';
 
+// 日本語の翻訳データ（デフォルト）
 export const ja: Translation = {
     common: {
         save: '保存',
@@ -35,7 +36,7 @@ export const ja: Translation = {
         leader: 'リーダー',
         subLeader: 'サブリーダー',
         supportWork: '追加業務・残業 (分)',
-        allowanceLabel: '手当給 (円)',
+        allowanceLabel: 'その他 (円)',
         transportLabel: '交通費支給',
         deleteConfirm: 'この日の記録を削除しますか？',
         batchDeleteConfirm: '日分の記録を全て削除しますか？',
@@ -75,6 +76,7 @@ export const ja: Translation = {
         helpStep3: '上部のカードに今月（15日締め翌月末払い）の給与見込みが表示されます。',
         helpStep4: '右上のメニュー（☰）から「設定」を開き、単価や交通費を変更できます。',
         helpSaveBody: 'データはお使いの端末（ブラウザ）に自動保存されます。サーバーには送信されないため安心ですが、ブラウザのキャッシュ削除や機種変更では消えてしまうのでご注意ください。',
+        helpPWA: 'ブラウザごとに保存されるので、ホーム画面に追加して利用することを推奨します',
         batchMode: '一括編集モード',
         selecting: '選択中',
         selectMult: '複数選択',

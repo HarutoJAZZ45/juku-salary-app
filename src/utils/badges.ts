@@ -3,17 +3,19 @@ import type { WorkEntry } from '../types';
 
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
 
+// バッジ定義インターフェース
 export interface Badge {
     id: string;
-    type: 'streak' | 'earnings';
+    type: 'streak' | 'earnings'; // 連勤または給与
     tier: BadgeTier;
-    labelKey: string; // Translation key
-    descriptionKey: string; // New: Description key
+    labelKey: string; // 翻訳キー
+    descriptionKey: string; // 説明文の翻訳キー
     icon: string;
 }
 
+// 期間内の連勤記録からバッジを判定して返す
 export const getStreakBadge = (entries: WorkEntry[], periodStart: Date, periodEnd: Date): Badge | null => {
-    // Filter entries within period and sort by date
+    // 期間内のエントリを日付順にソート
     const sortedDates = entries
         .map(e => parseISO(e.date))
         .filter(d => d >= periodStart && d <= periodEnd)
@@ -46,6 +48,7 @@ export const getStreakBadge = (entries: WorkEntry[], periodStart: Date, periodEn
     return null;
 };
 
+// 給与総額からバッジを判定して返す
 export const getEarningsBadge = (totalEarnings: number): Badge | null => {
     if (totalEarnings >= 160000) {
         return { id: 'earn-platinum', type: 'earnings', tier: 'platinum', labelKey: 'badges.earnPlatinum', descriptionKey: 'badges.earnPlatinumDesc', icon: 'trophy' };

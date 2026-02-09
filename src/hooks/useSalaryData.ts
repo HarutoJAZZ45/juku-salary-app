@@ -4,29 +4,34 @@ import type { WorkEntry, UserSettings } from '../types';
 const STORAGE_KEY_ENTRIES = 'juku_salary_entries';
 const STORAGE_KEY_CONFIG = 'juku_salary_config';
 
+// デフォルト設定
 const DEFAULT_SETTINGS: UserSettings = {
-    teachingHourlyRate: 1380,
-    hourlyRate: 1075,
-    transportCost: 500,
-    campusTransportRates: {
+    teachingHourlyRate: 1380, // 授業時給
+    hourlyRate: 1075,         // 事務時給（最低賃金など）
+    transportCost: 500,       // 基本交通費
+    campusTransportRates: {   // 校舎ごとの交通費
         '平岡': 1620,
         '新札幌': 1140,
         '月寒': 500,
         '円山': 500,
         '北大前': 500
     },
-    defaultCampus: '平岡',
-    closingDay: 15,
-    paymentMonthLag: 0,
-    annualLimit: 1030000
+    defaultCampus: '平岡',   // 所属校舎
+    closingDay: 15,          // 締め日
+    paymentMonthLag: 0,      // 支払月ラグ（0=当月、1=翌月）
+    annualLimit: 1030000     // 扶養控除の壁（年収）
 };
 
+/**
+ * 給与データ管理用のカスタムフック
+ * LocalStorageへの保存と読み込み、データの更新・削除機能を提供する
+ */
 export const useSalaryData = () => {
     const [entries, setEntries] = useState<Record<string, WorkEntry>>({});
     const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // Load from storage
+    // ストレージからの読み込み（初回のみ）
     useEffect(() => {
         try {
             const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
@@ -37,7 +42,7 @@ export const useSalaryData = () => {
             }
             if (storedConfig) {
                 const loaded = JSON.parse(storedConfig);
-                // Migration: Ensure deep merge for campusTransportRates
+                // マイグレーション: 校舎別交通費設定などはディープマージして欠損を防ぐ
                 setSettings({
                     ...DEFAULT_SETTINGS,
                     ...loaded,
@@ -54,19 +59,21 @@ export const useSalaryData = () => {
         }
     }, []);
 
-    // Save to storage
+    // 勤務データの保存（entries変更時に実行）
     useEffect(() => {
         if (isLoaded) {
             localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
         }
     }, [entries, isLoaded]);
 
+    // 設定データの保存（settings変更時に実行）
     useEffect(() => {
         if (isLoaded) {
             localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(settings));
         }
     }, [settings, isLoaded]);
 
+    // リストの更新または新規追加
     const updateEntry = (date: string, data: Partial<WorkEntry>) => {
         setEntries(prev => {
             const existing = prev[date] || {
@@ -80,7 +87,7 @@ export const useSalaryData = () => {
 
             const newEntry = { ...existing, ...data };
 
-            // If everything is zero, remove it to keep clean
+            // 全ての値がゼロまたは空の場合は、エントリ自体を削除してデータをクリーンに保つ
             if ((!newEntry.selectedBlocks || newEntry.selectedBlocks.length === 0) && newEntry.supportMinutes === 0 && newEntry.allowanceAmount === 0 && !newEntry.hasTransport) {
                 const { [date]: _, ...rest } = prev;
                 return rest;
@@ -92,6 +99,7 @@ export const useSalaryData = () => {
 
     const getEntry = (date: string) => entries[date];
 
+    // エントリの削除
     const deleteEntry = (date: string) => {
         setEntries(prev => {
             const { [date]: _, ...rest } = prev;

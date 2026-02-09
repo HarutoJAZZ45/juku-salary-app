@@ -13,6 +13,8 @@ interface SettingsModalProps {
 
 const CAMPUSES: Campus[] = ['平岡', '新札幌', '月寒', '円山', '北大前'];
 
+// 設定モーダル
+// 時給、交通費、校舎などの基本設定を変更する
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, onClose, onSave }) => {
     const { t, language, setLanguage } = useTranslation();
 
@@ -58,7 +60,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Settings size={20} /> {t.settings.title} <span style={{ fontSize: '10px', background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#64748b' }}>v2.5</span>
+                        <Settings size={20} /> {t.settings.title}
                     </h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                         <X size={24} color="#64748b" />

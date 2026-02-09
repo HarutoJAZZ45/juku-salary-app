@@ -16,15 +16,19 @@ interface CalendarGridProps {
     selectedDates: Date[];
 }
 
+// カレンダーグリッドコンポーネント
+// 月間カレンダーを表示し、各日付の勤務状況や給与を表示する
 export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entries, settings, onDayClick, isSelectionMode, selectedDates }) => {
     const { t } = useTranslation();
+    // 月初・月末・カレンダー表示用の開始日・終了日を計算
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
-    const startDate = startOfWeek(monthStart, { weekStartsOn: 0 }); // Sunday start
+    const startDate = startOfWeek(monthStart, { weekStartsOn: 0 }); // 日曜始まり
     const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
     const dateFormat = "d";
 
+    // 表示期間内の全日付配列を生成
     const days = eachDayOfInterval({
         start: startDate,
         end: endDate,
@@ -34,7 +38,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entrie
 
     return (
         <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
-            {/* Header Days */}
+            {/* 曜日ヘッダー */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.4)' }}>
                 {weekDays.map((d, i) => (
                     <div key={i} style={{
@@ -49,16 +53,18 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entrie
                 ))}
             </div>
 
-            {/* Grid */}
+            {/* 日付グリッド本体 */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
                 {days.map((day) => {
                     const formattedDate = format(day, 'yyyy-MM-dd');
                     const entry = entries[formattedDate];
+                    // その日の給与合計を計算
                     const dayTotal = entry ? calculateDailyTotal(entry, settings) : 0;
 
                     const isCurrentMonth = isSameMonth(day, monthStart);
                     const isTodayDate = isToday(day);
 
+                    // 選択モード時に選択されているかチェック
                     const isSelected = selectedDates.some(d => format(d, 'yyyy-MM-dd') === formattedDate);
 
                     return (

@@ -7,6 +7,8 @@ interface BadgeHelpModalProps {
     onClose: () => void;
 }
 
+// バッジヘルプモーダル
+// バッジの獲得条件や種類の一覧を表示する
 export const BadgeHelpModal: React.FC<BadgeHelpModalProps> = ({ isOpen, onClose }) => {
     const { t } = useTranslation();
 

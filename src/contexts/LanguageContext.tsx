@@ -21,9 +21,14 @@ const dictionaries: Record<Language, Translation> = {
 
 const STORAGE_KEY = 'juku_app_language';
 
+/**
+ * 言語コンテキストプロバイダー
+ * アプリケーション全体に多言語対応機能を提供する
+ */
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [language, setLanguageState] = useState<Language>('ja');
 
+    // 初期化時、保存された言語設定があれば読み込む
     useEffect(() => {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored && (stored === 'ja' || stored === 'en' || stored === 'es')) {
@@ -31,11 +36,13 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
     }, []);
 
+    // 言語設定の更新と永続化
     const setLanguage = (lang: Language) => {
         setLanguageState(lang);
         localStorage.setItem(STORAGE_KEY, lang);
     };
 
+    // 現在の言語に対応する辞書データ
     const t = dictionaries[language];
 
     return (
@@ -45,6 +52,10 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     );
 };
 
+/**
+ * 翻訳フック
+ * コンポーネント内で翻訳データにアクセスするために使用する
+ */
 export const useTranslation = () => {
     const context = useContext(LanguageContext);
     if (!context) {
