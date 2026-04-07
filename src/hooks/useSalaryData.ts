@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import type { WorkEntry, UserSettings } from '../types';
+import { useAuth } from './useAuth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const STORAGE_KEY_ENTRIES = 'juku_salary_entries';
 const STORAGE_KEY_CONFIG = 'juku_salary_config';
@@ -37,51 +40,94 @@ export const useSalaryData = () => {
     const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // ストレージからの読み込み（初回のみ）
-    useEffect(() => {
-        try {
-            const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
-            const storedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
+    // Authフックでユーザー状態を取得
+    const { user } = useAuth();
 
-            if (storedEntries) {
-                setEntries(JSON.parse(storedEntries));
+    // ストレージおよびFirestoreからの読み込み
+    useEffect(() => {
+        const loadInitialData = async () => {
+            let loadedEntries = {};
+            let loadedConfig = null;
+
+            // 1. ローカルストレージからの読み込み
+            try {
+                const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
+                const storedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
+
+                if (storedEntries) {
+                    loadedEntries = JSON.parse(storedEntries);
+                }
+                if (storedConfig) {
+                    loadedConfig = JSON.parse(storedConfig);
+                }
+            } catch (e) {
+                console.error("Failed to load local data", e);
             }
-            if (storedConfig) {
-                const loaded = JSON.parse(storedConfig);
-                // マイグレーション: 校舎別交通費設定などはディープマージして欠損を防ぐ
+
+            // 2. ユーザーがログインしている場合はFirestoreから上書き取得
+            if (user) {
+                try {
+                    const userRef = doc(db, 'users', user.uid);
+                    const docSnap = await getDoc(userRef);
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data();
+                        if (cloudData.entries) loadedEntries = cloudData.entries;
+                        if (cloudData.config) loadedConfig = cloudData.config;
+                    }
+                } catch (error) {
+                    console.error("Error loading cloud data", error);
+                }
+            }
+
+            // 状態へ反映
+            setEntries(loadedEntries);
+            if (loadedConfig) {
                 setSettings({
                     ...DEFAULT_SETTINGS,
-                    ...loaded,
+                    ...loadedConfig,
                     campusTransportRates: {
                         ...DEFAULT_SETTINGS.campusTransportRates,
-                        ...(loaded.campusTransportRates || {})
+                        ...(loadedConfig.campusTransportRates || {})
                     },
                     profile: {
                         ...DEFAULT_SETTINGS.profile!,
-                        ...(loaded.profile || {})
+                        ...(loadedConfig.profile || {})
                     }
                 });
             }
-        } catch (e) {
-            console.error("Failed to load data", e);
-        } finally {
             setIsLoaded(true);
-        }
-    }, []);
+        };
+
+        loadInitialData();
+    }, [user]);
 
     // 勤務データの保存（entries変更時に実行）
     useEffect(() => {
         if (isLoaded) {
             localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+            if (user) {
+                const saveToFirestore = async () => {
+                    const userRef = doc(db, 'users', user.uid);
+                    await setDoc(userRef, { entries }, { merge: true }).catch(e => console.error(e));
+                };
+                saveToFirestore();
+            }
         }
-    }, [entries, isLoaded]);
+    }, [entries, isLoaded, user]);
 
     // 設定データの保存（settings変更時に実行）
     useEffect(() => {
         if (isLoaded) {
             localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(settings));
+            if (user) {
+                const saveToFirestore = async () => {
+                    const userRef = doc(db, 'users', user.uid);
+                    await setDoc(userRef, { config: settings }, { merge: true }).catch(e => console.error(e));
+                };
+                saveToFirestore();
+            }
         }
-    }, [settings, isLoaded]);
+    }, [settings, isLoaded, user]);
 
     // リストの更新または新規追加
     const updateEntry = (date: string, data: Partial<WorkEntry>) => {

@@ -126,5 +126,20 @@ export const es: Translation = {
         importWarning: 'La importación sobrescribirá los datos de las fechas existentes. ¿Continuar?',
         success: 'Datos importados con éxito.',
         error: 'Error al importar datos.',
+    },
+    auth: {
+        login: 'Iniciar Sesión',
+        logout: 'Cerrar Sesión',
+        loginToSync: 'Inicie sesión para sincronizar',
+        googleLogin: 'Iniciar sesión con Google',
+        anonymousLogin: 'Entrar como Invitado',
+        syncingData: 'Sincronizando...',
+        syncSuccess: 'Datos sincronizados en la nube.',
+        syncData: 'Sincronizar a la Nube',
+        email: 'Correo Electrónico',
+        password: 'Contraseña (6+ carac.)',
+        register: 'Registrarse',
+        switchToLogin: '¿Ya tienes cuenta? Iniciar',
+        switchToRegister: '¿No tienes cuenta? Regístrate',
     }
 };

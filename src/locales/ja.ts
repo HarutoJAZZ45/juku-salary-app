@@ -126,5 +126,20 @@ export const ja: Translation = {
         importWarning: 'インポートすると、同じ日付のデータは上書きされます。よろしいですか？',
         success: 'インポートが完了しました。',
         error: 'インポートに失敗しました。ファイルを確認してください。',
+    },
+    auth: {
+        login: 'ログイン',
+        logout: 'ログアウト',
+        loginToSync: 'ログインしてデータを同期',
+        googleLogin: 'Googleでログイン',
+        anonymousLogin: 'ゲスト（匿名）でログイン',
+        syncingData: '同期中...',
+        syncSuccess: 'データをクラウドに同期しました。',
+        syncData: 'クラウドにデータを同期',
+        email: 'メールアドレス',
+        password: 'パスワード (6文字以上)',
+        register: '新規登録',
+        switchToLogin: 'すでにアカウントをお持ちの方 (ログイン)',
+        switchToRegister: 'アカウントをお持ちでない方 (新規登録)',
     }
 };

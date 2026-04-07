@@ -12,7 +12,9 @@ import { TaxMonitor } from './components/TaxMonitor';
 import { AnalyticsModal } from './components/AnalyticsModal';
 import { DataManagementModal } from './components/DataManagementModal';
 import { AccountModal } from './components/AccountModal';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, Smartphone, User } from 'lucide-react';
+import { AuthModal } from './components/AuthModal';
+import { useAuth } from './hooks/useAuth';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, Smartphone, User, Cloud } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
@@ -26,6 +28,9 @@ function App() {
   const { t } = useTranslation();
   // 給与データのカスタムフック（読み込み、更新、削除、設定）
   const { entries, settings, updateEntry, deleteEntry, setSettings, isLoaded } = useSalaryData();
+
+  // 認証のカスタムフック
+  const { user } = useAuth();
 
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
 
@@ -41,6 +46,7 @@ function App() {
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // 一括編集モードの状態管理
@@ -275,6 +281,13 @@ function App() {
           <button onClick={() => setIsAnalyticsOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
             <TrendingUp size={20} />
           </button>
+          <button onClick={() => setIsAuthOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>
+            {user && user.photoURL ? (
+              <img src={user.photoURL} alt="User" style={{ width: 20, height: 20, borderRadius: '50%' }} />
+            ) : (
+              <Cloud size={20} />
+            )}
+          </button>
           <button onClick={() => setIsAccountOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>
             <User size={20} />
             {(() => {
@@ -475,6 +488,11 @@ function App() {
         entries={entries}
         settings={settings}
         onUpdateSettings={setSettings}
+      />
+
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
       />
       <Analytics />
     </>

@@ -128,4 +128,19 @@ export interface Translation {
         success: string;
         error: string;
     };
+    auth: {
+        login: string;
+        logout: string;
+        loginToSync: string;
+        googleLogin: string;
+        anonymousLogin: string;
+        syncingData: string;
+        syncSuccess: string;
+        syncData: string;
+        email: string;
+        password: string;
+        register: string;
+        switchToLogin: string;
+        switchToRegister: string;
+    };
 }

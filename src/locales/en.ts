@@ -126,5 +126,20 @@ export const en: Translation = {
         importWarning: 'Importing will overwrite data for existing dates. Continue?',
         success: 'Data imported successfully.',
         error: 'Failed to import data.',
+    },
+    auth: {
+        login: 'Login',
+        logout: 'Logout',
+        loginToSync: 'Login to sync data',
+        googleLogin: 'Login with Google',
+        anonymousLogin: 'Login as Guest',
+        syncingData: 'Syncing...',
+        syncSuccess: 'Data synced successfully to the cloud.',
+        syncData: 'Sync Data to Cloud',
+        email: 'Email',
+        password: 'Password (6+ chars)',
+        register: 'Register',
+        switchToLogin: 'Already have an account? Login',
+        switchToRegister: 'Don\'t have an account? Register',
     }
 };
