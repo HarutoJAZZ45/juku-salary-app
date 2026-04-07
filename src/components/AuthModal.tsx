@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../contexts/LanguageContext';
 import { X, LogOut, User, Cloud, Mail, Download } from 'lucide-react';
+import { getAdditionalUserInfo } from 'firebase/auth';
+import type { User as FirebaseUser } from 'firebase/auth';
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -22,7 +24,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
     const handleGoogleLogin = async () => {
         try {
-            await signInWithGoogle();
+            const result = await signInWithGoogle();
+            const additionalInfo = getAdditionalUserInfo(result);
+            if (additionalInfo?.isNewUser) {
+                await handleSync(result.user, true);
+            } else {
+                await handleDownload(result.user, true);
+            }
         } catch (error) {
             console.error("Login failed:", error);
             alert("Login failed.");
@@ -31,7 +39,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
     const handleAnonymousLogin = async () => {
         try {
-            await loginAnonymously();
+            const result = await loginAnonymously();
+            const additionalInfo = getAdditionalUserInfo(result);
+            if (additionalInfo?.isNewUser) {
+                await handleSync(result.user, true);
+            } else {
+                await handleDownload(result.user, true);
+            }
         } catch (error) {
             console.error("Anonymous login failed:", error);
             alert("Login failed.");
@@ -43,9 +57,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         setAuthLoading(true);
         try {
             if (isSignUp) {
-                await signUpWithEmail(email, password);
+                const result = await signUpWithEmail(email, password);
+                await handleSync(result.user, true);
             } else {
-                await loginWithEmail(email, password);
+                const result = await loginWithEmail(email, password);
+                await handleDownload(result.user, true);
             }
         } catch (error) {
             console.error("Email auth failed:", error);
@@ -59,8 +75,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         await signOut();
     };
 
-    const handleSync = async () => {
-        if (!user) return;
+    // targetUser: 指定されたユーザー（ログイン直後用）
+    // isAuto: 自動実行かどうか（アラートを制御）
+    const handleSync = async (targetUser?: FirebaseUser, isAuto = false) => {
+        const currentUser = targetUser || user;
+        if (!currentUser) return;
         setIsSyncing(true);
         try {
             const entriesStr = localStorage.getItem('juku_salary_entries');
@@ -68,34 +87,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             const entries = entriesStr ? JSON.parse(entriesStr) : {};
             const config = configStr ? JSON.parse(configStr) : {};
 
-            await syncDataToCloud(entries, config);
-            alert(t.auth.syncSuccess || "クラウドへの保存が完了しました！");
+            await syncDataToCloud(entries, config, currentUser);
+            if (!isAuto) alert(t.auth.syncSuccess || "クラウドへの保存が完了しました！");
+            else console.log("Automatic backup successful for new user.");
         } catch (error) {
             console.error(error);
-            alert("Sync failed.");
+            if (!isAuto) alert("Sync failed.");
         } finally {
             setIsSyncing(false);
         }
     };
 
-    const handleDownload = async () => {
-        if (!user) return;
-        if (!window.confirm("クラウド上のデータで現在の端末のデータをすべて上書きします。よろしいですか？")) return;
+    const handleDownload = async (targetUser?: FirebaseUser, isAuto = false) => {
+        const currentUser = targetUser || user;
+        if (!currentUser) return;
+
+        // 自動実行でない場合は確認を求める
+        if (!isAuto && !window.confirm("クラウド上のデータで現在の端末のデータをすべて上書きします。よろしいですか？")) return;
 
         setIsSyncing(true);
         try {
-            const data = await loadDataFromCloud();
+            const data = await loadDataFromCloud(currentUser);
             if (data) {
                 localStorage.setItem('juku_salary_entries', JSON.stringify(data.entries || {}));
                 localStorage.setItem('juku_salary_config', JSON.stringify(data.config || {}));
-                alert("クラウドからデータを復元しました。\n※設定や勤務データを正しく反映するため、ページを強制リロードします。");
+                if (!isAuto) alert("クラウドからデータを復元しました。\n※設定や勤務データを正しく反映するため、ページを強制リロードします。");
                 window.location.reload();
             } else {
-                alert("クラウド上に保存されたデータが見つかりません。先に「クラウドへ保存」を行ってください。");
+                if (!isAuto) alert("クラウド上に保存されたデータが見つかりません。先に「クラウドへ保存」を行ってください。");
             }
         } catch (e) {
             console.error(e);
-            alert("Download failed.");
+            if (!isAuto) alert("Download failed.");
         } finally {
             setIsSyncing(false);
         }
@@ -141,7 +164,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                         </div>
 
                         <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '8px' }}>
-                            <button onClick={handleSync} disabled={isSyncing} style={{
+                            <button onClick={() => handleSync()} disabled={isSyncing} style={{
                                 flex: 1, padding: '12px', borderRadius: '12px', background: 'linear-gradient(135deg, #0ea5e9, #2563eb)', color: 'white',
                                 border: 'none', fontWeight: 600, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: isSyncing ? 'wait' : 'pointer',
                                 boxShadow: '0 4px 10px rgba(37, 99, 235, 0.2)'
@@ -150,7 +173,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                                 <span style={{ fontSize: '11px', textAlign: 'center' }}>クラウドへ保存<br />(アップロード)</span>
                             </button>
 
-                            <button onClick={handleDownload} disabled={isSyncing} style={{
+                            <button onClick={() => handleDownload()} disabled={isSyncing} style={{
                                 flex: 1, padding: '12px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white',
                                 border: 'none', fontWeight: 600, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', cursor: isSyncing ? 'wait' : 'pointer',
                                 boxShadow: '0 4px 10px rgba(5, 150, 105, 0.2)'

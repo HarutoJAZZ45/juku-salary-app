@@ -21,7 +21,7 @@ export const useAuth = () => {
     const signInWithGoogle = async () => {
         try {
             const provider = new GoogleAuthProvider();
-            await signInWithPopup(auth, provider);
+            return await signInWithPopup(auth, provider);
         } catch (error) {
             console.error("Error signing in with Google", error);
             throw error;
@@ -30,7 +30,7 @@ export const useAuth = () => {
 
     const loginWithEmail = async (email: string, password: string) => {
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            return await signInWithEmailAndPassword(auth, email, password);
         } catch (error) {
             console.error("Error logging in with email", error);
             throw error;
@@ -39,7 +39,7 @@ export const useAuth = () => {
 
     const signUpWithEmail = async (email: string, password: string) => {
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
+            return await createUserWithEmailAndPassword(auth, email, password);
         } catch (error) {
             console.error("Error signing up with email", error);
             throw error;
@@ -48,7 +48,7 @@ export const useAuth = () => {
 
     const loginAnonymously = async () => {
         try {
-            await signInAnonymously(auth);
+            return await signInAnonymously(auth);
         } catch (error) {
             console.error("Error signing in anonymously", error);
             throw error;
@@ -65,10 +65,11 @@ export const useAuth = () => {
     };
 
     // ユーザーデータのFirestoreへの同期（手動または初回ログイン時など）
-    const syncDataToCloud = async (entries: Record<string, WorkEntry>, config: UserSettings) => {
-        if (!user) return;
+    const syncDataToCloud = async (entries: Record<string, WorkEntry>, config: UserSettings, targetUser?: User | null) => {
+        const currentUser = targetUser || user;
+        if (!currentUser) return;
         try {
-            const userRef = doc(db, 'users', user.uid);
+            const userRef = doc(db, 'users', currentUser.uid);
             await setDoc(userRef, {
                 entries,
                 config,
@@ -82,10 +83,11 @@ export const useAuth = () => {
     };
 
     // ユーザーデータのFirestoreからの取得
-    const loadDataFromCloud = async () => {
-        if (!user) return null;
+    const loadDataFromCloud = async (targetUser?: User | null) => {
+        const currentUser = targetUser || user;
+        if (!currentUser) return null;
         try {
-            const userRef = doc(db, 'users', user.uid);
+            const userRef = doc(db, 'users', currentUser.uid);
             const docSnap = await getDoc(userRef);
             if (docSnap.exists()) {
                 return docSnap.data() as { entries: Record<string, WorkEntry>, config: UserSettings };

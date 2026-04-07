@@ -93,9 +93,8 @@ export const useSalaryData = () => {
                     if (docSnap.exists()) {
                         const cloudData = docSnap.data();
 
-                        if (cloudData.entries) {
-                            setEntries(cloudData.entries);
-                        }
+                        // クラウドのデータで完全に上書きする（ローカルの残骸を残さない）
+                        setEntries(cloudData.entries || {});
 
                         if (cloudData.config) {
                             setSettings({
@@ -110,6 +109,8 @@ export const useSalaryData = () => {
                                     ...(cloudData.config.profile || {})
                                 }
                             });
+                        } else {
+                            setSettings(DEFAULT_SETTINGS);
                         }
                     }
                 } catch (error) {
