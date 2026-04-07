@@ -219,13 +219,13 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
                                             height: '40px',
                                             borderRadius: '50%',
                                             background: user.themeColor
-                                                ? `linear-gradient(135deg, ${user.themeColor}, #1e293b)`
-                                                : 'linear-gradient(135deg, #334155, #0f172a)',
+                                                ? `linear-gradient(135deg, ${user.themeColor}, #cbd5e1)`
+                                                : '#e2e8f0',
                                             flexShrink: 0,
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
+                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                                         }}>
                                             {(() => {
                                                 const IconComp = AVATAR_MAP[user.avatarId || 'user'] || User;
