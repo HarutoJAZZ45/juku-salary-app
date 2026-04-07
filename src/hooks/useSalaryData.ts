@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { WorkEntry, UserSettings } from '../types';
 import { useAuth } from './useAuth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -40,24 +40,31 @@ export const useSalaryData = () => {
     const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
     const [isLoaded, setIsLoaded] = useState(false);
 
+    // 同期的なロードガード（useRefはレンダーを待たずに即座に反映される）
+    const isLoadingRef = useRef(true);
+
     // Authフックでユーザー状態を取得
     const { user } = useAuth();
 
     // ストレージおよびFirestoreからの初回読み込み
     useEffect(() => {
-        setIsLoaded(false); // ユーザーが変わるたびにロード中状態に戻す
+        // ★ 即座にガードをON（保存エフェクトが古いデータを書き込むのを防ぐ）
+        isLoadingRef.current = true;
+        setIsLoaded(false);
 
         const loadInitialData = async () => {
             if (user) {
-                // ログインしている場合: クラウドのデータのみを信頼する
+                // ===== ログインしている場合: クラウドのデータのみを信頼する =====
                 try {
                     const userRef = doc(db, 'users', user.uid);
                     const docSnap = await getDoc(userRef);
 
                     if (docSnap.exists()) {
                         const cloudData = docSnap.data();
-                        setEntries(cloudData.entries || {});
-                        localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(cloudData.entries || {}));
+                        // クラウドのデータで完全に上書き（ローカルは無視）
+                        const cloudEntries = cloudData.entries || {};
+                        setEntries(cloudEntries);
+                        localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(cloudEntries));
 
                         if (cloudData.config) {
                             const mergedConfig = {
@@ -103,7 +110,7 @@ export const useSalaryData = () => {
                     if (storedEntries) setEntries(JSON.parse(storedEntries));
                 }
             } else {
-                // ログインしていない場合: ローカルストレージから読む
+                // ===== ログインしていない場合: ローカルストレージから読む =====
                 try {
                     const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
                     const storedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
@@ -129,7 +136,8 @@ export const useSalaryData = () => {
                 }
             }
 
-            // 全ての読み込みが完了してからフラグを立てる
+            // ★ 読み込み完了後にガードを解除
+            isLoadingRef.current = false;
             setIsLoaded(true);
         };
 
@@ -138,8 +146,8 @@ export const useSalaryData = () => {
 
     // 勤務データの保存（entries変更時に実行）
     useEffect(() => {
-        // ロード完了前、またはデータが空の状態での上書き保存を防ぐ
-        if (!isLoaded) return;
+        // ★ useRefで同期的にチェック（Reactの非同期state更新を待たない）
+        if (isLoadingRef.current || !isLoaded) return;
 
         localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
 
@@ -158,19 +166,20 @@ export const useSalaryData = () => {
 
     // 設定データの保存（settings変更時に実行）
     useEffect(() => {
-        if (isLoaded) {
-            localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(settings));
-            if (user) {
-                const saveToFirestore = async () => {
-                    const userRef = doc(db, 'users', user.uid);
-                    await setDoc(userRef, { config: settings }, { merge: true }).catch(e => console.error(e));
-                    // 設定変更時（プロフ変更やランキングON/OFF切り替え）にも同期
-                    import('../utils/ranking').then(({ updateRankingStats }) => {
-                        updateRankingStats(user.uid, entries, settings);
-                    });
-                };
-                saveToFirestore();
-            }
+        // ★ useRefで同期的にチェック
+        if (isLoadingRef.current || !isLoaded) return;
+
+        localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(settings));
+        if (user) {
+            const saveToFirestore = async () => {
+                const userRef = doc(db, 'users', user.uid);
+                await setDoc(userRef, { config: settings }, { merge: true }).catch(e => console.error(e));
+                // 設定変更時（プロフ変更やランキングON/OFF切り替え）にも同期
+                import('../utils/ranking').then(({ updateRankingStats }) => {
+                    updateRankingStats(user.uid, entries, settings);
+                });
+            };
+            saveToFirestore();
         }
     }, [settings, isLoaded, user]);
 
