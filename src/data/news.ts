@@ -19,7 +19,7 @@ export const NEWS_ITEMS: NewsItem[] = [
             es: '🏆 ¡Función de clasificación añadida!'
         },
         content: {
-            ja: `月間・年間の「担当コマ数」と「出勤日数」を競い合える**ランキング機能**を追加しました！\n\n**使い方**:\n1. 画面右上のトロフィーアイコン（🏆）からランキングを見ることができます🌍\n2. ランキングに自分のスコアを載せたい場合は、**プロフィール（👤）メニューの一番下**にある「ランキングに参加する」をONにしてください！✨\n\n※プライバシー保護のため、ONにした方のみスコアが集計・ランキングに公開されます。オフのままなら今まで通りです。`,
+            ja: `月間・年間の「担当コマ数」と「出勤日数」を競い合える**ランキング機能**を追加しました！\n\n**使い方**:\n1. 画面右上のトロフィーアイコン（🏆）からランキングを見ることができます🌍\n2. ランキングに参加・掲載を希望する場合は、**プロフィール（👤）メニューの一番下**にある「ランキングに参加する」をONにしてください！✨\n\n※プライバシー保護のため、ONにした方のみスコアが集計・公開されます。初期設定ではオフになっています。`,
             en: `We have added a **Ranking Feature** to compete in monthly/yearly "Classes Taught" and "Work Days"!\n\n**How to use**:\n1. Check the rankings from the Trophy icon (🏆) at the top right 🌍\n2. If you want to participate, please turn ON the "Enable Ranking" option located at the **very bottom of the Profile (👤) menu**! ✨\n\n*For privacy protection, your score will only be calculated and published if you turn it ON.`,
             es: `¡Hemos añadido una **Función de Clasificación** para competir en "Clases impartidas" y "Días de trabajo" mensuales y anuales!\n\n**Cómo usar**:\n1. Revisa las clasificaciones desde el icono de Trofeo (🏆) en la parte superior derecha 🌍\n2. Si quieres participar, ¡enciende la opción "Habilitar clasificación" ubicada en la **parte inferior del menú de Perfil (👤)**! ✨\n\n*Para proteger la privacidad, tu puntaje solo se calculará y publicará si lo enciendes.`
         },
@@ -30,38 +30,38 @@ export const NEWS_ITEMS: NewsItem[] = [
         id: '20260407-01',
         date: '2026-04-07',
         title: {
-            ja: 'ログイン機能とクラウド自動同期を追加しました！☁️',
-            en: 'Login & Cloud Auto-Sync Added! ☁️',
-            es: '¡Inicio de sesión y sincronización en la nube añadidos! ☁️'
+            ja: 'ログイン機能とデータ同期を追加しました！☁️',
+            en: 'Login & Data Sync Added! ☁️',
+            es: '¡Inicio y sincronización de sesión añadidos! ☁️'
         },
         content: {
-            ja: `待望の「ログイン機能」と「自動データ同期」を追加しました！
+            ja: `待望の「ログイン機能」と「データ同期機能」を追加しました！
 ヘッダー右上の「雲アイコン（☁️）」から、Googleアカウントやメールアドレスでログインできます。
 
 **新機能のポイント**:
-* ☁️ **リアルタイム自動同期**: ログイン状態になると、端末間でデータが自動かつリアルタイムに同期されます。スマホで入力したシフトが手動更新なしでPCに反映されます！
-* 🔐 **安全なバックアップ**: クラウド上に安全に保存されるため、機種変更時や端末紛失時も安心です。
+* ☁️ **クラウド自動バックアップ**: ログイン状態になると、手元で編集したシフトや設定データが自動的にクラウドへ保存されます。機種変更時や端末紛失時も安心です！
+* 🔄 **他端末へのデータの復元**: 同期は通信量を抑えるため、アプリを開いた時の1回のみ自動で読み込まれます。別の端末で入力したデータを今すぐ反映させたい場合は、ログインメニュー（☁️）から**「クラウドから復元」**ボタンを押してください！
 * 👤 **ゲストログイン**: アカウント作成が面倒な場合は、とりあえずゲストとして試すことも可能です。
 
-これまで通りローカルにも保存されますが、ログインすることで複数デバイス間でシームレスに利用できるようになります。ぜひご活用ください！`,
-            en: `We have added the highly anticipated "Login & Cloud Auto-Sync" feature!
+ぜひご活用ください！`,
+            en: `We have added the highly anticipated "Login & Cloud Sync" feature!
 You can log in with your Google account or email from the "Cloud Icon (☁️)" at the top right of the header.
 
 **What's New**:
-* ☁️ **Real-time Auto-Sync**: When logged in, your data syncs automatically across devices in real-time. Shifts entered on your phone will reflect on your PC without manual refreshing!
-* 🔐 **Secure Backup**: Rest assured that your data is securely stored in the cloud, even when changing devices.
+* ☁️ **Auto Cloud Backup**: When logged in, your local changes are automatically saved to the cloud!
+* 🔄 **Restore Data**: To save data, the app only fetches from the cloud once when opened. If you need to fetch recent changes made on another device, use the **"Restore from Cloud"** button in the login menu!
 * 👤 **Guest Login**: Want to try it first? You can use the Guest Login option without creating an account.
 
-We hope this makes using the app across multiple devices seamless and safe!`,
-            es: `¡Hemos añadido la tan esperada función de "Inicio de sesión y Sincronización automática"!
+We hope you enjoy this update!`,
+            es: `¡Hemos añadido la tan esperada función de "Inicio de sesión y Sincronización en la nube"!
 Puedes iniciar sesión con tu cuenta de Google o correo electrónico desde el "Icono de nube (☁️)" en la parte superior derecha.
 
 **Novedades**:
-* ☁️ **Sincronización en tiempo real**: Al iniciar sesión, tus datos se sincronizan automáticamente entre dispositivos en tiempo real. ¡Los turnos ingresados en tu teléfono se reflejarán en tu PC!
-* 🔐 **Copia de seguridad segura**: Ten la seguridad de que tus datos están almacenados de forma segura en la nube.
-* 👤 **Inicio de sesión de invitado**: ¿Quieres probarlo primero? Puedes usar la opción de Invitado sin crear una cuenta.
+* ☁️ **Copia de seguridad automática**: ¡Al iniciar sesión, tus cambios locales se guardan automáticamente en la nube!
+* 🔄 **Restaurar datos**: La aplicación solo obtiene datos de la nube una vez al abrirse. Si necesitas obtener los cambios recientes de otro dispositivo, usa el botón **"Restaurar desde la nube"** en el menú de inicio de sesión.
+* 👤 **Invitado**: ¿Quieres probarlo primero? Puedes usar la opción de Invitado.
 
-¡Con esta sincronización, usar la aplicación en múltiples dispositivos será muy sencillo!`,
+¡Esperamos que disfrutes de esta actualización!`,
         },
         category: 'update',
         important: true,
