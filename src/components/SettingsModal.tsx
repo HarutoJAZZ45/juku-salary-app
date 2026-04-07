@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { UserSettings, Campus } from '../types';
-import { X, Save, Settings, Info, Globe } from 'lucide-react';
+import { X, Save, Settings, Info, Globe, Trophy } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
 import type { Language } from '../locales/types';
 
@@ -242,6 +242,39 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                                 {lang === 'ja' ? '日本語' : lang === 'en' ? 'English' : 'Español'}
                             </button>
                         ))}
+                    </div>
+                </div>
+
+                {/* Ranking settings */}
+                <div style={{ border: '1px solid #fef3c7', borderRadius: '12px', padding: '16px', background: '#fffbeb' }}>
+                    <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#b45309', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Trophy size={16} /> {t.ranking.title}
+                    </h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ flex: 1, paddingRight: '12px' }}>
+                            <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#92400e', marginBottom: '4px' }}>
+                                {t.ranking.enableRanking}
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#b45309', lineHeight: '1.4' }}>
+                                {t.ranking.enableRankingDesc}
+                            </div>
+                        </div>
+                        <label style={{ cursor: 'pointer', marginTop: '4px' }}>
+                            <input
+                                type="checkbox"
+                                checked={formData.profile?.isPublicRankingEnabled || false}
+                                onChange={(e) => {
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        profile: {
+                                            ...(prev.profile || { name: 'ゲスト講師', activeTitle: 'rookie', unlockedTitles: ['rookie'], avatarId: 'user' }),
+                                            isPublicRankingEnabled: e.target.checked
+                                        }
+                                    }));
+                                }}
+                                style={{ width: '18px', height: '18px', accentColor: '#f59e0b' }}
+                            />
+                        </label>
                     </div>
                 </div>
 

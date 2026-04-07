@@ -371,26 +371,6 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                                 </div>
                             )}
                         </div>
-
-                        {/* Ranking Participation Section */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                            <div>
-                                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#334155', marginBottom: '4px' }}>
-                                    {t.ranking.enableRanking}
-                                </div>
-                                <div style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.4' }}>
-                                    {t.ranking.enableRankingDesc}
-                                </div>
-                            </div>
-                            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={settings.profile?.isPublicRankingEnabled || false}
-                                    onChange={(e) => handleUpdateProfile({ isPublicRankingEnabled: e.target.checked })}
-                                    style={{ width: '18px', height: '18px', accentColor: currentTheme.from }}
-                                />
-                            </label>
-                        </div>
                     </div>
                 )}
 

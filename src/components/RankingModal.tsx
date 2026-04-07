@@ -20,21 +20,36 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
     const [rankings, setRankings] = useState<RankingData[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    const recentMonths = React.useMemo(() => {
+        const keys = [];
+        const now = new Date();
+        let targetMonth = now.getMonth() + 1;
+        let targetYear = now.getFullYear();
+        if (now.getDate() > settings.closingDay) {
+            targetMonth++;
+            if (targetMonth > 12) { targetMonth = 1; targetYear++; }
+        }
+        for (let i = 0; i < 3; i++) {
+            let m = targetMonth - i;
+            let y = targetYear;
+            if (m <= 0) { m += 12; y--; }
+            keys.push(`${y}-${String(m).padStart(2, '0')}`);
+        }
+        return keys;
+    }, [settings.closingDay]);
+
+    const recentYears = React.useMemo(() => {
+        const now = new Date();
+        let currentFy = now.getFullYear();
+        if (now.getMonth() + 1 < 4) currentFy--;
+        return [currentFy.toString(), (currentFy - 1).toString()];
+    }, []);
+
     useEffect(() => {
         if (!isOpen) return;
-
-        // デフォルトのターゲットキーを現在の月に設定
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        let currentMonth = now.getMonth() + 1; // 1-12
-        if (now.getDate() > settings.closingDay) {
-            currentMonth++;
-            if (currentMonth > 12) currentMonth = 1; // 翌年にまたぐ場合は本来年号も計算必要だがここでは簡易的に
-        }
-
-        const initialMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
-        setTargetKey(initialMonth);
-    }, [isOpen, settings.closingDay]);
+        // 開いたときや切り替えたときにデフォルトを設定
+        setTargetKey(periodType === 'monthly' ? recentMonths[0] : recentYears[0]);
+    }, [isOpen, settings.closingDay, periodType, recentMonths, recentYears]);
 
     useEffect(() => {
         if (!isOpen || !targetKey) return;
@@ -121,7 +136,6 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
                         <button
                             onClick={() => {
                                 setPeriodType('yearly');
-                                setTargetKey(new Date().getFullYear().toString());
                             }}
                             style={{ flex: 1, padding: '8px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, background: periodType === 'yearly' ? '#fff' : 'transparent', color: periodType === 'yearly' ? '#f59e0b' : '#64748b', border: 'none', boxShadow: periodType === 'yearly' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', cursor: 'pointer' }}
                         >
@@ -136,18 +150,13 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
                             style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', background: 'white' }}
                         >
                             {periodType === 'monthly' ? (
-                                <>
-                                    <option value="2024-03">2024-03</option>
-                                    <option value="2024-04">2024-04</option>
-                                    <option value="2024-05">2024-05</option>
-                                    <option value="2024-06">2024-06</option>
-                                </>
+                                recentMonths.map(m => (
+                                    <option key={m} value={m}>{m}</option>
+                                ))
                             ) : (
-                                <>
-                                    <option value="2023">2023年度</option>
-                                    <option value="2024">2024年度</option>
-                                    <option value="2025">2025年度</option>
-                                </>
+                                recentYears.map(y => (
+                                    <option key={y} value={y}>{y}年度</option>
+                                ))
                             )}
                         </select>
 
