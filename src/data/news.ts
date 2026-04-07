@@ -153,7 +153,7 @@ Ahora puede exportar (guardar) e importar (restaurar) sus datos salariales para 
 ¡Recomendamos hacer copias de seguridad regularmente!`
         },
         category: 'update',
-        important: true,
+        important: false,
     },
     {
         id: '20260203-06',
