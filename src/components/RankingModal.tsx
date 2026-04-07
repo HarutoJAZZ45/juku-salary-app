@@ -1,9 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trophy, Shield } from 'lucide-react';
+import { X, Trophy, Shield, User, Zap, Coffee, Camera, Book, Music, Smile, Shirt, Star, Dribbble } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { RankingData, UserSettings } from '../types';
 import { useTranslation } from '../contexts/LanguageContext';
+import type { LucideIcon } from 'lucide-react';
+
+// アバターアイコンのマッピング
+const AVATAR_MAP: Record<string, LucideIcon> = {
+    'user': User,
+    'zap': Zap,
+    'coffee': Coffee,
+    'camera': Camera,
+    'book': Book,
+    'music': Music,
+    'smile': Smile,
+    'shirt': Shirt,
+    'star': Star,
+    'basketball': Dribbble,
+};
 
 interface RankingModalProps {
     isOpen: boolean;
@@ -200,7 +215,10 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
                                         </div>
 
                                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: user.themeColor ? `linear-gradient(135deg, ${user.themeColor}, #cbd5e1)` : '#e2e8f0', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '18px' }}>
-                                            {user.name.charAt(0).toUpperCase()}
+                                            {(() => {
+                                                const AvatarIcon = AVATAR_MAP[user.avatarId || 'user'] || User;
+                                                return <AvatarIcon size={22} />;
+                                            })()}
                                         </div>
 
                                         <div style={{ flex: 1, minWidth: 0 }}>
