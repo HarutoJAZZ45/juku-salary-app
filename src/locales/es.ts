@@ -150,7 +150,6 @@ export const es: Translation = {
         logout: 'Cerrar Sesión',
         loginToSync: 'Inicie sesión para sincronizar',
         googleLogin: 'Iniciar sesión con Google',
-        anonymousLogin: 'Entrar como Invitado',
         syncingData: 'Sincronizando...',
         syncSuccess: 'Datos sincronizados en la nube.',
         syncData: 'Sincronizar a la Nube',

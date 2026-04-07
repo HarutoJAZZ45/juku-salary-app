@@ -150,7 +150,6 @@ export const ja: Translation = {
         logout: 'ログアウト',
         loginToSync: 'ログインしてデータを同期',
         googleLogin: 'Googleでログイン',
-        anonymousLogin: 'ゲスト（匿名）でログイン',
         syncingData: '同期中...',
         syncSuccess: 'データをクラウドに同期しました。',
         syncData: 'クラウドにデータを同期',

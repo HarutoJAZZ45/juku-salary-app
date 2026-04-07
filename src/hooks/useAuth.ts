@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInAnonymously, signOut as firebaseSignOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import type { WorkEntry, UserSettings } from '../types';
@@ -46,14 +46,6 @@ export const useAuth = () => {
         }
     };
 
-    const loginAnonymously = async () => {
-        try {
-            return await signInAnonymously(auth);
-        } catch (error) {
-            console.error("Error signing in anonymously", error);
-            throw error;
-        }
-    };
 
     const signOut = async () => {
         try {
@@ -105,7 +97,6 @@ export const useAuth = () => {
         signInWithGoogle,
         loginWithEmail,
         signUpWithEmail,
-        loginAnonymously,
         signOut,
         syncDataToCloud,
         loadDataFromCloud

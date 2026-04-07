@@ -150,7 +150,6 @@ export const en: Translation = {
         logout: 'Logout',
         loginToSync: 'Login to sync data',
         googleLogin: 'Login with Google',
-        anonymousLogin: 'Login as Guest',
         syncingData: 'Syncing...',
         syncSuccess: 'Data synced successfully to the cloud.',
         syncData: 'Sync Data to Cloud',

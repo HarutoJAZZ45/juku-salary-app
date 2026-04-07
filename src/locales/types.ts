@@ -151,7 +151,6 @@ export interface Translation {
         logout: string;
         loginToSync: string;
         googleLogin: string;
-        anonymousLogin: string;
         syncingData: string;
         syncSuccess: string;
         syncData: string;

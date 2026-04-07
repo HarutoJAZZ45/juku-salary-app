@@ -11,7 +11,7 @@ interface AuthModalProps {
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     const { t } = useTranslation();
-    const { user, signInWithGoogle, loginAnonymously, signUpWithEmail, loginWithEmail, signOut, syncDataToCloud, loadDataFromCloud } = useAuth();
+    const { user, signInWithGoogle, signUpWithEmail, loginWithEmail, signOut, syncDataToCloud, loadDataFromCloud } = useAuth();
     const [isSyncing, setIsSyncing] = useState(false);
 
     const [email, setEmail] = useState('');
@@ -39,21 +39,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         }
     };
 
-    const handleAnonymousLogin = async () => {
-        try {
-            const result = await loginAnonymously();
-            const cloudData = await loadDataFromCloud(result.user);
-
-            if (!cloudData) {
-                await handleSync(result.user, true);
-            } else {
-                await handleDownload(result.user, true);
-            }
-        } catch (error) {
-            console.error("Anonymous login failed:", error);
-            alert("Login failed.");
-        }
-    };
 
     const handleEmailAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -259,12 +244,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                             {t.auth.googleLogin}
                         </button>
 
-                        <button onClick={handleAnonymousLogin} style={{
-                            padding: '12px', borderRadius: '12px', background: '#f1f5f9', color: '#334155',
-                            fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', border: '1px solid #cbd5e1'
-                        }}>
-                            <User size={18} /> {t.auth.anonymousLogin}
-                        </button>
+
                     </div>
                 )}
             </div>
