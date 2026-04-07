@@ -343,7 +343,7 @@ function App() {
           <strong>{t.app.helpSave}</strong><br />
           {t.app.helpSaveBody}
           <div style={{ marginTop: '16px', padding: '8px', background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '8px', color: '#be123c', fontWeight: 'bold' }}>
-            ※確実にデータを同期させたい場合は、ログインメニュー（☁️アイコン）から「クラウドへ保存」「クラウドから復元」を用いて手動で同期してください。
+            ※確実にデータを同期させたい場合は、ログインメニューから「クラウドへ保存」「クラウドから復元」を用いて手動で同期してください。
           </div>
         </div>
       )}
