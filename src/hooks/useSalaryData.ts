@@ -45,6 +45,8 @@ export const useSalaryData = () => {
 
     // ストレージおよびFirestoreからの初回読み込み
     useEffect(() => {
+        setIsLoaded(false); // ユーザーが変わるたびにロード中状態に戻す
+
         const loadInitialData = async () => {
             let loadedEntries = {};
             let loadedConfig = null;

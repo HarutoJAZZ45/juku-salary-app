@@ -83,7 +83,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     };
 
     const handleLogout = async () => {
-        await signOut();
+        if (window.confirm("ログアウトしますか？\n（ログアウトすると端末上のデータはクリアされますが、クラウドに保存されたデータは残ります）")) {
+            await signOut();
+            localStorage.removeItem('juku_salary_entries');
+            localStorage.removeItem('juku_salary_config');
+            window.location.reload();
+        }
     };
 
     // targetUser: 指定されたユーザー（ログイン直後用）
