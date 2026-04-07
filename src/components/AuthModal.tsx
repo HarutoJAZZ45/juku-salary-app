@@ -83,12 +83,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     };
 
     const handleLogout = async () => {
-        if (window.confirm("ログアウトしますか？\n（ログアウトすると端末上のデータはクリアされますが、クラウドに保存されたデータは残ります）")) {
-            await signOut();
-            localStorage.removeItem('juku_salary_entries');
-            localStorage.removeItem('juku_salary_config');
-            window.location.reload();
-        }
+        await signOut();
+        // ログアウト時はローカルデータを残す（次に新規登録する場合に備えて）
+        // 既存ユーザーのログイン時にクラウドデータで上書きされるため安全
     };
 
     // targetUser: 指定されたユーザー（ログイン直後用）
@@ -104,8 +101,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             const config = configStr ? JSON.parse(configStr) : {};
 
             await syncDataToCloud(entries, config, currentUser);
-            if (!isAuto) alert(t.auth.syncSuccess || "クラウドへの保存が完了しました！");
-            else console.log("Automatic backup successful for new user.");
+            if (!isAuto) {
+                alert(t.auth.syncSuccess || "クラウドへの保存が完了しました！");
+            } else {
+                console.log("Automatic backup successful for new user.");
+                // 新規登録後、クラウドと同期した状態でアプリを再初期化
+                window.location.reload();
+            }
         } catch (error) {
             console.error(error);
             if (!isAuto) alert("Sync failed.");
@@ -125,6 +127,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         try {
             const data = await loadDataFromCloud(currentUser);
             if (data) {
+                // 既存ユーザー: ローカルを一度クリアしてからクラウドデータで上書き
+                localStorage.removeItem('juku_salary_entries');
+                localStorage.removeItem('juku_salary_config');
                 localStorage.setItem('juku_salary_entries', JSON.stringify(data.entries || {}));
                 localStorage.setItem('juku_salary_config', JSON.stringify(data.config || {}));
                 if (!isAuto) alert("クラウドからデータを復元しました。\n※設定や勤務データを正しく反映するため、ページを強制リロードします。");
