@@ -483,7 +483,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                         </div>
 
                         {/* Ranking Participation Section */}
-                        <div style={{ marginTop: '16px', border: '1px solid #fef3c7', borderRadius: '12px', padding: '16px', background: '#fffbeb' }}>
+                        <div style={{ marginTop: '16px', border: '1px solid #fef3c7', borderRadius: '12px', padding: '16px', background: '#fffbeb', gridColumn: 'span 2' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                 <div style={{ flex: 1, paddingRight: '12px' }}>
                                     <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#92400e', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
