@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { UserSettings, Campus } from '../types';
-import { X, Save, Settings, Info, Globe, Trophy } from 'lucide-react';
+import { X, Save, Settings, Info, Globe } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
 import type { Language } from '../locales/types';
 
@@ -244,12 +244,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                         ))}
                     </div>
                 </div>
-            </div>
 
-            <button className="glass-btn" onClick={handleSave} style={{ width: '100%', marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <Save size={18} /> {t.settings.saveButton}
-            </button>
+                <button className="glass-btn" onClick={handleSave} style={{ width: '100%', marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <Save size={18} /> {t.settings.saveButton}
+                </button>
+            </div>
         </div>
-    </div >
-  );
+    );
 };
