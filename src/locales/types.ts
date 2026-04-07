@@ -80,6 +80,7 @@ export interface Translation {
         helpStep2: string;
         helpStep3: string;
         helpStep4: string;
+        helpStep5: string;
 
         batchMode: string;
         selecting: string;

@@ -262,8 +262,11 @@ function App() {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: '24px', padding: '0 8px', height: 'var(--header-height)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="./logo.svg" alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px', boxShadow: '0 4px 10px rgba(4, 96, 167, 0.2)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <img src="./apple-touch-icon.png" alt="Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+          <span style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '-0.5px', background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            {t.header.title}
+          </span>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
@@ -339,6 +342,7 @@ function App() {
           2. {t.app.helpStep2}<br />
           3. {t.app.helpStep3}<br />
           4. {t.app.helpStep4}<br />
+          5. {t.app.helpStep5}<br />
           <br />
           <strong>{t.app.helpSave}</strong><br />
           {t.app.helpSaveBody}
