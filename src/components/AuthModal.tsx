@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../contexts/LanguageContext';
 import { X, LogOut, User, Cloud, Mail, Download } from 'lucide-react';
-import { getAdditionalUserInfo } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
 
 interface AuthModalProps {
@@ -25,10 +24,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     const handleGoogleLogin = async () => {
         try {
             const result = await signInWithGoogle();
-            const additionalInfo = getAdditionalUserInfo(result);
-            if (additionalInfo?.isNewUser) {
+            const cloudData = await loadDataFromCloud(result.user);
+
+            if (!cloudData) {
+                // クラウドにデータがない = 新規ユーザーとして扱う
                 await handleSync(result.user, true);
             } else {
+                // クラウドにデータがある = 既存ユーザーとして上書き
                 await handleDownload(result.user, true);
             }
         } catch (error) {
@@ -40,8 +42,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     const handleAnonymousLogin = async () => {
         try {
             const result = await loginAnonymously();
-            const additionalInfo = getAdditionalUserInfo(result);
-            if (additionalInfo?.isNewUser) {
+            const cloudData = await loadDataFromCloud(result.user);
+
+            if (!cloudData) {
                 await handleSync(result.user, true);
             } else {
                 await handleDownload(result.user, true);
@@ -56,12 +59,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         e.preventDefault();
         setAuthLoading(true);
         try {
+            let result;
             if (isSignUp) {
-                const result = await signUpWithEmail(email, password);
+                result = await signUpWithEmail(email, password);
+                // 新規登録時は無条件で現在のローカルデータをアップロード
                 await handleSync(result.user, true);
             } else {
-                const result = await loginWithEmail(email, password);
-                await handleDownload(result.user, true);
+                result = await loginWithEmail(email, password);
+                // 既存ログイン時は、クラウドにデータがあればダウンロード、なければ念のためアップロード
+                const cloudData = await loadDataFromCloud(result.user);
+                if (cloudData) {
+                    await handleDownload(result.user, true);
+                } else {
+                    await handleSync(result.user, true);
+                }
             }
         } catch (error) {
             console.error("Email auth failed:", error);

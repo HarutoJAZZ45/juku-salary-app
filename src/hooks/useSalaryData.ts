@@ -43,10 +43,8 @@ export const useSalaryData = () => {
     // Authフックでユーザー状態を取得
     const { user } = useAuth();
 
-    // ストレージおよびFirestoreからのリアルタイム読み込み
+    // ストレージおよびFirestoreからの初回読み込み
     useEffect(() => {
-
-
         const loadInitialData = async () => {
             let loadedEntries = {};
             let loadedConfig = null;
@@ -58,13 +56,10 @@ export const useSalaryData = () => {
 
                 if (storedEntries) {
                     loadedEntries = JSON.parse(storedEntries);
+                    setEntries(loadedEntries);
                 }
                 if (storedConfig) {
                     loadedConfig = JSON.parse(storedConfig);
-                }
-
-                setEntries(loadedEntries);
-                if (loadedConfig) {
                     setSettings({
                         ...DEFAULT_SETTINGS,
                         ...loadedConfig,
@@ -82,9 +77,7 @@ export const useSalaryData = () => {
                 console.error("Failed to load local data", e);
             }
 
-            setIsLoaded(true);
-
-            // 2. ユーザーがログインしている場合はFirestoreから初回のみデータを取得（通信量削減のため）
+            // 2. ユーザーがログインしている場合はFirestoreからデータを取得
             if (user) {
                 try {
                     const userRef = doc(db, 'users', user.uid);
@@ -92,9 +85,8 @@ export const useSalaryData = () => {
 
                     if (docSnap.exists()) {
                         const cloudData = docSnap.data();
-
-                        // クラウドのデータで完全に上書きする（ローカルの残骸を残さない）
-                        setEntries(cloudData.entries || {});
+                        const finalEntries = cloudData.entries || {};
+                        setEntries(finalEntries);
 
                         if (cloudData.config) {
                             setSettings({
@@ -109,37 +101,37 @@ export const useSalaryData = () => {
                                     ...(cloudData.config.profile || {})
                                 }
                             });
-                        } else {
-                            setSettings(DEFAULT_SETTINGS);
                         }
                     }
                 } catch (error) {
                     console.error("Initial sync error:", error);
                 }
             }
+
+            // 全ての読み込みが完了してからフラグを立てる
+            setIsLoaded(true);
         };
 
         loadInitialData();
-
-        // クリーンアップは不要になりました（リアルタイム監視を廃止したため）
-        return () => { };
     }, [user]);
 
     // 勤務データの保存（entries変更時に実行）
     useEffect(() => {
-        if (isLoaded) {
-            localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
-            if (user) {
-                const saveToFirestore = async () => {
-                    const userRef = doc(db, 'users', user.uid);
-                    await setDoc(userRef, { entries }, { merge: true }).catch(e => console.error(e));
-                    // ランキングデータの自動同期
-                    import('../utils/ranking').then(({ updateRankingStats }) => {
-                        updateRankingStats(user.uid, entries, settings);
-                    });
-                };
-                saveToFirestore();
-            }
+        // ロード完了前、またはデータが空の状態での上書き保存を防ぐ
+        if (!isLoaded) return;
+
+        localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+
+        if (user) {
+            const saveToFirestore = async () => {
+                const userRef = doc(db, 'users', user.uid);
+                await setDoc(userRef, { entries }, { merge: true }).catch(e => console.error(e));
+                // ランキングデータの自動同期
+                import('../utils/ranking').then(({ updateRankingStats }) => {
+                    updateRankingStats(user.uid, entries, settings);
+                });
+            };
+            saveToFirestore();
         }
     }, [entries, isLoaded, user]);
 
