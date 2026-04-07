@@ -482,13 +482,36 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                             </div>
                         </div>
                     </div>
-
-
-                    <div style={{ fontSize: '12px', textAlign: 'center', color: '#9ca3af' }}>
-                        ※データは端末(ブラウザ)ごと、またはバックアップデータに基づきます
-                    </div>
                 </div>
             </div>
+
+            {/* Ranking Participation Section */}
+            <div style={{ marginTop: '16px', border: '1px solid #fef3c7', borderRadius: '12px', padding: '16px', background: '#fffbeb' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1, paddingRight: '12px' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#92400e', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Trophy size={14} /> {t.ranking.enableRanking}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#b45309', lineHeight: '1.4' }}>
+                            {t.ranking.enableRankingDesc}
+                        </div>
+                    </div>
+                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', marginTop: '4px' }}>
+                        <input
+                            type="checkbox"
+                            checked={settings.profile?.isPublicRankingEnabled || false}
+                            onChange={(e) => handleUpdateProfile({ isPublicRankingEnabled: e.target.checked })}
+                            style={{ width: '18px', height: '18px', accentColor: '#f59e0b' }}
+                        />
+                    </label>
+                </div>
+            </div>
+
+            <div style={{ fontSize: '12px', textAlign: 'center', color: '#9ca3af', marginTop: '16px' }}>
+                ※データは端末(ブラウザ)ごと、またはバックアップデータに基づきます
+            </div>
         </div>
+            </div >
+        </div >
     );
 };

@@ -345,6 +345,9 @@ function App() {
           <br />
           <strong>{t.app.helpSave}</strong><br />
           {t.app.helpSaveBody}
+          <div style={{ marginTop: '16px', padding: '8px', background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '8px', color: '#be123c', fontWeight: 'bold' }}>
+            ※確実にデータを反映させたい場合は、ログイン画面（☁️アイコン）の中にある「データ同期」ボタンを押してください。
+          </div>
         </div>
       )}
 

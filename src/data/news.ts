@@ -11,6 +11,22 @@ export interface NewsItem {
 
 export const NEWS_ITEMS: NewsItem[] = [
     {
+        id: '20260407-02',
+        date: '2026-04-07',
+        title: {
+            ja: '🏆 ランキング機能を追加しました！',
+            en: '🏆 Ranking Feature Added!',
+            es: '🏆 ¡Función de clasificación añadida!'
+        },
+        content: {
+            ja: `月間・年間の「担当コマ数」と「出勤日数」を競い合える**ランキング機能**を追加しました！\n\n**使い方**:\n1. 画面右上のトロフィーアイコン（🏆）からランキングを見ることができます🌍\n2. ランキングに自分のスコアを載せたい場合は、**プロフィール（👤）メニューの一番下**にある「ランキングに参加する」をONにしてください！✨\n\n※プライバシー保護のため、ONにした方のみスコアが集計・ランキングに公開されます。オフのままなら今まで通りです。`,
+            en: `We have added a **Ranking Feature** to compete in monthly/yearly "Classes Taught" and "Work Days"!\n\n**How to use**:\n1. Check the rankings from the Trophy icon (🏆) at the top right 🌍\n2. If you want to participate, please turn ON the "Enable Ranking" option located at the **very bottom of the Profile (👤) menu**! ✨\n\n*For privacy protection, your score will only be calculated and published if you turn it ON.`,
+            es: `¡Hemos añadido una **Función de Clasificación** para competir en "Clases impartidas" y "Días de trabajo" mensuales y anuales!\n\n**Cómo usar**:\n1. Revisa las clasificaciones desde el icono de Trofeo (🏆) en la parte superior derecha 🌍\n2. Si quieres participar, ¡enciende la opción "Habilitar clasificación" ubicada en la **parte inferior del menú de Perfil (👤)**! ✨\n\n*Para proteger la privacidad, tu puntaje solo se calculará y publicará si lo enciendes.`
+        },
+        category: 'update',
+        important: true,
+    },
+    {
         id: '20260407-01',
         date: '2026-04-07',
         title: {
