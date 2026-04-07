@@ -57,7 +57,10 @@ export const updateRankingStats = async (uid: string | undefined, entries: Recor
 
     console.log('[Ranking] Saving ranking data:', JSON.stringify(rankingData.monthly));
 
+    // Firestoreはundefinedを受け付けないため、undefinedのフィールドを除去
+    const cleanData = JSON.parse(JSON.stringify(rankingData));
+
     const rankRef = doc(db, 'rankings', uid);
-    await setDoc(rankRef, rankingData).catch(e => console.error("[Ranking] Ranking sync error: ", e));
+    await setDoc(rankRef, cleanData).catch(e => console.error("[Ranking] Ranking sync error: ", e));
     console.log('[Ranking] Ranking data saved successfully.');
 };
