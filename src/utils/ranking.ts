@@ -6,10 +6,13 @@ import { getFiscalYear, getPeriodRange } from './calculator';
 export const updateRankingStats = async (uid: string | undefined, entries: Record<string, WorkEntry>, settings: UserSettings) => {
     if (!uid) return;
 
+    console.log('[Ranking] updateRankingStats called. isPublicRankingEnabled:', settings.profile?.isPublicRankingEnabled);
+
     if (!settings.profile?.isPublicRankingEnabled) {
         // ランキング不参加の場合は、ランキングコレクションからデータを削除
         const rankRef = doc(db, 'rankings', uid);
         await deleteDoc(rankRef).catch(() => { });
+        console.log('[Ranking] Ranking opt-out: deleted ranking data.');
         return;
     }
 
@@ -52,6 +55,9 @@ export const updateRankingStats = async (uid: string | undefined, entries: Recor
         rankingData.yearly[yearKey].days += workDaysCount;
     });
 
+    console.log('[Ranking] Saving ranking data:', JSON.stringify(rankingData.monthly));
+
     const rankRef = doc(db, 'rankings', uid);
-    await setDoc(rankRef, rankingData).catch(e => console.error("Ranking sync error: ", e));
+    await setDoc(rankRef, rankingData).catch(e => console.error("[Ranking] Ranking sync error: ", e));
+    console.log('[Ranking] Ranking data saved successfully.');
 };
