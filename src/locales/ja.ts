@@ -49,9 +49,13 @@ export const ja: Translation = {
         hourlyRate: '生徒対応給 (時給)',
         transportSettings: '交通費設定 (校舎別)',
         closingDay: '締め日 (日)',
-        saveButton: '設定を保存',
-        language: '言語 (Language)',
-        annualLimit: '扶養控除 (年収の壁)',
+        annualLimit: '扶養控除の壁（年）',
+        language: '言語設定 (Language)',
+        saveButton: '設定を保存する',
+        yearlyRatesTitle: '年度別時給設定',
+        addYearlyRate: '年度を追加',
+        yearLabel: '年度',
+        delete: '削除'
     },
     tax: {
         title: '扶養管理',

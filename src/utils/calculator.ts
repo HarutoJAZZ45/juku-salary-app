@@ -3,6 +3,17 @@ import type { WorkEntry, UserSettings, WorkBlock } from '../types';
 const BLOCK_ORDER: WorkBlock[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
 /**
+ * 渡された日付文字列(YYYY-MM-DD)から年度（Fiscal Year）を判定する
+ * 1月〜3月は前年、4月〜12月は当年とする
+ */
+export const getFiscalYear = (dateStr: string): number => {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // 1-12
+    return month < 4 ? year - 1 : year; // 1月〜3月なら前年度
+};
+
+/**
  * 給与計算のメインロジック
  * 勤務データと設定情報を基に、その日の給与合計を算出する
  */
@@ -10,9 +21,18 @@ export const calculateDailyTotal = (entry: WorkEntry, settings: UserSettings): n
     let total = 0;
     const blocks = entry.selectedBlocks || [];
 
-    // 1. コマ給（授業給）の計算
-    // 基本時給の設定
+    // 年度別の時給を判定
     let standardHourlyRate = settings.teachingHourlyRate;
+    let standardSupportRate = settings.hourlyRate;
+
+    if (settings.yearSpecificRates) {
+        const fy = getFiscalYear(entry.date);
+        if (settings.yearSpecificRates[fy]) {
+            standardHourlyRate = settings.yearSpecificRates[fy].teachingHourlyRate;
+            standardSupportRate = settings.yearSpecificRates[fy].hourlyRate;
+        }
+    }
+
     const home = settings.defaultCampus || '平岡';
     const work = entry.campus || '平岡';
 
@@ -73,7 +93,7 @@ export const calculateDailyTotal = (entry: WorkEntry, settings: UserSettings): n
     }
 
     // 事務給の総額計算（分を時間に換算し、事務時給を掛ける）
-    total += Math.floor((totalSupportMinutes / 60) * settings.hourlyRate);
+    total += Math.floor((totalSupportMinutes / 60) * standardSupportRate);
 
     // 3. 勤務手当（勤務給）の加算
     // 勤務実績がある場合のみ発生

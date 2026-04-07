@@ -102,6 +102,91 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                     <input type="number" value={formData.hourlyRate} onChange={e => handleChange('hourlyRate', Number(e.target.value))} />
                 </div>
 
+                {/* 3. Yearly Rates */}
+                <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: formData.yearSpecificRates && Object.keys(formData.yearSpecificRates).length > 0 ? '12px' : '0' }}>
+                        <h4 style={{ margin: 0, fontSize: '14px', color: '#475569' }}>
+                            {t.settings.yearlyRatesTitle}
+                        </h4>
+                        <button
+                            onClick={() => {
+                                const input = window.prompt("対象の年度を西暦で入力してください (例: 2024)");
+                                if (input && !isNaN(Number(input))) {
+                                    const year = Number(input);
+                                    setFormData(prev => ({
+                                        ...prev,
+                                        yearSpecificRates: {
+                                            ...(prev.yearSpecificRates || {}),
+                                            [year]: { teachingHourlyRate: prev.teachingHourlyRate, hourlyRate: prev.hourlyRate }
+                                        }
+                                    }));
+                                }
+                            }}
+                            style={{ padding: '4px 8px', fontSize: '12px', borderRadius: '6px', background: '#e0e7ff', color: '#4f46e5', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+                        >
+                            + {t.settings.addYearlyRate}
+                        </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {Object.entries(formData.yearSpecificRates || {}).sort(([a], [b]) => Number(b) - Number(a)).map(([year, rates]) => (
+                            <div key={year} style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    <div style={{ fontWeight: 600, color: '#334155', fontSize: '14px' }}>
+                                        {year}{t.settings.yearLabel}
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            const newRates = { ...formData.yearSpecificRates };
+                                            delete newRates[Number(year)];
+                                            setFormData(prev => ({ ...prev, yearSpecificRates: newRates }));
+                                        }}
+                                        style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '12px', cursor: 'pointer', padding: 0 }}
+                                    >
+                                        {t.settings.delete}
+                                    </button>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                    <div>
+                                        <label style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>{t.settings.teachingRate}</label>
+                                        <input
+                                            type="number"
+                                            value={rates.teachingHourlyRate}
+                                            onChange={e => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    yearSpecificRates: {
+                                                        ...prev.yearSpecificRates,
+                                                        [Number(year)]: { ...rates, teachingHourlyRate: Number(e.target.value) }
+                                                    }
+                                                }));
+                                            }}
+                                            style={{ width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid #e2e8f0' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>{t.settings.hourlyRate}</label>
+                                        <input
+                                            type="number"
+                                            value={rates.hourlyRate}
+                                            onChange={e => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    yearSpecificRates: {
+                                                        ...prev.yearSpecificRates,
+                                                        [Number(year)]: { ...rates, hourlyRate: Number(e.target.value) }
+                                                    }
+                                                }));
+                                            }}
+                                            style={{ width: '100%', padding: '6px', borderRadius: '6px', border: '1px solid #e2e8f0' }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {/* 3. Transport Settings (No longer hidden) */}
                 <div style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
                     <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>

@@ -49,9 +49,13 @@ export const en: Translation = {
         hourlyRate: 'Support Rate (Hourly)',
         transportSettings: 'Transport Rates (Per Campus)',
         closingDay: 'Closing Day',
-        saveButton: 'Save Settings',
+        annualLimit: 'Annual Tax Limit',
         language: 'Language',
-        annualLimit: 'Annual Limit (Tax Wall)',
+        saveButton: 'Save Settings',
+        yearlyRatesTitle: 'Yearly Rates',
+        addYearlyRate: 'Add Year',
+        yearLabel: 'Year',
+        delete: 'Delete'
     },
     tax: {
         title: 'Tax Monitor',

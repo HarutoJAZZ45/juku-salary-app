@@ -39,6 +39,12 @@ export interface UserSettings {
   campusTransportRates: Record<Campus, number>; // 校舎ごとのデフォルト交通費
   defaultCampus: Campus;      // 所属校舎（ホームスクール）
 
+  // 年度別の時給オーバーライド
+  yearSpecificRates?: Record<number, {
+    teachingHourlyRate: number;
+    hourlyRate: number;
+  }>;
+
   // プロフィール設定 (v3.0)
   profile?: UserProfile;
 

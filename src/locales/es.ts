@@ -49,9 +49,13 @@ export const es: Translation = {
         hourlyRate: 'Tasa de Apoyo (Hora)',
         transportSettings: 'Tasas de Transporte (Por Campus)',
         closingDay: 'Día de Cierre',
-        saveButton: 'Guardar Configuración',
+        saveButton: 'Guardar configuración',
         language: 'Idioma (Language)',
-        annualLimit: 'Límite Anual (Impuestos)',
+        annualLimit: 'Límite de impuestos anuales',
+        yearlyRatesTitle: 'Tarifas Anuales',
+        addYearlyRate: 'Añadir Año',
+        yearLabel: 'Año',
+        delete: 'Eliminar'
     },
     tax: {
         title: 'Monitor de Impuestos',

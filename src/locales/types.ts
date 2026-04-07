@@ -50,9 +50,13 @@ export interface Translation {
         hourlyRate: string;
         transportSettings: string;
         closingDay: string;
-        saveButton: string;
-        language: string;
         annualLimit: string;
+        language: string;
+        saveButton: string;
+        yearlyRatesTitle: string;
+        addYearlyRate: string;
+        yearLabel: string;
+        delete: string;
     };
     app: {
         helpTitle: string;
