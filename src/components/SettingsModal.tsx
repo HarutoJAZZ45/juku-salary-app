@@ -250,7 +250,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                 <Save size={18} /> {t.settings.saveButton}
             </button>
         </div>
-        </div >
-    );
-
+    </div >
+  );
 };

@@ -506,10 +506,6 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                     </label>
                 </div>
             </div>
-
-            <div style={{ fontSize: '12px', textAlign: 'center', color: '#9ca3af', marginTop: '16px' }}>
-                ※データは端末(ブラウザ)ごと、またはバックアップデータに基づきます
-            </div>
         </div>
             </div >
         </div >
