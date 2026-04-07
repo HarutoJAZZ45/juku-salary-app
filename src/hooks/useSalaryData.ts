@@ -154,7 +154,8 @@ export const useSalaryData = () => {
         if (user) {
             const saveToFirestore = async () => {
                 const userRef = doc(db, 'users', user.uid);
-                await setDoc(userRef, { entries }, { merge: true }).catch(e => console.error(e));
+                const cleanEntries = JSON.parse(JSON.stringify({ entries }));
+                await setDoc(userRef, cleanEntries, { merge: true }).catch(e => console.error(e));
                 // ランキングデータの自動同期
                 import('../utils/ranking').then(({ updateRankingStats }) => {
                     updateRankingStats(user.uid, entries, settings);
@@ -173,7 +174,8 @@ export const useSalaryData = () => {
         if (user) {
             const saveToFirestore = async () => {
                 const userRef = doc(db, 'users', user.uid);
-                await setDoc(userRef, { config: settings }, { merge: true }).catch(e => console.error(e));
+                const cleanConfig = JSON.parse(JSON.stringify({ config: settings }));
+                await setDoc(userRef, cleanConfig, { merge: true }).catch(e => console.error(e));
                 // 設定変更時（プロフ変更やランキングON/OFF切り替え）にも同期
                 import('../utils/ranking').then(({ updateRankingStats }) => {
                     updateRankingStats(user.uid, entries, settings);
