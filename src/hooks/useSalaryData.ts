@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { WorkEntry, UserSettings } from '../types';
 import { useAuth } from './useAuth';
-import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const STORAGE_KEY_ENTRIES = 'juku_salary_entries';
@@ -45,7 +45,7 @@ export const useSalaryData = () => {
 
     // ストレージおよびFirestoreからのリアルタイム読み込み
     useEffect(() => {
-        let unsubscribe: (() => void) | undefined;
+
 
         const loadInitialData = async () => {
             let loadedEntries = {};
@@ -84,12 +84,11 @@ export const useSalaryData = () => {
 
             setIsLoaded(true);
 
-            // 2. ユーザーがログインしている場合はFirestoreのリアルタイム監視（onSnapshot）を開始
+            // 2. ユーザーがログインしている場合はFirestoreから初回のみデータを取得（通信量削減のため）
             if (user) {
-                const userRef = doc(db, 'users', user.uid);
-                unsubscribe = onSnapshot(userRef, (docSnap) => {
-                    // 当該端末から書き込んだイベント（pending state）の場合は除外してループを防ぐ
-                    if (docSnap.metadata.hasPendingWrites) return;
+                try {
+                    const userRef = doc(db, 'users', user.uid);
+                    const docSnap = await getDoc(userRef);
 
                     if (docSnap.exists()) {
                         const cloudData = docSnap.data();
@@ -113,20 +112,16 @@ export const useSalaryData = () => {
                             });
                         }
                     }
-                }, (error) => {
-                    console.error("Realtime sync error:", error);
-                });
+                } catch (error) {
+                    console.error("Initial sync error:", error);
+                }
             }
         };
 
         loadInitialData();
 
-        // クリーンアップ関数でリッスンを解除
-        return () => {
-            if (unsubscribe) {
-                unsubscribe();
-            }
-        };
+        // クリーンアップは不要になりました（リアルタイム監視を廃止したため）
+        return () => { };
     }, [user]);
 
     // 勤務データの保存（entries変更時に実行）
