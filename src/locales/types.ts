@@ -58,6 +58,19 @@ export interface Translation {
         yearLabel: string;
         delete: string;
     };
+    ranking: {
+        title: string;
+        monthly: string;
+        yearly: string;
+        classes: string;
+        days: string;
+        classesUnit: string;
+        daysUnit: string;
+        enableRanking: string;
+        enableRankingDesc: string;
+        unranked: string;
+        noData: string;
+    };
     app: {
         helpTitle: string;
         helpUsage: string;

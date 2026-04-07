@@ -74,6 +74,26 @@ export interface UserProfile {
   themeColor?: string; // 背景テーマカラー
   activeTitle?: string; // 現在選択中の称号
   unlockedTitles?: string[]; // 獲得した称号のリスト
+  isPublicRankingEnabled?: boolean; // ランキング参加フラグ
+}
+
+/**
+ * ランキングデータ
+ */
+export interface RankingStats {
+  classes: number;
+  days: number;
+}
+
+export interface RankingData {
+  uid: string;
+  name: string;
+  avatarId: string;
+  themeColor?: string;
+  activeTitle?: string;
+  monthly: Record<string, RankingStats>; // key: "2024-04"
+  yearly: Record<string, RankingStats>;  // key: "2024"
+  updatedAt?: number;
 }
 
 /**

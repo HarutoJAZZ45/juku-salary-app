@@ -13,8 +13,9 @@ import { AnalyticsModal } from './components/AnalyticsModal';
 import { DataManagementModal } from './components/DataManagementModal';
 import { AccountModal } from './components/AccountModal';
 import { AuthModal } from './components/AuthModal';
+import { RankingModal } from './components/RankingModal';
 import { useAuth } from './hooks/useAuth';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud } from 'lucide-react';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
@@ -47,6 +48,7 @@ function App() {
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isRankingOpen, setIsRankingOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // 一括編集モードの状態管理
@@ -278,6 +280,9 @@ function App() {
           >
             <Info size={20} />
           </button>
+          <button onClick={() => setIsRankingOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
+            <Trophy size={20} fill="#fbbf24" stroke="#d97706" />
+          </button>
           <button onClick={() => setIsAnalyticsOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
             <TrendingUp size={20} />
           </button>
@@ -481,6 +486,11 @@ function App() {
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
+      />
+      <RankingModal
+        isOpen={isRankingOpen}
+        onClose={() => setIsRankingOpen(false)}
+        settings={settings}
       />
       <Analytics />
     </>

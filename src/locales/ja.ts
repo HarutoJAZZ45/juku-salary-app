@@ -57,6 +57,19 @@ export const ja: Translation = {
         yearLabel: '年度',
         delete: '削除'
     },
+    ranking: {
+        title: 'ランキング',
+        monthly: '月間',
+        yearly: '年間',
+        classes: 'コマ数',
+        days: '出勤日数',
+        classesUnit: 'コマ',
+        daysUnit: '日',
+        enableRanking: 'ランキング（スコア公開）に参加する',
+        enableRankingDesc: '他のユーザーが見るランキング掲示板に、プロフィールとコマ数・出勤数が公開されます。',
+        unranked: '現在ランキング設定はオフです。参加するにはプロフィールの設定からオンにしてください！',
+        noData: 'まだ誰もランキングに参加していません。'
+    },
     tax: {
         title: '扶養管理',
         annualIncome: '今年の年収 (1月〜)',

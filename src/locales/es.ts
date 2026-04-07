@@ -57,6 +57,19 @@ export const es: Translation = {
         yearLabel: 'Año',
         delete: 'Eliminar'
     },
+    ranking: {
+        title: 'Clasificación',
+        monthly: 'Mensual',
+        yearly: 'Anual',
+        classes: 'Clases',
+        days: 'Días Trab.',
+        classesUnit: 'clases',
+        daysUnit: 'días',
+        enableRanking: 'Participar en Claificación Pública',
+        enableRankingDesc: 'Tus estadísticas y perfil serán visibles para otros usuarios en la tabla de clasificación.',
+        unranked: 'Actualmente estás fuera. ¡Actívalo en las opciones para unirte!',
+        noData: 'No hay datos de clasificación aún.'
+    },
     tax: {
         title: 'Monitor de Impuestos',
         annualIncome: 'Ingreso Anual',

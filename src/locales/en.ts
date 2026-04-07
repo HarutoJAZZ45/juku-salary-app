@@ -57,6 +57,19 @@ export const en: Translation = {
         yearLabel: 'Year',
         delete: 'Delete'
     },
+    ranking: {
+        title: 'Ranking',
+        monthly: 'Monthly',
+        yearly: 'Yearly',
+        classes: 'Classes',
+        days: 'Work Days',
+        classesUnit: 'classes',
+        daysUnit: 'days',
+        enableRanking: 'Participate in Public Rankings',
+        enableRankingDesc: 'Your stats (classes/days) and profile name will be visible to other users on the leaderboard.',
+        unranked: 'You are currently opted out. Enable in settings to join the leaderboard!',
+        noData: 'No ranking data available yet.'
+    },
     tax: {
         title: 'Tax Monitor',
         annualIncome: 'YTD Income',
