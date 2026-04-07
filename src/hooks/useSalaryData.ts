@@ -48,50 +48,19 @@ export const useSalaryData = () => {
         setIsLoaded(false); // ユーザーが変わるたびにロード中状態に戻す
 
         const loadInitialData = async () => {
-            let loadedEntries = {};
-            let loadedConfig = null;
-
-            // 1. まずローカルストレージから即座に読み込む
-            try {
-                const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
-                const storedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
-
-                if (storedEntries) {
-                    loadedEntries = JSON.parse(storedEntries);
-                    setEntries(loadedEntries);
-                }
-                if (storedConfig) {
-                    loadedConfig = JSON.parse(storedConfig);
-                    setSettings({
-                        ...DEFAULT_SETTINGS,
-                        ...loadedConfig,
-                        campusTransportRates: {
-                            ...DEFAULT_SETTINGS.campusTransportRates,
-                            ...(loadedConfig.campusTransportRates || {})
-                        },
-                        profile: {
-                            ...DEFAULT_SETTINGS.profile!,
-                            ...(loadedConfig.profile || {})
-                        }
-                    });
-                }
-            } catch (e) {
-                console.error("Failed to load local data", e);
-            }
-
-            // 2. ユーザーがログインしている場合はFirestoreからデータを取得
             if (user) {
+                // ログインしている場合: クラウドのデータのみを信頼する
                 try {
                     const userRef = doc(db, 'users', user.uid);
                     const docSnap = await getDoc(userRef);
 
                     if (docSnap.exists()) {
                         const cloudData = docSnap.data();
-                        const finalEntries = cloudData.entries || {};
-                        setEntries(finalEntries);
+                        setEntries(cloudData.entries || {});
+                        localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(cloudData.entries || {}));
 
                         if (cloudData.config) {
-                            setSettings({
+                            const mergedConfig = {
                                 ...DEFAULT_SETTINGS,
                                 ...cloudData.config,
                                 campusTransportRates: {
@@ -102,11 +71,61 @@ export const useSalaryData = () => {
                                     ...DEFAULT_SETTINGS.profile!,
                                     ...(cloudData.config.profile || {})
                                 }
+                            };
+                            setSettings(mergedConfig);
+                            localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(mergedConfig));
+                        }
+                    } else {
+                        // クラウドにデータがない場合（新規登録直後）: ローカルから読む
+                        const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
+                        const storedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
+                        if (storedEntries) setEntries(JSON.parse(storedEntries));
+                        if (storedConfig) {
+                            const loadedConfig = JSON.parse(storedConfig);
+                            setSettings({
+                                ...DEFAULT_SETTINGS,
+                                ...loadedConfig,
+                                campusTransportRates: {
+                                    ...DEFAULT_SETTINGS.campusTransportRates,
+                                    ...(loadedConfig.campusTransportRates || {})
+                                },
+                                profile: {
+                                    ...DEFAULT_SETTINGS.profile!,
+                                    ...(loadedConfig.profile || {})
+                                }
                             });
                         }
                     }
                 } catch (error) {
-                    console.error("Initial sync error:", error);
+                    console.error("Cloud data load error:", error);
+                    // フォールバック: クラウド読み込みに失敗した場合はローカルから読む
+                    const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
+                    if (storedEntries) setEntries(JSON.parse(storedEntries));
+                }
+            } else {
+                // ログインしていない場合: ローカルストレージから読む
+                try {
+                    const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
+                    const storedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
+
+                    if (storedEntries) setEntries(JSON.parse(storedEntries));
+                    if (storedConfig) {
+                        const loadedConfig = JSON.parse(storedConfig);
+                        setSettings({
+                            ...DEFAULT_SETTINGS,
+                            ...loadedConfig,
+                            campusTransportRates: {
+                                ...DEFAULT_SETTINGS.campusTransportRates,
+                                ...(loadedConfig.campusTransportRates || {})
+                            },
+                            profile: {
+                                ...DEFAULT_SETTINGS.profile!,
+                                ...(loadedConfig.profile || {})
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error("Failed to load local data", e);
                 }
             }
 
