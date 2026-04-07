@@ -219,12 +219,13 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
                                             height: '40px',
                                             borderRadius: '50%',
                                             background: user.themeColor
-                                                ? `linear-gradient(135deg, ${user.themeColor}, #cbd5e1)`
-                                                : '#e2e8f0',
+                                                ? `linear-gradient(135deg, ${user.themeColor}, #ffffff)`
+                                                : '#ffffff',
                                             flexShrink: 0,
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
+                                            border: '1px solid #f1f5f9',
                                             boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
                                         }}>
                                             {(() => {
