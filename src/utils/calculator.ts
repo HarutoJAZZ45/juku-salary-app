@@ -121,37 +121,22 @@ export const calculateDailyTotal = (entry: WorkEntry, settings: UserSettings): n
 
 /**
  * 給与期間の取得
- * 締め日に基づいて、表示すべき期間（開始日・終了日）を計算する
+ * 月末に振り込まれる給与に対応する期間（開始日・終了日）を計算する
+ * （例：4月なら、当月の給与として3/16〜4/15を表示する）
  */
 export const getPeriodRange = (currentDate: Date, closingDay: number = 15) => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth(); // 0-indexed
-    const day = currentDate.getDate();
 
-    let startMonth, startYear, endMonth, endYear;
-
-    // 締め日以前なら前月度、締め日以降なら当月度として扱う
-    if (day <= closingDay) {
-        startMonth = month - 1;
-        startYear = year;
-        if (startMonth < 0) {
-            startMonth = 11;
-            startYear = year - 1;
-        }
-
-        endMonth = month;
-        endYear = year;
-    } else {
-        startMonth = month;
-        startYear = year;
-
-        endMonth = month + 1;
-        endYear = year;
-        if (endMonth > 11) {
-            endMonth = 0;
-            endYear = year + 1;
-        }
+    let startMonth = month - 1;
+    let startYear = year;
+    if (startMonth < 0) {
+        startMonth = 11;
+        startYear = year - 1;
     }
+
+    const endMonth = month;
+    const endYear = year;
 
     const startDate = new Date(startYear, startMonth, closingDay + 1);
     const endDate = new Date(endYear, endMonth, closingDay);
