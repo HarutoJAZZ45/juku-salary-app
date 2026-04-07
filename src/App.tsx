@@ -264,9 +264,6 @@ function App() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <img src="./logo.svg" alt="Logo" style={{ width: '40px', height: '40px', borderRadius: '8px', boxShadow: '0 4px 10px rgba(4, 96, 167, 0.2)' }} />
-          <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.5px' }}>
-            Juku Salary
-          </h1>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
@@ -346,7 +343,7 @@ function App() {
           <strong>{t.app.helpSave}</strong><br />
           {t.app.helpSaveBody}
           <div style={{ marginTop: '16px', padding: '8px', background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '8px', color: '#be123c', fontWeight: 'bold' }}>
-            ※確実にデータを反映させたい場合は、ログイン画面（☁️アイコン）の中にある「データ同期」ボタンを押してください。
+            ※確実にデータを同期させたい場合は、ログインメニュー（☁️アイコン）から「クラウドへ保存」「クラウドから復元」を用いて手動で同期してください。
           </div>
         </div>
       )}
