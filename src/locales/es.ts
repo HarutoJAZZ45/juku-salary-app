@@ -75,8 +75,8 @@ export const es: Translation = {
         helpStep2: 'Ingrese clases, horas de apoyo y subsidios.',
         helpStep3: 'Vea su salario estimado para el mes actual.',
         helpStep4: 'Abra "Configuración" desde el menú superior derecho (☰) para ajustar tarifas y costos de transporte.',
-        helpSaveBody: 'Los datos se guardan automáticamente en su dispositivo. Es seguro ya que no se envía a ningún servidor, pero tenga en cuenta que se perderá si borra la caché del navegador.',
-        helpPWA: 'Los datos se guardan por navegador, por lo que recomendamos añadir esta aplicación a su pantalla de inicio.',
+        helpSaveBody: 'Los datos se guardan automáticamente en su dispositivo. Además, al iniciar sesión desde el "Icono de nube" en la parte superior derecha, sus datos se sincronizarán en la nube de forma segura en tiempo real, lo que le permitirá compartir datos sin problemas en varios dispositivos.',
+
         batchMode: 'Modo de edición por lotes',
         selecting: 'Seleccionando',
         selectMult: 'Selección múltiple',

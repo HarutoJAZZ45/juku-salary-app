@@ -75,8 +75,8 @@ export const en: Translation = {
         helpStep2: 'Enter classes, support hours, and allowances.',
         helpStep3: 'View your estimated salary for the current month.',
         helpStep4: 'Open "Settings" from the top-right menu (☰) to adjust rates and transport costs.',
-        helpSaveBody: 'Data is auto-saved to your device (browser). It is safe as it is not sent to any server, but please note it will be lost if you clear browser cache.',
-        helpPWA: 'Data is saved per browser, so we recommend adding this app to your home screen.',
+        helpSaveBody: 'Data is auto-saved to your device. Furthermore, by logging in from the "Cloud Icon" at the top right, your data will be safely synced to the cloud in real-time, allowing you to seamlessly share data across multiple devices!',
+
         batchMode: 'Batch Edit Mode',
         selecting: 'Selecting',
         selectMult: 'Select Multiple',

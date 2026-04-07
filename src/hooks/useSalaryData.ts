@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { WorkEntry, UserSettings } from '../types';
 import { useAuth } from './useAuth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const STORAGE_KEY_ENTRIES = 'juku_salary_entries';
@@ -43,13 +43,15 @@ export const useSalaryData = () => {
     // Authフックでユーザー状態を取得
     const { user } = useAuth();
 
-    // ストレージおよびFirestoreからの読み込み
+    // ストレージおよびFirestoreからのリアルタイム読み込み
     useEffect(() => {
+        let unsubscribe: (() => void) | undefined;
+
         const loadInitialData = async () => {
             let loadedEntries = {};
             let loadedConfig = null;
 
-            // 1. ローカルストレージからの読み込み
+            // 1. まずローカルストレージから即座に読み込む
             try {
                 const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
                 const storedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
@@ -60,45 +62,71 @@ export const useSalaryData = () => {
                 if (storedConfig) {
                     loadedConfig = JSON.parse(storedConfig);
                 }
+
+                setEntries(loadedEntries);
+                if (loadedConfig) {
+                    setSettings({
+                        ...DEFAULT_SETTINGS,
+                        ...loadedConfig,
+                        campusTransportRates: {
+                            ...DEFAULT_SETTINGS.campusTransportRates,
+                            ...(loadedConfig.campusTransportRates || {})
+                        },
+                        profile: {
+                            ...DEFAULT_SETTINGS.profile!,
+                            ...(loadedConfig.profile || {})
+                        }
+                    });
+                }
             } catch (e) {
                 console.error("Failed to load local data", e);
             }
 
-            // 2. ユーザーがログインしている場合はFirestoreから上書き取得
+            setIsLoaded(true);
+
+            // 2. ユーザーがログインしている場合はFirestoreのリアルタイム監視（onSnapshot）を開始
             if (user) {
-                try {
-                    const userRef = doc(db, 'users', user.uid);
-                    const docSnap = await getDoc(userRef);
+                const userRef = doc(db, 'users', user.uid);
+                unsubscribe = onSnapshot(userRef, (docSnap) => {
+                    // 当該端末から書き込んだイベント（pending state）の場合は除外してループを防ぐ
+                    if (docSnap.metadata.hasPendingWrites) return;
+
                     if (docSnap.exists()) {
                         const cloudData = docSnap.data();
-                        if (cloudData.entries) loadedEntries = cloudData.entries;
-                        if (cloudData.config) loadedConfig = cloudData.config;
-                    }
-                } catch (error) {
-                    console.error("Error loading cloud data", error);
-                }
-            }
 
-            // 状態へ反映
-            setEntries(loadedEntries);
-            if (loadedConfig) {
-                setSettings({
-                    ...DEFAULT_SETTINGS,
-                    ...loadedConfig,
-                    campusTransportRates: {
-                        ...DEFAULT_SETTINGS.campusTransportRates,
-                        ...(loadedConfig.campusTransportRates || {})
-                    },
-                    profile: {
-                        ...DEFAULT_SETTINGS.profile!,
-                        ...(loadedConfig.profile || {})
+                        if (cloudData.entries) {
+                            setEntries(cloudData.entries);
+                        }
+
+                        if (cloudData.config) {
+                            setSettings({
+                                ...DEFAULT_SETTINGS,
+                                ...cloudData.config,
+                                campusTransportRates: {
+                                    ...DEFAULT_SETTINGS.campusTransportRates,
+                                    ...(cloudData.config.campusTransportRates || {})
+                                },
+                                profile: {
+                                    ...DEFAULT_SETTINGS.profile!,
+                                    ...(cloudData.config.profile || {})
+                                }
+                            });
+                        }
                     }
+                }, (error) => {
+                    console.error("Realtime sync error:", error);
                 });
             }
-            setIsLoaded(true);
         };
 
         loadInitialData();
+
+        // クリーンアップ関数でリッスンを解除
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        };
     }, [user]);
 
     // 勤務データの保存（entries変更時に実行）

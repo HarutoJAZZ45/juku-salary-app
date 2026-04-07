@@ -117,12 +117,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                             <div style={{ fontSize: '12px', color: '#64748b' }}>{user.email || "Anonymous Account"}</div>
                         </div>
 
-                        <p style={{ fontSize: '13px', color: '#64748b', textAlign: 'center', background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
-                            {t.auth.loginToSync}
-                        </p>
-
-                        <button onClick={handleSync} disabled={isSyncing} className="primary-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                            <Cloud size={18} /> {isSyncing ? t.auth.syncingData : t.auth.syncData}
+                        <button onClick={handleSync} disabled={isSyncing} className="primary-btn" style={{
+                            width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px',
+                            padding: '16px', fontSize: '16px', fontWeight: 'bold', borderRadius: '16px',
+                            background: 'linear-gradient(135deg, #0ea5e9, #2563eb)', color: 'white',
+                            boxShadow: '0 8px 15px rgba(37, 99, 235, 0.3)', border: 'none', cursor: isSyncing ? 'wait' : 'pointer',
+                            marginTop: '8px'
+                        }}>
+                            <Cloud size={22} /> {isSyncing ? t.auth.syncingData : t.auth.syncData}
                         </button>
 
                         <button onClick={handleLogout} style={{

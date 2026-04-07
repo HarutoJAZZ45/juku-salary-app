@@ -14,7 +14,7 @@ import { DataManagementModal } from './components/DataManagementModal';
 import { AccountModal } from './components/AccountModal';
 import { AuthModal } from './components/AuthModal';
 import { useAuth } from './hooks/useAuth';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, Smartphone, User, Cloud } from 'lucide-react';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
@@ -340,18 +340,6 @@ function App() {
           <br />
           <strong>{t.app.helpSave}</strong><br />
           {t.app.helpSaveBody}
-          <div style={{
-            color: 'var(--primary)',
-            marginTop: '8px',
-            fontSize: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontWeight: 500
-          }}>
-            <Smartphone size={14} />
-            <span>{t.app.helpPWA}</span>
-          </div>
         </div>
       )}
 

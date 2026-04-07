@@ -11,6 +11,46 @@ export interface NewsItem {
 
 export const NEWS_ITEMS: NewsItem[] = [
     {
+        id: '20260407-01',
+        date: '2026-04-07',
+        title: {
+            ja: 'ログイン機能とクラウド自動同期を追加しました！☁️',
+            en: 'Login & Cloud Auto-Sync Added! ☁️',
+            es: '¡Inicio de sesión y sincronización en la nube añadidos! ☁️'
+        },
+        content: {
+            ja: `待望の「ログイン機能」と「自動データ同期」を追加しました！
+ヘッダー右上の「雲アイコン（☁️）」から、Googleアカウントやメールアドレスでログインできます。
+
+**新機能のポイント**:
+* ☁️ **リアルタイム自動同期**: ログイン状態になると、端末間でデータが自動かつリアルタイムに同期されます。スマホで入力したシフトが手動更新なしでPCに反映されます！
+* 🔐 **安全なバックアップ**: クラウド上に安全に保存されるため、機種変更時や端末紛失時も安心です。
+* 👤 **ゲストログイン**: アカウント作成が面倒な場合は、とりあえずゲストとして試すことも可能です。
+
+これまで通りローカルにも保存されますが、ログインすることで複数デバイス間でシームレスに利用できるようになります。ぜひご活用ください！`,
+            en: `We have added the highly anticipated "Login & Cloud Auto-Sync" feature!
+You can log in with your Google account or email from the "Cloud Icon (☁️)" at the top right of the header.
+
+**What's New**:
+* ☁️ **Real-time Auto-Sync**: When logged in, your data syncs automatically across devices in real-time. Shifts entered on your phone will reflect on your PC without manual refreshing!
+* 🔐 **Secure Backup**: Rest assured that your data is securely stored in the cloud, even when changing devices.
+* 👤 **Guest Login**: Want to try it first? You can use the Guest Login option without creating an account.
+
+We hope this makes using the app across multiple devices seamless and safe!`,
+            es: `¡Hemos añadido la tan esperada función de "Inicio de sesión y Sincronización automática"!
+Puedes iniciar sesión con tu cuenta de Google o correo electrónico desde el "Icono de nube (☁️)" en la parte superior derecha.
+
+**Novedades**:
+* ☁️ **Sincronización en tiempo real**: Al iniciar sesión, tus datos se sincronizan automáticamente entre dispositivos en tiempo real. ¡Los turnos ingresados en tu teléfono se reflejarán en tu PC!
+* 🔐 **Copia de seguridad segura**: Ten la seguridad de que tus datos están almacenados de forma segura en la nube.
+* 👤 **Inicio de sesión de invitado**: ¿Quieres probarlo primero? Puedes usar la opción de Invitado sin crear una cuenta.
+
+¡Con esta sincronización, usar la aplicación en múltiples dispositivos será muy sencillo!`,
+        },
+        category: 'update',
+        important: true,
+    },
+    {
         id: '20260209-01',
         date: '2026-02-09',
         title: {

@@ -63,7 +63,7 @@ export interface Translation {
         helpStep2: string;
         helpStep3: string;
         helpStep4: string;
-        helpPWA: string;
+
         batchMode: string;
         selecting: string;
         selectMult: string;
