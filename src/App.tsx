@@ -262,11 +262,8 @@ function App() {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: '24px', padding: '0 8px', height: 'var(--header-height)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="./apple-touch-icon.png" alt="Logo" style={{ width: '36px', height: '36px', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-          <span style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '-0.5px', background: 'linear-gradient(135deg, #1e293b 0%, #475569 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            {t.header.title}
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <img src="./apple-touch-icon.png" alt="Logo" style={{ width: '44px', height: '44px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.12)' }} />
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
@@ -342,7 +339,10 @@ function App() {
           2. {t.app.helpStep2}<br />
           3. {t.app.helpStep3}<br />
           4. {t.app.helpStep4}<br />
-          5. {t.app.helpStep5}<br />
+          <div style={{ marginTop: '12px', padding: '12px', background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', border: '1px solid #bae6fd', borderRadius: '12px', color: '#0369a1', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ fontSize: '20px' }}>📱</div>
+            <div>{t.app.helpStep5}</div>
+          </div>
           <br />
           <strong>{t.app.helpSave}</strong><br />
           {t.app.helpSaveBody}
