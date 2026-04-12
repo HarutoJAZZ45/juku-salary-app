@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
-import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import type { WorkEntry, UserSettings } from '../types';
@@ -39,10 +39,26 @@ export const useAuth = () => {
 
     const signUpWithEmail = async (email: string, password: string) => {
         try {
-            return await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            if (userCredential.user) {
+                await sendEmailVerification(userCredential.user);
+            }
+            return userCredential;
         } catch (error) {
             console.error("Error signing up with email", error);
             throw error;
+        }
+    };
+
+    const resendVerification = async () => {
+        if (user) {
+            try {
+                await sendEmailVerification(user);
+                console.log("Verification email sent.");
+            } catch (error) {
+                console.error("Error resending verification email", error);
+                throw error;
+            }
         }
     };
 
@@ -99,6 +115,7 @@ export const useAuth = () => {
         signUpWithEmail,
         signOut,
         syncDataToCloud,
-        loadDataFromCloud
+        loadDataFromCloud,
+        resendVerification
     };
 };

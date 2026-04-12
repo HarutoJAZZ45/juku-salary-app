@@ -11,7 +11,7 @@ interface AuthModalProps {
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     const { t } = useTranslation();
-    const { user, signInWithGoogle, signUpWithEmail, loginWithEmail, signOut, syncDataToCloud, loadDataFromCloud } = useAuth();
+    const { user, signInWithGoogle, signUpWithEmail, loginWithEmail, signOut, syncDataToCloud, loadDataFromCloud, resendVerification } = useAuth();
     const [isSyncing, setIsSyncing] = useState(false);
 
     const [email, setEmail] = useState('');
@@ -47,6 +47,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             let result;
             if (isSignUp) {
                 result = await signUpWithEmail(email, password);
+                alert(t.auth.verificationSent);
                 // 新規登録時は無条件で現在のローカルデータをアップロード
                 await handleSync(result.user, true);
             } else {
@@ -165,9 +166,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                             )}
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontWeight: 600 }}>{user.displayName || "Guest"}</div>
-                            <div style={{ fontSize: '12px', color: '#64748b' }}>{user.email || "Anonymous Account"}</div>
+                            <div style={{ fontWeight: 600 }}>{user.displayName || "User"}</div>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>{user.email}</div>
                         </div>
+
+                        {!user.emailVerified && user.providerData.some(p => p.providerId === 'password') && (
+                            <div style={{
+                                width: '100%', padding: '12px', background: '#fff7ed', border: '1px solid #ffedd5',
+                                borderRadius: '12px', color: '#9a3412', fontSize: '13px', textAlign: 'center'
+                            }}>
+                                <div>{t.auth.notVerified}</div>
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            await resendVerification();
+                                            alert(t.auth.verificationResent);
+                                        } catch (e) {
+                                            alert("Failed to resend. Please try again later.");
+                                        }
+                                    }}
+                                    style={{
+                                        background: 'none', border: 'none', color: '#ea580c',
+                                        fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline', marginTop: '4px'
+                                    }}
+                                >
+                                    {t.auth.resendVerification}
+                                </button>
+                            </div>
+                        )}
 
                         <div style={{ display: 'flex', gap: '8px', width: '100%', marginTop: '8px' }}>
                             <button onClick={() => handleSync()} disabled={isSyncing} style={{

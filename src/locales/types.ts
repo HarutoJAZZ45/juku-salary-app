@@ -159,5 +159,9 @@ export interface Translation {
         register: string;
         switchToLogin: string;
         switchToRegister: string;
+        verificationSent: string;
+        notVerified: string;
+        resendVerification: string;
+        verificationResent: string;
     };
 }

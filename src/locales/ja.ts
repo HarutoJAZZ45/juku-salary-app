@@ -158,5 +158,9 @@ export const ja: Translation = {
         register: '新規登録',
         switchToLogin: 'すでにアカウントをお持ちの方 (ログイン)',
         switchToRegister: 'アカウントをお持ちでない方 (新規登録)',
+        verificationSent: '確認メールを送信しました。メールボックスを確認してください。',
+        notVerified: 'メールアドレスが未確認です。',
+        resendVerification: '確認メールを再送',
+        verificationResent: '確認メールを再送しました。',
     }
 };

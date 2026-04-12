@@ -158,5 +158,9 @@ export const en: Translation = {
         register: 'Register',
         switchToLogin: 'Already have an account? Login',
         switchToRegister: 'Don\'t have an account? Register',
+        verificationSent: 'Verification email sent. Please check your inbox.',
+        notVerified: 'Email address not verified.',
+        resendVerification: 'Resend verification email',
+        verificationResent: 'Verification email resent.',
     }
 };

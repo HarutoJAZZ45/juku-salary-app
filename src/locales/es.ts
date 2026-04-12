@@ -158,5 +158,9 @@ export const es: Translation = {
         register: 'Registrarse',
         switchToLogin: '¿Ya tienes cuenta? Iniciar',
         switchToRegister: '¿No tienes cuenta? Regístrate',
+        verificationSent: 'Correo de verificación enviado. Por favor, revisa tu bandeja de entrada.',
+        notVerified: 'Dirección de correo no verificada.',
+        resendVerification: 'Reenviar correo de verificación',
+        verificationResent: 'Correo de verificación reenviado.',
     }
 };
