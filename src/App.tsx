@@ -28,7 +28,7 @@ import { calculateLevelData, TITLES } from './utils/levelSystem';
 function App() {
   const { t } = useTranslation();
   // 給与データのカスタムフック（読み込み、更新、削除、設定）
-  const { entries, settings, updateEntry, deleteEntry, setSettings, isLoaded } = useSalaryData();
+  const { entries, settings, updateEntry, deleteEntry, setSettings, updateSettings, isLoaded } = useSalaryData();
 
   // 認証のカスタムフック
   const { user } = useAuth();
@@ -99,7 +99,7 @@ function App() {
         updates.activeTitle = undefined;
       }
 
-      setSettings({
+      updateSettings({
         ...settings,
         profile: {
           ...settings.profile,
@@ -451,7 +451,7 @@ function App() {
         isOpen={isSettingsOpen}
         settings={settings}
         onClose={() => setIsSettingsOpen(false)}
-        onSave={setSettings}
+        onSave={updateSettings}
       />
 
       <FeedbackModal
@@ -484,7 +484,7 @@ function App() {
         onClose={() => setIsAccountOpen(false)}
         entries={entries}
         settings={settings}
-        onUpdateSettings={setSettings}
+        onUpdateSettings={updateSettings}
       />
 
       <AuthModal

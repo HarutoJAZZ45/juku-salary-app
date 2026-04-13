@@ -209,6 +209,31 @@ export const useSalaryData = () => {
         });
     };
 
+    // 設定の即時保存をサポートする更新関数
+    const updateSettings = async (newSettings: UserSettings) => {
+        setSettings(newSettings);
+        
+        // 1. LocalStorageに即座に反映（オフライン・クラッシュ対策）
+        localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(newSettings));
+
+        // 2. ログイン中ならFirestoreへ即座に送信
+        if (user) {
+            try {
+                const userRef = doc(db, 'users', user.uid);
+                await setDoc(userRef, { config: newSettings }, { merge: true });
+                
+                // ランキングデータも即座に更新
+                const { updateRankingStats } = await import('../utils/ranking');
+                await updateRankingStats(user.uid, entries, newSettings);
+                
+                console.log("Settings synced to cloud immediately.");
+            } catch (error) {
+                console.error("Immediate cloud sync failed:", error);
+                // 失敗してもLocalStorageには保存されているので次回以降に同期される
+            }
+        }
+    };
+
     const getEntry = (date: string) => entries[date];
 
     // エントリの削除
@@ -226,6 +251,7 @@ export const useSalaryData = () => {
         deleteEntry,
         getEntry,
         setSettings,
+        updateSettings,
         isLoaded
     };
 };
