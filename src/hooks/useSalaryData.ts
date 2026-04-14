@@ -32,8 +32,9 @@ const DEFAULT_SETTINGS: UserSettings = {
 };
 
 /**
- * 給与データ管理用のカスタムフック
- * LocalStorageへの保存と読み込み、データの更新・削除機能を提供する
+ * 勤務データとユーザー設定のグローバル状態管理を行うコアフック（オフラインファースト対応）。
+ * LocalStorage（ローカル）とFirestore（クラウド）間でデータの双方向同期を担い、
+ * 認証状態に応じてデータのSource of Truth（真のデータ元）を切り替えます。
  */
 export const useSalaryData = () => {
     const [entries, setEntries] = useState<Record<string, WorkEntry>>({});
@@ -46,9 +47,11 @@ export const useSalaryData = () => {
     // Authフックでユーザー状態を取得
     const { user } = useAuth();
 
-    // ストレージおよびFirestoreからの初回読み込み
+    // --- 初期データのロード ---
     useEffect(() => {
-        // ★ 即座にガードをON（保存エフェクトが古いデータを書き込むのを防ぐ）
+        // ★ 即座に同期ガードをONにする
+        // なぜ？: データのロードが完了する前に、Reactの初期ステート（空データ）が
+        // 下記の保存用useEffectによってクラウドやLocalStorageに書き込まれてしまう「データ消失」を防ぐため
         isLoadingRef.current = true;
         setIsLoaded(false);
 
@@ -136,7 +139,7 @@ export const useSalaryData = () => {
                 }
             }
 
-            // ★ 読み込み完了後にガードを解除
+            // ★ データの読み込み完了後、同期ガードを解除して後続の保存プロセスを許可
             isLoadingRef.current = false;
             setIsLoaded(true);
         };

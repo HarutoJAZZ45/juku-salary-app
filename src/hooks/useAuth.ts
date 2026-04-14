@@ -5,12 +5,16 @@ import { auth, db } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import type { WorkEntry, UserSettings } from '../types';
 
+/**
+ * Firebase Authenticationを用いたユーザー認証・状態管理を行うカスタムフック。
+ * ログイン/サインアップ処理に加え、認証状態の監視、初期のクラウドデータ同期機能を提供します。
+ */
 export const useAuth = () => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // 認証状態の監視
+        // Firebaseの認証状態の変化を監視（自動ログインやログアウトを検知）
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
             setLoading(false);
@@ -72,7 +76,10 @@ export const useAuth = () => {
         }
     };
 
-    // ユーザーデータのFirestoreへの同期（手動または初回ログイン時など）
+    /**
+     * ローカルのデータをFirestoreへバックアップ（同期）する。
+     * 未ログイン状態で入力したデータを、新規ログイン直後にクラウドへ移行させるためのヘルパー関数です。
+     */
     const syncDataToCloud = async (entries: Record<string, WorkEntry>, config: UserSettings, targetUser?: User | null) => {
         const currentUser = targetUser || user;
         if (!currentUser) return;

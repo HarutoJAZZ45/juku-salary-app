@@ -44,6 +44,14 @@ export const getTitleForLevel = (level: number): string => {
     return match ? match.text : "新人";
 };
 
+/**
+ * レベルやXP（経験値）に関する統計データ全体を再計算します。
+ * 全ての勤務エントリを走査して、累計XP・レベル・次のレベルまでの進捗率などを導き出します。
+ * 
+ * @param {Record<string, WorkEntry>} entries - ユーザの全勤務データ
+ * @param {UserSettings} settings - 給与計算に必要なユーザ設定
+ * @returns {LevelData} 計算後のレベル・プログレス・給与総額などのデータセット
+ */
 export const calculateLevelData = (entries: Record<string, WorkEntry>, settings: UserSettings): LevelData => {
     let totalEarnings = 0;
     let totalClasses = 0;
@@ -65,7 +73,8 @@ export const calculateLevelData = (entries: Record<string, WorkEntry>, settings:
         }
     });
 
-    // XP計算ロジック
+    // --- XP（経験値）獲得計算ロジック ---
+    // 3つの要素（給与額、コマ数、出勤日数）を合算して最終的な累計XPを決定します
     // 1. 給与: 100円につき 1 XP
     // 2. コマ数: 1コマにつき 50 XP
     // 3. 勤務日数: 1日につき 50 XP

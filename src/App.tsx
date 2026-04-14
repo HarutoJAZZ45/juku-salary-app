@@ -23,8 +23,15 @@ import { useTranslation } from './contexts/LanguageContext';
 import { getEventBadges } from './utils/badges';
 import { calculateLevelData, TITLES } from './utils/levelSystem';
 
-// メインアプリケーションコンポーネント
-// 全体のレイアウトと状態管理を行う
+/**
+ * メインアプリケーションコンポーネント (SPAのルートレイアウト)
+ * 
+ * 役割:
+ * 1. カスタムフック (`useSalaryData`, `useAuth`, `useTranslation`) によるグローバル状態の中央管理
+ * 2. 画面レイアウト（Header枠、SummaryCardへのPropsバケツリレー、CalendarGrid配置など）のオーケストレーション
+ * 3. 多数のフルスクリーン・モーダルUI（設定、バッジ、プロフィール等）の開閉フラグ(state)の中央管理
+ * 4. 副作用（`useEffect`）を用いた称号の自動アンロックやニュースの未読チェック
+ */
 function App() {
   const { t } = useTranslation();
   // 給与データのカスタムフック（読み込み、更新、削除、設定）
@@ -92,11 +99,12 @@ function App() {
     });
 
     if (changed) {
-      // もし現在セットしている称号が剥奪された場合（レベル称号は剥奪されないが汎用的に）
+      // プロフィールの状態を更新
+      // （※バッジシステムやレベルは表示のみの導出データではなく、アバターや称号の設定値としてLocalStorage/Firestoreに永続化される）
       const activeTitle = settings.profile.activeTitle;
       const updates: Partial<typeof settings.profile> = { unlockedTitles: newUnlockedTitles };
       if (activeTitle && !newUnlockedTitles.includes(activeTitle)) {
-        updates.activeTitle = undefined;
+        updates.activeTitle = undefined; // 所持していない称号がセットされていたらリセット
       }
 
       updateSettings({

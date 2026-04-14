@@ -14,8 +14,15 @@ export const getFiscalYear = (dateStr: string): number => {
 };
 
 /**
- * 給与計算のメインロジック
- * 勤務データと設定情報を基に、その日の給与合計を算出する
+ * 給与計算のコアロジック (単一の勤務日の給与を計算)
+ * 
+ * 制約事項:
+ * - この関数は純粋関数（Pure Function）として実装されており、外部の状態を変更しません。
+ * - ローカルストレージやFirebase等の副作用から完全に切り離してテスト可能に設計されています。
+ * 
+ * @param {WorkEntry} entry - その日の勤務データ (コマ、手当、交通費の有無など)
+ * @param {UserSettings} settings - ユーザー設定 (時給、交通費デフォルト値、役職設定など)
+ * @returns {number} 計算されたその日の給与総額（小数点以下切り捨て）
  */
 export const calculateDailyTotal = (entry: WorkEntry, settings: UserSettings): number => {
     let total = 0;
@@ -50,6 +57,10 @@ export const calculateDailyTotal = (entry: WorkEntry, settings: UserSettings): n
 
     for (const block of blocks) {
         let unitPrice = 0;
+        
+        // --- 特殊役職の時給計算 ---
+        // 役職（リーダー等）は個別設定されたコマに対してのみ適用され、通常時給を上書きします
+        // （優先度: Leader > SubLeader > Normal）
         // 役職に応じた単価設定（リーダー > サブリーダー > 通常）
         if (leaderBlocks.includes(block)) {
             unitPrice = 2000 * 1.5; // リーダー給（固定）
@@ -81,7 +92,8 @@ export const calculateDailyTotal = (entry: WorkEntry, settings: UserSettings): n
         const currentIndex = BLOCK_ORDER.indexOf(current);
         const nextIndex = BLOCK_ORDER.indexOf(next);
 
-        // 連続している場合のみ休憩時間を計算
+        // --- コマ間（授業間）休憩時間の判定 ---
+        // ブロック順序が連続（例: A -> B）している場合のみ、コマ間の休憩時間が発生したとみなす
         if (nextIndex === currentIndex + 1) {
             // BコマとCコマの間は昼休憩のため給与対象外
             if (current === 'B' && next === 'C') {

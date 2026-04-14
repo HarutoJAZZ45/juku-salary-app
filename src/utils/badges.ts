@@ -14,7 +14,15 @@ export interface Badge {
     icon: string;
 }
 
-// 期間内の連勤記録からバッジを判定して全て返す
+/**
+ * 期間内の勤務データから「連勤バッジ（Streak Badges）」を判定してリストにして返します。
+ * 連続して勤務した日付を判定し、3日・4日・5日以上の連続勤務に対して異なるTierのバッジを付与します。
+ * 
+ * @param {WorkEntry[]} entries - 特定の給与計算期間内に絞り込まれた勤務データ配列
+ * @param {Date} periodStart - 期間の開始日
+ * @param {Date} periodEnd - 期間の終了日
+ * @returns {Badge[]} 条件を満たしたバッジの配列
+ */
 export const getStreakBadges = (entries: WorkEntry[], periodStart: Date, periodEnd: Date): Badge[] => {
     // 期間内のエントリを日付順にソート
     const sortedDates = entries
@@ -52,7 +60,14 @@ export const getStreakBadges = (entries: WorkEntry[], periodStart: Date, periodE
     return foundBadges;
 };
 
-// 給与総額からバッジを判定して返す
+/**
+ * 対象の給与計算期間における「給与総額バッジ（Earnings Badges）」を判定します。
+ * 稼いだ額（7万〜16万円以上）に応じて異なるTierのバッジを返します。
+ * ※1期間につき最大1つの最も高いバッジのみが選ばれます。
+ * 
+ * @param {number} totalEarnings - 対象期間の給与総額
+ * @returns {Badge | null} 条件を満たした場合のバッジ情報、満たさない場合はnull
+ */
 export const getEarningsBadge = (totalEarnings: number): Badge | null => {
     if (totalEarnings >= 160000) {
         return { id: 'earn-platinum', type: 'earnings', tier: 'platinum', labelKey: 'badges.earnPlatinum', descriptionKey: 'badges.earnPlatinumDesc', icon: 'trophy' };
@@ -91,7 +106,14 @@ export const getEventBadges = (entries: Record<string, WorkEntry>): Badge[] => {
     return foundBadges;
 };
 
-// 全期間の獲得バッジ数を計算する
+/**
+ * 全期間のデータを走査し、毎月の締め日ごとに区切って「これまで獲得した全バッジの数」を集計します。
+ * Profile画面などで、獲得バッジの総数を種類別（連勤、給与、イベント）に表示するために使用されます。
+ * 
+ * @param {Record<string, WorkEntry>} entries - ユーザの全勤務データ
+ * @param {UserSettings} settings - 給与計算・締め日設定
+ * @returns {{ streak: number, earnings: number, event: number }} バッジ種類別の獲得総数
+ */
 export const calculateTotalBadges = (entries: Record<string, WorkEntry>, settings: UserSettings): { streak: number, earnings: number, event: number } => {
     let streakCount = 0;
     let earningsCount = 0;
