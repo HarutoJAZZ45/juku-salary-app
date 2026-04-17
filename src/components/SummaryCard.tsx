@@ -79,7 +79,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
             color: 'white',
             boxShadow: '0 10px 25px -5px rgba(4, 96, 167, 0.4)'
         }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
                     <h2 style={{ fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.9 }}>
                         {t.summary.paymentEstimate} <span style={{ fontSize: '10px', opacity: 0.8 }}>({period.start.getMonth() + 1}/{period.start.getDate()} - {period.end.getMonth() + 1}/{period.end.getDate()})</span>
@@ -89,10 +89,11 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
                     </div>
                 </div>
                 {badges.length > 0 && (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '12px' }}>
-                    <BadgeDisplay badges={badges} onClick={onBadgeClick} />
-                </div>
-            )}
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '12px' }}>
+                        <BadgeDisplay badges={badges} onClick={onBadgeClick} />
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
