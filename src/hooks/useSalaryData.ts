@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { WorkEntry, UserSettings } from '../types';
 import { useAuth } from './useAuth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -157,6 +157,10 @@ export const useSalaryData = () => {
         if (user) {
             const saveToFirestore = async () => {
                 const userRef = doc(db, 'users', user.uid);
+                // 上書き（mergeなし）では config 等他フィールドが消えるリスクがあるため、
+                // entries フィールドのみ merge する。
+                // ただし Firestore の merge:true はネスト Map を再帰マージしないガードが必要ない場合は setDoc 完全上書きを使う。
+                // エントリ把加時はここを通る。削除時は deleteEntry が直接先に処理する。
                 const cleanEntries = JSON.parse(JSON.stringify({ entries }));
                 await setDoc(userRef, cleanEntries, { merge: true }).catch(e => console.error(e));
                 // ランキングデータの自動同期
@@ -239,28 +243,43 @@ export const useSalaryData = () => {
 
     const getEntry = (date: string) => entries[date];
 
-    // エントリの削除（クラウド即時同期付き）
-    const deleteEntry = useCallback((date: string) => {
-        setEntries(prev => {
-            const { [date]: _, ...rest } = prev;
+    // エントリの削除
+    // updateSettings と同じパターン：現在の entries から削除対象を除いた値を計算し、
+    // LocalStorage と Firestore を明示的・即時に更新する
+    const deleteEntry = async (date: string) => {
+        // 現在の entries ステートから削除対象を除く
+        const { [date]: _, ...rest } = entries;
 
-            // 削除後の新しいentriesでFirestoreを即時更新
-            if (user) {
+        // 1. Reactステートを更新
+        setEntries(rest);
+
+        // 2. LocalStorageを即時更新（オフライン・クラッシュ対策）
+        localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(rest));
+
+        // 3. ログイン中ならFirestoreへ即時書き込み
+        if (user) {
+            try {
                 const userRef = doc(db, 'users', user.uid);
-                const cleanEntries = JSON.parse(JSON.stringify({ entries: rest }));
-                setDoc(userRef, cleanEntries, { merge: true })
-                    .then(() => {
-                        import('../utils/ranking').then(({ updateRankingStats }) => {
-                            // settingsはrefで参照（クロージャの古い値を避けるため）
-                            updateRankingStats(user.uid, rest, settings);
-                        });
-                    })
-                    .catch(e => console.error('[deleteEntry] Cloud sync error:', e));
-            }
+                // 「削除」を正確に反映するため、entries フィールド全体を上書きするのが鍵。
+                // merge: true も config フィールドを保持するため廃止しない。
+                // ただし、Firestore の merge:true はネスト Map を再帰マージするため、
+                // entries フィールドを山母コレクションの内容ごと「削除したキーが残る」問題が起きる。
+                // 解決策： config も一緒に完全上書きする。
+                await setDoc(userRef, {
+                    entries: rest,
+                    config: settings
+                });
 
-            return rest;
-        });
-    }, [user, settings]);
+                // ランキングデータも同期
+                const { updateRankingStats } = await import('../utils/ranking');
+                await updateRankingStats(user.uid, rest, settings);
+
+                console.log('[deleteEntry] Cloud sync complete.');
+            } catch (e) {
+                console.error('[deleteEntry] Cloud sync error:', e);
+            }
+        }
+    };
 
     return {
         entries,
