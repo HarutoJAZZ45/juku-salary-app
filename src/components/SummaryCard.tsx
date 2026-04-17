@@ -89,22 +89,10 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
                     </div>
                 </div>
                 {badges.length > 0 && (
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '12px' }}>
-                        <BadgeDisplay badges={badges} onClick={onBadgeClick} />
-                    </div>
-                )}
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '12px', backdropFilter: 'blur(4px)' }}>
-                    <div style={{ fontSize: '11px', opacity: 0.9 }}>{t.summary.teachingPay}</div>
-                    <div style={{ fontWeight: 600 }}>{stats.komaCount}</div>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '12px' }}>
+                    <BadgeDisplay badges={badges} onClick={onBadgeClick} />
                 </div>
-                <div style={{ background: 'rgba(255,255,255,0.15)', padding: '12px', borderRadius: '12px', backdropFilter: 'blur(4px)' }}>
-                    <div style={{ fontSize: '11px', opacity: 0.9 }}>{t.summary.supportPay}</div>
-                    <div style={{ fontWeight: 600 }}>{stats.supportHours.toFixed(1)}</div>
-                </div>
-            </div>
+            )}
         </div>
     );
 };

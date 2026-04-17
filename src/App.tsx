@@ -376,11 +376,7 @@ function App() {
         onBadgeClick={() => setIsBadgeHelpOpen(true)}
       />
 
-      <div style={{ padding: '0 8px' }}>
-        <TaxMonitor entries={entries} settings={settings} />
-      </div>
 
-      {/* 月移動ナビゲーションと一括選択切り替えボタン */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', padding: '0 8px' }}>
         <button onClick={() => handleMonthNav('prev')} style={{ background: 'none', border: 'none', padding: '8px', cursor: 'pointer' }}>
           <ChevronLeft size={24} color="#64748b" />
@@ -438,6 +434,10 @@ function App() {
         />
       </div>
 
+      {/* 扶養管理ゲージ（カレンダーの下） */}
+      <div style={{ padding: '16px 8px 0' }}>
+        <TaxMonitor entries={entries} settings={settings} />
+      </div>
       {/* 一括編集時の下部フローティングアクションバー */}
       {isSelectionMode && (
         <div style={{
