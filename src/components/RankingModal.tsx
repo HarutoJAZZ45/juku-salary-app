@@ -36,22 +36,24 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
     const [isLoading, setIsLoading] = useState(false);
 
     const recentMonths = React.useMemo(() => {
-        const keys = [];
+        // 当月を先頭に、前月・翌月の計3ヶ月を返す
+        // 締め日に関係なく「今月が何月か」を基準にする
         const now = new Date();
-        let targetMonth = now.getMonth() + 1;
-        let targetYear = now.getFullYear();
-        if (now.getDate() > settings.closingDay) {
-            targetMonth++;
-            if (targetMonth > 12) { targetMonth = 1; targetYear++; }
-        }
-        for (let i = 0; i < 3; i++) {
-            let m = targetMonth - i;
-            let y = targetYear;
+        const currentMonth = now.getMonth() + 1; // 1〜12
+        const currentYear = now.getFullYear();
+
+        // offsets: [0]=当月, [1]=翌月, [2]=前月 の順で格納し
+        // ドロップダウンは当月→前月→翌月の順で表示したいので
+        // offsets: [0]=当月, [1]=前月, [2]=翌月
+        const offsets = [0, -1, 1];
+        return offsets.map(offset => {
+            let m = currentMonth + offset;
+            let y = currentYear;
             if (m <= 0) { m += 12; y--; }
-            keys.push(`${y}-${String(m).padStart(2, '0')}`);
-        }
-        return keys;
-    }, [settings.closingDay]);
+            else if (m > 12) { m -= 12; y++; }
+            return `${y}-${String(m).padStart(2, '0')}`;
+        });
+    }, []);
 
     const recentYears = React.useMemo(() => {
         const now = new Date();
