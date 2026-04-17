@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { WorkEntry, UserSettings } from '../types';
 import { useAuth } from './useAuth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -239,13 +239,28 @@ export const useSalaryData = () => {
 
     const getEntry = (date: string) => entries[date];
 
-    // エントリの削除
-    const deleteEntry = (date: string) => {
+    // エントリの削除（クラウド即時同期付き）
+    const deleteEntry = useCallback((date: string) => {
         setEntries(prev => {
             const { [date]: _, ...rest } = prev;
+
+            // 削除後の新しいentriesでFirestoreを即時更新
+            if (user) {
+                const userRef = doc(db, 'users', user.uid);
+                const cleanEntries = JSON.parse(JSON.stringify({ entries: rest }));
+                setDoc(userRef, cleanEntries, { merge: true })
+                    .then(() => {
+                        import('../utils/ranking').then(({ updateRankingStats }) => {
+                            // settingsはrefで参照（クロージャの古い値を避けるため）
+                            updateRankingStats(user.uid, rest, settings);
+                        });
+                    })
+                    .catch(e => console.error('[deleteEntry] Cloud sync error:', e));
+            }
+
             return rest;
         });
-    };
+    }, [user, settings]);
 
     return {
         entries,

@@ -15,7 +15,7 @@ import { AccountModal } from './components/AccountModal';
 import { AuthModal } from './components/AuthModal';
 import { RankingModal } from './components/RankingModal';
 import { useAuth } from './hooks/useAuth';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy } from 'lucide-react';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy, CalendarDays } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
@@ -188,6 +188,14 @@ function App() {
   // 月の移動処理
   const handleMonthNav = (dir: 'prev' | 'next') => {
     setCurrentViewDate(d => dir === 'prev' ? subMonths(d, 1) : addMonths(d, 1));
+  };
+
+  // 今月かどうかを判定（「今日に戻る」ボタンの表示制御）
+  const isCurrentMonth = format(currentViewDate, 'yyyy-MM') === format(new Date(), 'yyyy-MM');
+
+  // 今日に戻る処理
+  const handleGoToToday = () => {
+    setCurrentViewDate(new Date());
   };
 
   return (
@@ -381,6 +389,25 @@ function App() {
           <span style={{ fontSize: '16px', fontWeight: 700, color: '#334155' }}>
             {format(currentViewDate, t.calendar.formatMonth)}
           </span>
+          {/* 今日に戻るボタン（今月以外を表示中のみ表示） */}
+          {!isCurrentMonth && (
+            <button
+              onClick={handleGoToToday}
+              title="今日に戻る"
+              style={{
+                padding: '4px 10px', fontSize: '12px', borderRadius: '12px',
+                border: '1px solid #bfdbfe',
+                background: '#eff6ff',
+                color: '#3b82f6',
+                fontWeight: 600, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '4px',
+                transition: 'all 0.15s'
+              }}
+            >
+              <CalendarDays size={13} />
+              今日
+            </button>
+          )}
           <button
             onClick={toggleSelectionMode}
             style={{
