@@ -285,10 +285,9 @@ function App() {
         </div>
       )}
       <header style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        marginBottom: '24px', padding: '0 8px', height: 'var(--header-height)'
+        display: 'flex', justifyContent: 'flex-end', alignItems: 'center',
+        marginBottom: '12px', padding: '0 8px', height: 'auto', minHeight: '44px'
       }}>
-        <div />
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
             onClick={() => {

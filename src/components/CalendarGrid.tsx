@@ -92,7 +92,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entrie
 
                     let numColor = 'inherit';
                     if (isTodayDate) {
-                        numColor = 'white';
+                        numColor = 'var(--primary)';
                     } else if (isRedDay) {
                         numColor = isCurrentMonth ? '#ef4444' : 'rgba(239, 68, 68, 0.4)';
                     } else if (isBlueDay) {
@@ -127,17 +127,17 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({ currentMonth, entrie
                             }}
                             className="calendar-cell"
                         >
-                            {/* 日付数字 - 今日は丸バッジで強調 */}
+                            {/* 日付数字 - 今日は控えめなバッジで強調 */}
                             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2px' }}>
                                 <span style={{
                                     width: '24px', height: '24px',
                                     borderRadius: '50%',
-                                    background: isTodayDate ? 'var(--primary)' : 'transparent',
+                                    background: isTodayDate ? 'rgba(99,102,241,0.15)' : 'transparent',
                                     color: numColor,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     fontSize: '12px',
                                     fontWeight: isTodayDate ? 700 : 400,
-                                    boxShadow: isTodayDate ? '0 2px 6px rgba(99,102,241,0.4)' : 'none',
+                                    boxShadow: 'none',
                                     flexShrink: 0,
                                 }}>
                                     {format(day, dateFormat)}
