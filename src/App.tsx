@@ -254,6 +254,16 @@ function App() {
               {t.settings.title}
             </button>
 
+            {/* 統計グラフ - ハンバーガーメニュー内 */}
+            <button
+              onClick={() => { setIsAnalyticsOpen(true); setIsMenuOpen(false); }}
+              className="menu-item"
+              style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
+            >
+              <TrendingUp size={18} />
+              統計・グラフ
+            </button>
+
             <button
               onClick={() => { setIsDataManagementOpen(true); setIsMenuOpen(false); }}
               className="menu-item"
@@ -278,9 +288,7 @@ function App() {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: '24px', padding: '0 8px', height: 'var(--header-height)'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <img src="./apple-touch-icon.png" alt="Logo" style={{ width: '44px', height: '44px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.12)' }} />
-        </div>
+        <div />
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
             onClick={() => {
@@ -296,14 +304,55 @@ function App() {
           <button onClick={() => setIsRankingOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
             <Trophy size={20} fill="#fbbf24" stroke="#d97706" />
           </button>
-          <button onClick={() => setIsAnalyticsOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
-            <TrendingUp size={20} />
-          </button>
-          <button onClick={() => setIsAuthOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>
+          {/* ログインボタン: 未ログイン→紫「Login」/ メールログイン→イニシャル緑 / Googleログイン→アバター+緑ドット */}
+          <button
+            onClick={() => setIsAuthOpen(true)}
+            className="glass-btn"
+            style={{
+              padding: user ? '6px 8px' : '6px 12px',
+              background: user ? 'rgba(255,255,255,0.5)' : 'var(--primary)',
+              color: user ? 'var(--text-main)' : 'white',
+              boxShadow: user ? 'none' : '0 2px 8px rgba(99,102,241,0.35)',
+              position: 'relative',
+              display: 'flex', alignItems: 'center', gap: '6px',
+              borderRadius: '10px', fontWeight: 600, fontSize: '13px',
+              transition: 'all 0.2s'
+            }}
+          >
             {user && user.photoURL ? (
-              <img src={user.photoURL} alt="User" style={{ width: 20, height: 20, borderRadius: '50%' }} />
+              // Googleログイン: アバター画像 + 緑ドット
+              <>
+                <img src={user.photoURL} alt="User" style={{ width: 20, height: 20, borderRadius: '50%' }} />
+                <span style={{
+                  position: 'absolute', bottom: '5px', right: '5px',
+                  width: '7px', height: '7px', background: '#22c55e',
+                  borderRadius: '50%', border: '1.5px solid white'
+                }} />
+              </>
+            ) : user ? (
+              // メールログイン: イニシャルアバター（緑）+ 緑ドット
+              <>
+                <span style={{
+                  width: 22, height: 22, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #6366f1, #3b82f6)',
+                  color: 'white', fontSize: '11px', fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0, textTransform: 'uppercase'
+                }}>
+                  {(user.displayName?.[0] ?? user.email?.[0] ?? '?')}
+                </span>
+                <span style={{
+                  position: 'absolute', bottom: '5px', right: '5px',
+                  width: '7px', height: '7px', background: '#22c55e',
+                  borderRadius: '50%', border: '1.5px solid white'
+                }} />
+              </>
             ) : (
-              <Cloud size={20} />
+              // 未ログイン: Cloud + "Login"
+              <>
+                <Cloud size={16} />
+                <span>Login</span>
+              </>
             )}
           </button>
           <button onClick={() => setIsAccountOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>

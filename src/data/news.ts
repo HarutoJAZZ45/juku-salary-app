@@ -7,9 +7,65 @@ export interface NewsItem {
     content: Record<Language, string>; // 言語ごとの本文
     category: 'notice' | 'update'; // お知らせ または アップデート
     important?: boolean; // 重要フラグ
+    imageUrl?: string; // 添付画像URL
 }
 
 export const NEWS_ITEMS: NewsItem[] = [
+    {
+        id: '20260421-03',
+        date: '2026-04-21',
+        title: {
+            ja: 'このアプリをご友人にご紹介ください🤝',
+            en: 'Please share this app with your friends 🤝',
+            es: 'Por favor, comparta esta aplicación con sus amigos 🤝'
+        },
+        content: {
+            ja: `ご利用くださっているみなさま、ありがとうございます。気に入ってくれた方はぜひ、このQRコードを使って、給与計算にお困りの方へご紹介をお願いします！
+また、至らない部分も多いと思いますので、ささいなことでもメニュー内の「Feedback」からご指摘をお願いします。可能な限り迅速に対応いたします。`,
+            en: `Thank you for using our app! If you like it, please use this QR code to introduce it to those who are troubleshooting their salary calculations!
+Also, there might be many areas we could improve. Please give us your feedback, no matter how small, from the "Feedback" menu. We will address it as quickly as possible.`,
+            es: `¡Gracias por usar nuestra aplicación! Si te gusta, utiliza este código QR para presentarla a quienes tengan problemas con sus cálculos salariales.
+Además, es posible que haya muchas áreas que podamos mejorar. Por favor, danos tus comentarios, por pequeños que sean, a través del menú "Feedback". Los abordaremos lo más rápido posible.`
+        },
+        category: 'notice',
+        important: false,
+        imageUrl: '/QR.jpg'
+    },
+    {
+        id: '20260421-02',
+        date: '2026-04-21',
+        title: {
+            ja: 'ブラウザの翻訳機能について⚠️',
+            en: 'About browser translation features ⚠️',
+            es: 'Acerca de las funciones de traducción del navegador ⚠️'
+        },
+        content: {
+            ja: `Chromeなどで翻訳機能をオンにしていると、アプリがうまく機能しないことがありますので、お手数ですが機能自体をオフにしてご利用ください。
+※本アプリは設定画面(⚙️)から標準で日本語、英語、スペイン語への切り替えが可能です。`,
+            en: `If you have the translation feature turned on in Chrome or other browsers, the app may not function properly. Please turn it off when using the app.
+*You can change the language (EN/ES/JA) from the settings button (⚙️).`,
+            es: `Si tiene activada la función de traducción en Chrome u otros navegadores, es posible que la aplicación no funcione correctamente. Por favor, desactívela al usar la aplicación.
+*Puede cambiar el idioma (ES/EN/JA) desde el botón de configuración (⚙️).`
+        },
+        category: 'notice',
+        important: false,
+    },
+    {
+        id: '20260421-01',
+        date: '2026-04-21',
+        title: {
+            ja: 'Androidのホーム画面アイコンを差し替えました📱',
+            en: 'Updated Android Home Screen Icon 📱',
+            es: 'Icono de pantalla de inicio de Android actualizado 📱'
+        },
+        content: {
+            ja: `アンドロイド端末で「ホーム画面に追加」をした場合のアイコンを差し替えました。`,
+            en: `We have replaced the icon displayed when adding the app to your Android home screen.`,
+            es: `Hemos reemplazado el icono que se muestra al agregar la aplicación a la pantalla de inicio de Android.`
+        },
+        category: 'update',
+        important: false,
+    },
     {
         id: '20260407-02',
         date: '2026-04-07',

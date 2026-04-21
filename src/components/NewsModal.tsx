@@ -173,6 +173,11 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                                                 return part;
                                             })}
                                         </div>
+                                        {item.imageUrl && (
+                                            <div style={{ marginTop: '16px', textAlign: 'center' }}>
+                                                <img src={item.imageUrl} alt="Attached image" style={{ maxWidth: '100%', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
