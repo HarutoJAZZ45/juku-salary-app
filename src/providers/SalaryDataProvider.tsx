@@ -49,15 +49,22 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
     const [entries, setEntries] = useState<Record<string, WorkEntry>>({});
     const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [migrationNotice, setMigrationNotice] = useState<string | null>(null);
     const isLoadingRef = useRef(true);
     const entriesRef = useRef(entries);
     const settingsRef = useRef(settings);
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
 
     entriesRef.current = entries;
     settingsRef.current = settings;
 
     useEffect(() => {
+        if (authLoading) {
+            isLoadingRef.current = true;
+            setIsLoaded(false);
+            return;
+        }
+
         isLoadingRef.current = true;
 
         const loadInitialData = async () => {
@@ -81,8 +88,23 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
                     } else {
                         const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
                         const storedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
-                        if (storedEntries) setEntries(JSON.parse(storedEntries));
-                        if (storedConfig) setSettings(mergeSettings(JSON.parse(storedConfig)));
+                        const localEntries = storedEntries ? JSON.parse(storedEntries) : {};
+                        const localConfig = storedConfig ? mergeSettings(JSON.parse(storedConfig)) : DEFAULT_SETTINGS;
+                        setEntries(localEntries);
+                        setSettings(localConfig);
+
+                        await setDoc(userRef, {
+                            entries: localEntries,
+                            config: localConfig,
+                            migration: {
+                                localStorageImportedAt: new Date().toISOString(),
+                            },
+                            updatedAt: new Date().toISOString(),
+                        }, { merge: true });
+
+                        if (storedEntries || storedConfig) {
+                            setMigrationNotice('端末内に保存されていたデータをアカウントに移行しました。念のため、この端末内のデータはまだ残しています。');
+                        }
                     }
                 } catch (error) {
                     console.error('Cloud data load error:', error);
@@ -105,7 +127,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
         };
 
         void loadInitialData();
-    }, [user]);
+    }, [authLoading, user]);
 
     useEffect(() => {
         if (isLoadingRef.current || !isLoaded) return;
@@ -202,16 +224,20 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [entries, settings, user]);
 
+    const clearMigrationNotice = useCallback(() => setMigrationNotice(null), []);
+
     const value = useMemo(() => ({
         entries,
         settings,
+        migrationNotice,
         updateEntry,
         deleteEntry,
         getEntry,
         setSettings,
         updateSettings,
+        clearMigrationNotice,
         isLoaded,
-    }), [deleteEntry, entries, getEntry, isLoaded, settings, updateEntry, updateSettings]);
+    }), [clearMigrationNotice, deleteEntry, entries, getEntry, isLoaded, migrationNotice, settings, updateEntry, updateSettings]);
 
     return <SalaryDataContext.Provider value={value}>{children}</SalaryDataContext.Provider>;
 };

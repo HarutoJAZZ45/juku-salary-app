@@ -15,13 +15,58 @@ import { AccountModal } from './components/AccountModal';
 import { AuthModal } from './components/AuthModal';
 import { RankingModal } from './components/RankingModal';
 import { useAuth } from './hooks/useAuth';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy, CalendarDays } from 'lucide-react';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy, CalendarDays, ShieldCheck } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
 import { useTranslation } from './contexts/LanguageContext';
 import { getEventBadges } from './utils/badges';
 import { calculateLevelData, TITLES } from './utils/levelSystem';
+
+function LoginRequiredScreen() {
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+      background: 'linear-gradient(135deg, #eef2ff 0%, #f8fafc 48%, #ecfeff 100%)',
+      color: '#334155',
+      textAlign: 'center'
+    }}>
+      <div style={{
+        maxWidth: '420px',
+        padding: '28px',
+        borderRadius: '28px',
+        background: 'rgba(255,255,255,0.72)',
+        boxShadow: '0 24px 60px rgba(15, 23, 42, 0.12)',
+        border: '1px solid rgba(255,255,255,0.9)'
+      }}>
+        <div style={{
+          width: '56px',
+          height: '56px',
+          borderRadius: '18px',
+          margin: '0 auto 18px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #6366f1, #0ea5e9)',
+          color: 'white'
+        }}>
+          <ShieldCheck size={30} />
+        </div>
+        <h1 style={{ fontSize: '22px', marginBottom: '10px' }}>ログインして利用を開始</h1>
+        <p style={{ fontSize: '14px', lineHeight: 1.7, color: '#64748b', margin: 0 }}>
+          勤務記録と給与設定を安全に保存するため、ログイン後にホームを表示します。
+          端末内に既存データがある場合は、ログイン後にアカウントへ移行します。
+        </p>
+      </div>
+      <AuthModal isOpen onClose={() => undefined} />
+      <Analytics />
+    </div>
+  );
+}
 
 /**
  * メインアプリケーションコンポーネント (SPAのルートレイアウト)
@@ -35,10 +80,10 @@ import { calculateLevelData, TITLES } from './utils/levelSystem';
 function App() {
   const { t } = useTranslation();
   // 給与データのカスタムフック（読み込み、更新、削除、設定）
-  const { entries, settings, updateEntry, deleteEntry, updateSettings, isLoaded } = useSalaryData();
+  const { entries, settings, migrationNotice, updateEntry, deleteEntry, updateSettings, clearMigrationNotice, isLoaded } = useSalaryData();
 
   // 認証のカスタムフック
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
 
@@ -126,6 +171,12 @@ function App() {
       localStorage.setItem('lastReadNewsId', NEWS_ITEMS[0].id);
     }
   };
+
+  // 認証状態の確認完了までローディング表示
+  if (authLoading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'gray' }}>Loading...</div>;
+
+  // 未ログイン時はホーム画面を表示しない
+  if (!user) return <LoginRequiredScreen />;
 
   // データの読み込み完了までローディング表示
   if (!isLoaded) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'gray' }}>Loading...</div>;
@@ -378,6 +429,37 @@ function App() {
           </button>
         </div>
       </header>
+
+      {migrationNotice && (
+        <div style={{
+          margin: '0 8px 16px',
+          padding: '12px 14px',
+          borderRadius: '14px',
+          background: '#ecfdf5',
+          border: '1px solid #bbf7d0',
+          color: '#166534',
+          fontSize: '13px',
+          lineHeight: 1.6,
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'flex-start'
+        }}>
+          <ShieldCheck size={18} style={{ flexShrink: 0, marginTop: '1px' }} />
+          <div style={{ flex: 1 }}>{migrationNotice}</div>
+          <button
+            onClick={clearMigrationNotice}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              color: '#166534',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            OK
+          </button>
+        </div>
+      )}
 
       {isHelpOpen && (
         <div className="glass-panel" style={{ padding: '16px', marginBottom: '24px', fontSize: '13px', lineHeight: '1.6', position: 'relative' }}>

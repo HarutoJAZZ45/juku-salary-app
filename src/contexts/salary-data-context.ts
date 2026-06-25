@@ -5,11 +5,13 @@ import type { WorkEntry, UserSettings } from '../types';
 export interface SalaryDataContextValue {
     entries: Record<string, WorkEntry>;
     settings: UserSettings;
+    migrationNotice: string | null;
     updateEntry: (date: string, data: Partial<WorkEntry>) => void;
     deleteEntry: (date: string) => Promise<void>;
     getEntry: (date: string) => WorkEntry | undefined;
     setSettings: Dispatch<SetStateAction<UserSettings>>;
     updateSettings: (newSettings: UserSettings) => Promise<void>;
+    clearMigrationNotice: () => void;
     isLoaded: boolean;
 }
 
