@@ -11,7 +11,7 @@ interface NewsModalProps {
 // ニュースモーダル
 // アプリからのお知らせや更新情報を表示する
 export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
-    const { t, language } = useTranslation();
+    const { t } = useTranslation();
     const [filter, setFilter] = React.useState<'all' | 'important' | 'update'>('all');
 
     if (!isOpen) return null;
@@ -161,12 +161,12 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                                                 {item.date}
                                             </div>
                                         </div>
-                                        <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1e293b' }}>{item.title[language]}</h4>
+                                        <h4 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#1e293b' }}>{item.title.ja}</h4>
                                         <div style={{
                                             margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#475569',
                                             whiteSpace: 'pre-wrap' // Preserve newlines
                                         }}>
-                                            {item.content[language].split(/(\*\*.*?\*\*)/).map((part, i) => {
+                                            {item.content.ja.split(/(\*\*.*?\*\*)/).map((part, i) => {
                                                 if (part.startsWith('**') && part.endsWith('**')) {
                                                     return <strong key={i} style={{ color: '#1e293b' }}>{part.slice(2, -2)}</strong>;
                                                 }

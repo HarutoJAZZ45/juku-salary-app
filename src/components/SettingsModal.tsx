@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import type { UserSettings, Campus } from '../types';
-import { X, Save, Settings, Info, Globe } from 'lucide-react';
+import { X, Save, Settings, Info } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
-import type { Language } from '../locales/types';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -16,7 +15,7 @@ const CAMPUSES: Campus[] = ['平岡', '新札幌', '月寒', '円山', '北大�
 // 設定モーダル
 // 時給、交通費、校舎などの基本設定を変更する
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, onClose, onSave }) => {
-    const { t, language, setLanguage } = useTranslation();
+    const { t } = useTranslation();
     const [formData, setFormData] = useState<UserSettings>(settings);
 
     if (!isOpen) return null;
@@ -215,33 +214,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                 <div className="input-group">
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>{t.settings.annualLimit}</label>
                     <input type="number" value={formData.annualLimit} onChange={e => handleChange('annualLimit', Number(e.target.value))} />
-                </div>
-
-                <hr style={{ border: 'none', height: '1px', background: '#e2e8f0', margin: '16px 0' }} />
-
-                {/* Language Selector - Moved to Bottom */}
-                <div className="input-group">
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', fontSize: '14px', color: '#475569' }}>
-                        <Globe size={16} /> {t.settings.language}
-                    </label>
-                    <div style={{ display: 'flex', background: '#f8fafc', padding: '4px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        {(['ja', 'en', 'es'] as Language[]).map(lang => (
-                            <button
-                                key={lang}
-                                onClick={() => setLanguage(lang)}
-                                style={{
-                                    flex: 1, padding: '8px', borderRadius: '6px', border: 'none',
-                                    background: language === lang ? 'white' : 'transparent',
-                                    color: language === lang ? 'var(--primary)' : '#64748b',
-                                    fontWeight: language === lang ? 600 : 400,
-                                    boxShadow: language === lang ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                                    cursor: 'pointer', transition: 'all 0.2s'
-                                }}
-                            >
-                                {lang === 'ja' ? '日本語' : lang === 'en' ? 'English' : 'Español'}
-                            </button>
-                        ))}
-                    </div>
                 </div>
 
                 <button className="glass-btn" onClick={handleSave} style={{ width: '100%', marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>

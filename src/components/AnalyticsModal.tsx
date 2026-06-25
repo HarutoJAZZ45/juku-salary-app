@@ -14,7 +14,7 @@ interface AnalyticsModalProps {
 // 分析モーダルコンポーネント
 // 月ごとの給与推移や勤務時間をグラフで表示する
 export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose }) => {
-    const { t, language } = useTranslation();
+    const { t } = useTranslation();
     const { entries, settings } = useSalaryData();
 
     if (!isOpen) return null;
@@ -23,10 +23,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose 
 
     // Y軸の数値を「万円」または「k」単位でフォーマット
     const formatYAxis = (val: number) => {
-        if (language === 'ja') {
-            return `${val / 10000}万円`;
-        }
-        return `¥${val / 1000}k`;
+        return `${val / 10000}万円`;
     };
 
     // 月ごとのデータを集計するための初期化
