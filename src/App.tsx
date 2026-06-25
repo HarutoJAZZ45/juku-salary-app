@@ -14,14 +14,17 @@ import { DataManagementModal } from './components/DataManagementModal';
 import { AccountModal } from './components/AccountModal';
 import { AuthModal } from './components/AuthModal';
 import { RankingModal } from './components/RankingModal';
+import { LegalConsentGate } from './components/LegalConsentGate';
+import { LegalDocumentModal } from './components/LegalDocumentModal';
 import { useAuth } from './hooks/useAuth';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy, CalendarDays, ShieldCheck } from 'lucide-react';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy, CalendarDays, ShieldCheck, FileText } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { NEWS_ITEMS } from './data/news';
 import type { WorkEntry } from './types';
 import { useTranslation } from './contexts/LanguageContext';
 import { getEventBadges } from './utils/badges';
 import { calculateLevelData, TITLES } from './utils/levelSystem';
+import type { LegalDocumentType } from './legal/policies';
 
 function LoginRequiredScreen() {
   return (
@@ -102,6 +105,7 @@ function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isRankingOpen, setIsRankingOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openLegalDocument, setOpenLegalDocument] = useState<LegalDocumentType | null>(null);
 
   // 一括編集モードの状態管理
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -235,6 +239,7 @@ function App() {
   };
 
   return (
+    <LegalConsentGate user={user}>
     <>
       {/* メニューオーバーレイ（右上のハンバーガーメニュー） */}
       {isMenuOpen && (
@@ -307,6 +312,24 @@ function App() {
             >
               <Database size={18} />
               {t.dataManagement.title}
+            </button>
+
+            <button
+              onClick={() => { setOpenLegalDocument('terms'); setIsMenuOpen(false); }}
+              className="menu-item"
+              style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
+            >
+              <FileText size={18} />
+              利用規約
+            </button>
+
+            <button
+              onClick={() => { setOpenLegalDocument('privacy'); setIsMenuOpen(false); }}
+              className="menu-item"
+              style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
+            >
+              <ShieldCheck size={18} />
+              プライバシーポリシー
             </button>
 
             <button
@@ -648,8 +671,13 @@ function App() {
         onClose={() => setIsRankingOpen(false)}
         settings={settings}
       />
+      <LegalDocumentModal
+        type={openLegalDocument}
+        onClose={() => setOpenLegalDocument(null)}
+      />
       <Analytics />
     </>
+    </LegalConsentGate>
   );
 }
 

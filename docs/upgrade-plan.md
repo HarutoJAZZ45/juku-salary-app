@@ -87,6 +87,7 @@ publicProfiles/{uid}
   - `termsVersion`
   - `privacyAcceptedAt`
   - `privacyVersion`
+- Review the terms of service and privacy policy whenever features change user data handling, public profile behavior, rankings, follows, admin operations, or external service usage.
 - Firestore-backed announcements so news can be added without code changes.
 - Admin-only announcement and badge management.
 - Yearly salary settings as a required model, with migration from the current default salary settings into the current fiscal year.
