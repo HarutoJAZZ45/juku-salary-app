@@ -19,7 +19,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // Analytics はブラウザ環境でのみ初期化
-export let analytics: any = null;
+export let analytics: ReturnType<typeof getAnalytics> | null = null;
 if (typeof window !== 'undefined') {
     try {
         analytics = getAnalytics(app);

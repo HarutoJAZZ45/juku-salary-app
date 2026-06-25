@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X, Trophy, Star, User, Edit2, Save, Palette, Shirt, Zap, Coffee, Camera, Book, Music, Smile, Dribbble, Flame, Calendar } from 'lucide-react';
 import type { UserSettings, WorkEntry } from '../types';
 import { calculateLevelData } from '../utils/levelSystem';
@@ -59,7 +59,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     const { t } = useTranslation();
 
     const [isEditingName, setIsEditingName] = useState(false);
-    const [editName, setEditName] = useState('');
+    const [editName, setEditName] = useState(settings.profile?.name || 'ゲスト講師');
     const [showCustomize, setShowCustomize] = useState(false);
     const [isEditingTheme, setIsEditingTheme] = useState(false);
     const [isEditingAvatar, setIsEditingAvatar] = useState(false);
@@ -78,12 +78,6 @@ export const AccountModal: React.FC<AccountModalProps> = ({
         const current = settings.profile?.unlockedTitles || [];
         return current.some(t => !lastSeenTitlesState.includes(t));
     }, [settings.profile?.unlockedTitles, lastSeenTitlesState]);
-
-    useEffect(() => {
-        if (isOpen) {
-            setEditName(settings.profile?.name || 'ゲスト講師');
-        }
-    }, [isOpen, settings.profile?.name]);
 
     const handleUpdateProfile = (updates: Partial<typeof settings.profile>) => {
         onUpdateSettings({
@@ -191,7 +185,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                             ) : (
                                 <h2 style={{ fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
                                     {settings.profile?.name || 'Unknown'}
-                                    <button onClick={() => setIsEditingName(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white', opacity: 0.8 }}>
+                                    <button onClick={() => { setEditName(settings.profile?.name || 'ゲスト講師'); setIsEditingName(true); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white', opacity: 0.8 }}>
                                         <Edit2 className="w-4 h-4" />
                                     </button>
                                 </h2>

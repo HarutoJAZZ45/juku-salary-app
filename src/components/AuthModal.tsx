@@ -181,7 +181,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                                         try {
                                             await resendVerification();
                                             alert(t.auth.verificationResent);
-                                        } catch (e) {
+                                        } catch {
                                             alert("Failed to resend. Please try again later.");
                                         }
                                     }}

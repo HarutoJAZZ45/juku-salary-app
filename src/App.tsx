@@ -35,7 +35,7 @@ import { calculateLevelData, TITLES } from './utils/levelSystem';
 function App() {
   const { t } = useTranslation();
   // 給与データのカスタムフック（読み込み、更新、削除、設定）
-  const { entries, settings, updateEntry, deleteEntry, setSettings, updateSettings, isLoaded } = useSalaryData();
+  const { entries, settings, updateEntry, deleteEntry, updateSettings, isLoaded } = useSalaryData();
 
   // 認証のカスタムフック
   const { user } = useAuth();
@@ -63,8 +63,10 @@ function App() {
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
 
   // バッジと通知のロジック
-  const [hasUnreadNews, setHasUnreadNews] = useState(false);
-  const [showHelpHint, setShowHelpHint] = useState(false);
+  const [hasUnreadNews, setHasUnreadNews] = useState(() => (
+    NEWS_ITEMS.length > 0 && localStorage.getItem('lastReadNewsId') !== NEWS_ITEMS[0].id
+  ));
+  const [showHelpHint, setShowHelpHint] = useState(() => !localStorage.getItem('hasSeenHelp'));
 
   // 称号・バッジの獲得状況監視
   useEffect(() => {
@@ -115,24 +117,7 @@ function App() {
         }
       });
     }
-  }, [entries, settings, isLoaded, setSettings]);
-
-  useEffect(() => {
-    // ヘルプの初回表示チェック
-    // 初めてアプリアクセスしたユーザーにはヒントを表示する
-    const hasSeenHelp = localStorage.getItem('hasSeenHelp');
-    if (!hasSeenHelp) {
-      setShowHelpHint(true);
-    }
-
-    // 未読ニュースの確認
-    if (NEWS_ITEMS.length > 0) {
-      const lastReadId = localStorage.getItem('lastReadNewsId');
-      if (lastReadId !== NEWS_ITEMS[0].id) {
-        setHasUnreadNews(true);
-      }
-    }
-  }, []);
+  }, [entries, settings, isLoaded, updateSettings]);
 
   const handleOpenNews = () => {
     setIsNewsOpen(true);
@@ -514,21 +499,23 @@ function App() {
       )}
 
       {/* 各種モーダルコンポーネント */}
-      <WorkModal
-        isOpen={isWorkModalOpen}
-        date={selectedDate}
-        entry={!Array.isArray(selectedDate) && selectedDate ? entries[format(selectedDate, 'yyyy-MM-dd')] : undefined}
-        onClose={() => setIsWorkModalOpen(false)}
-        onSave={handleSavework}
-        onDelete={handleDeleteEntry}
-        settings={settings}
-        onSaveComplete={() => {
-          if (isSelectionMode) {
-            setIsSelectionMode(false);
-            setSelectedDates([]);
-          }
-        }}
-      />
+      {isWorkModalOpen && selectedDate && (
+        <WorkModal
+          isOpen
+          date={selectedDate}
+          entry={!Array.isArray(selectedDate) ? entries[format(selectedDate, 'yyyy-MM-dd')] : undefined}
+          onClose={() => setIsWorkModalOpen(false)}
+          onSave={handleSavework}
+          onDelete={handleDeleteEntry}
+          settings={settings}
+          onSaveComplete={() => {
+            if (isSelectionMode) {
+              setIsSelectionMode(false);
+              setSelectedDates([]);
+            }
+          }}
+        />
+      )}
 
       <SettingsModal
         isOpen={isSettingsOpen}
