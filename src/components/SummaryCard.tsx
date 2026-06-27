@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import type { UserSettings, WorkEntry } from '../types';
-import { calculateDailyTotal, formatCurrency, getPeriodRange } from '../utils/calculator';
+import { calculateDailyTotal, formatCurrency, getPeriodRange, parseLocalDate } from '../utils/calculator';
 import { useTranslation } from '../contexts/LanguageContext';
 import { getStreakBadges, getEarningsBadge, getEventBadges } from '../utils/badges';
 import type { Badge } from '../utils/badges';
@@ -27,7 +27,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
         const periodEntries: WorkEntry[] = [];
 
         Object.values(entries).forEach(entry => {
-            const entryDate = new Date(entry.date);
+            const entryDate = parseLocalDate(entry.date);
             // 期間内のエントリのみ対象
             if (entryDate >= period.start && entryDate <= period.end) {
                 total += calculateDailyTotal(entry, settings);
@@ -62,7 +62,7 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
         // イベントバッジ (期間内に該当する日付があるもの)
         const eventBadges = getEventBadges(entries).filter(b => {
             if (b.id === 'event-newyear-2026') {
-                const eventDate = new Date('2026-01-02');
+                const eventDate = parseLocalDate('2026-01-02');
                 return eventDate >= period.start && eventDate <= period.end;
             }
             return false;

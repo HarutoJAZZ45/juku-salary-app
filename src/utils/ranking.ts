@@ -1,7 +1,7 @@
 import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { WorkEntry, UserSettings, RankingData } from '../types';
-import { getFiscalYear, getPeriodRange } from './calculator';
+import { getFiscalYear, getPeriodRange, parseLocalDate } from './calculator';
 
 export const updateRankingStats = async (uid: string | undefined, entries: Record<string, WorkEntry>, settings: UserSettings) => {
     if (!uid) return;
@@ -32,7 +32,7 @@ export const updateRankingStats = async (uid: string | undefined, entries: Recor
     // Calculate aggregations
     Object.values(entries).forEach(entry => {
         // 対象月を決定
-        const entryDate = new Date(entry.date);
+        const entryDate = parseLocalDate(entry.date);
         const { end } = getPeriodRange(entryDate, settings.closingDay);
         // Ex: "2024-04"
         const monthKey = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}`;

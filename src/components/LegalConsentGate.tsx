@@ -101,18 +101,21 @@ export const LegalConsentGate = ({ user, children }: LegalConsentGateProps) => {
 
     return (
         <div style={{
-            minHeight: '100vh',
+            minHeight: '100dvh',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '24px',
+            padding: 'clamp(12px, 4vw, 24px)',
+            boxSizing: 'border-box',
+            overflowX: 'hidden',
             background: 'linear-gradient(135deg, #eef2ff 0%, #f8fafc 48%, #ecfeff 100%)',
             color: '#334155',
         }}>
             <div style={{
                 width: '100%',
                 maxWidth: '520px',
-                padding: '28px',
+                padding: 'clamp(20px, 6vw, 28px)',
+                boxSizing: 'border-box',
                 borderRadius: '28px',
                 background: 'rgba(255,255,255,0.78)',
                 boxShadow: '0 24px 60px rgba(15, 23, 42, 0.14)',
@@ -182,14 +185,30 @@ export const LegalConsentGate = ({ user, children }: LegalConsentGateProps) => {
                     fontSize: '13px',
                     lineHeight: 1.6,
                     marginBottom: '16px',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    cursor: 'pointer',
                 }}>
                     <input
                         type="checkbox"
                         checked={isChecked}
                         onChange={event => setIsChecked(event.target.checked)}
-                        style={{ marginTop: '3px' }}
+                        style={{
+                            margin: '2px 0 0',
+                            width: '20px',
+                            height: '20px',
+                            flex: '0 0 20px',
+                            accentColor: '#6366f1',
+                        }}
                     />
-                    <span>利用規約とプライバシーポリシーを確認し、内容に同意します。</span>
+                    <span style={{
+                        minWidth: 0,
+                        flex: 1,
+                        overflowWrap: 'anywhere',
+                        wordBreak: 'normal',
+                    }}>
+                        利用規約とプライバシーポリシーを確認し、内容に同意します。
+                    </span>
                 </label>
 
                 {status === 'error' && (
@@ -198,13 +217,13 @@ export const LegalConsentGate = ({ user, children }: LegalConsentGateProps) => {
                     </div>
                 )}
 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     <button
                         type="button"
                         onClick={accept}
                         disabled={!isChecked || isSaving}
                         style={{
-                            flex: 1,
+                            flex: '1 1 180px',
                             padding: '12px',
                             borderRadius: '14px',
                             border: 'none',
@@ -220,6 +239,7 @@ export const LegalConsentGate = ({ user, children }: LegalConsentGateProps) => {
                         type="button"
                         onClick={() => signOut()}
                         style={{
+                            flex: '1 1 110px',
                             padding: '12px',
                             borderRadius: '14px',
                             border: '1px solid #e2e8f0',

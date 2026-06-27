@@ -2,7 +2,7 @@ import React from 'react';
 import { X, TrendingUp } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
 import { useSalaryData } from '../hooks/useSalaryData';
-import { calculateDailyTotal } from '../utils/calculator';
+import { calculateDailyTotal, parseLocalDate } from '../utils/calculator';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 
@@ -44,7 +44,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose 
 
     // 勤務データを走査し、月ごとに集計
     Object.values(entries).forEach(entry => {
-        const date = new Date(entry.date);
+        const date = parseLocalDate(entry.date);
         if (date.getFullYear() === currentYear) {
             const key = format(date, 'yyyy-MM');
             if (monthlyData[key]) {

@@ -5,6 +5,7 @@ import {
     getFiscalYear,
     getPaymentDate,
     getPeriodRange,
+    parseLocalDate,
 } from '../src/utils/calculator.ts';
 
 const settings = {
@@ -86,6 +87,22 @@ test('15日締めの給与期間を前月16日から当月15日として返す',
         [period.end.getFullYear(), period.end.getMonth(), period.end.getDate()],
         [2026, 3, 15]
     );
+});
+
+test('日付文字列をローカル日付の0時として解釈し、締め日当日を期間に含める', () => {
+    const period = getPeriodRange(new Date(2026, 5, 1), 15);
+    const closingDate = parseLocalDate('2026-06-15');
+
+    assert.deepEqual(
+        [
+            closingDate.getFullYear(),
+            closingDate.getMonth(),
+            closingDate.getDate(),
+            closingDate.getHours(),
+        ],
+        [2026, 5, 15, 0]
+    );
+    assert.equal(closingDate >= period.start && closingDate <= period.end, true);
 });
 
 test('締め日と支払月ラグから25日の支給日を返す', () => {

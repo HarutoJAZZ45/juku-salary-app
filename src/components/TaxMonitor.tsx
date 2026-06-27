@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from '../contexts/LanguageContext';
 import type { WorkEntry, UserSettings } from '../types';
-import { calculateDailyTotal, getPaymentDate } from '../utils/calculator';
+import { calculateDailyTotal, getPaymentDate, parseLocalDate } from '../utils/calculator';
 import { AlertCircle } from 'lucide-react';
 
 interface TaxMonitorProps {
@@ -22,7 +22,7 @@ export const TaxMonitor: React.FC<TaxMonitorProps> = ({ entries, settings }) => 
         years.add(currentYear); // 現在の年は必ず含める
 
         Object.values(entries).forEach(entry => {
-            const workDate = new Date(entry.date);
+            const workDate = parseLocalDate(entry.date);
             // ユーザー設定のラグを使用 (デフォルト1)
             const payDate = getPaymentDate(workDate, settings.closingDay, settings.paymentMonthLag ?? 1);
             years.add(payDate.getFullYear());
@@ -34,7 +34,7 @@ export const TaxMonitor: React.FC<TaxMonitorProps> = ({ entries, settings }) => 
     // Calculate annual income based on PAYMENT DATE (Jan 1 - Dec 31)
     let totalIncome = 0;
     Object.values(entries).forEach(entry => {
-        const workDate = new Date(entry.date);
+        const workDate = parseLocalDate(entry.date);
         const payDate = getPaymentDate(workDate, settings.closingDay, settings.paymentMonthLag ?? 1);
 
         if (payDate.getFullYear() === selectedYear) {

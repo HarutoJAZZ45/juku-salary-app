@@ -3,11 +3,24 @@ import type { WorkEntry, UserSettings, WorkBlock } from '../types';
 const BLOCK_ORDER: WorkBlock[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
 /**
+ * YYYY-MM-DD を端末のローカル日付の0時として解釈する。
+ * new Date('YYYY-MM-DD') はUTC扱いになり、日本時間では9時になるため、
+ * 締め日当日の期間比較には使用しない。
+ */
+export const parseLocalDate = (dateStr: string): Date => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+    if (!match) return new Date(dateStr);
+
+    const [, year, month, day] = match;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+};
+
+/**
  * 渡された日付文字列(YYYY-MM-DD)から年度（Fiscal Year）を判定する
  * 1月〜3月は前年、4月〜12月は当年とする
  */
 export const getFiscalYear = (dateStr: string): number => {
-    const date = new Date(dateStr);
+    const date = parseLocalDate(dateStr);
     const year = date.getFullYear();
     const month = date.getMonth() + 1; // 1-12
     return month < 4 ? year - 1 : year; // 1月〜3月なら前年度
