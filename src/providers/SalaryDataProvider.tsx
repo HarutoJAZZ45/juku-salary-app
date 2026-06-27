@@ -137,7 +137,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
             const saveToFirestore = async () => {
                 const userRef = doc(db, 'users', user.uid);
                 const cleanEntries = JSON.parse(JSON.stringify({ entries }));
-                await setDoc(userRef, cleanEntries, { merge: true }).catch(console.error);
+                await setDoc(userRef, cleanEntries, { mergeFields: ['entries'] }).catch(console.error);
                 const { updateRankingStats } = await import('../utils/ranking');
                 await updateRankingStats(user.uid, entries, settingsRef.current);
             };
@@ -153,7 +153,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
             const saveToFirestore = async () => {
                 const userRef = doc(db, 'users', user.uid);
                 const cleanConfig = JSON.parse(JSON.stringify({ config: settings }));
-                await setDoc(userRef, cleanConfig, { merge: true }).catch(console.error);
+                await setDoc(userRef, cleanConfig, { mergeFields: ['config'] }).catch(console.error);
                 const { updateRankingStats } = await import('../utils/ranking');
                 await updateRankingStats(user.uid, entriesRef.current, settings);
             };
@@ -195,7 +195,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
         if (user) {
             try {
                 const userRef = doc(db, 'users', user.uid);
-                await setDoc(userRef, { config: newSettings }, { merge: true });
+                await setDoc(userRef, { config: newSettings }, { mergeFields: ['config'] });
                 const { updateRankingStats } = await import('../utils/ranking');
                 await updateRankingStats(user.uid, entriesRef.current, newSettings);
             } catch (error) {
@@ -207,26 +207,31 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
     const getEntry = useCallback((date: string) => entries[date], [entries]);
 
     const deleteEntry = useCallback(async (date: string) => {
-        const rest = { ...entries };
+        const rest = { ...entriesRef.current };
         delete rest[date];
+
+        if (user) {
+            const userRef = doc(db, 'users', user.uid);
+            await setDoc(userRef, {
+                entries: rest,
+                config: settingsRef.current,
+                updatedAt: new Date().toISOString(),
+            }, { mergeFields: ['entries', 'config', 'updatedAt'] });
+        }
+
+        entriesRef.current = rest;
         setEntries(rest);
         localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(rest));
 
         if (user) {
             try {
-                const userRef = doc(db, 'users', user.uid);
-                await setDoc(userRef, {
-                    entries: rest,
-                    config: settings,
-                    updatedAt: new Date().toISOString(),
-                }, { merge: true });
                 const { updateRankingStats } = await import('../utils/ranking');
-                await updateRankingStats(user.uid, rest, settings);
+                await updateRankingStats(user.uid, rest, settingsRef.current);
             } catch (error) {
-                console.error('[deleteEntry] Cloud sync error:', error);
+                console.error('[deleteEntry] Ranking sync error:', error);
             }
         }
-    }, [entries, settings, user]);
+    }, [user]);
 
     const clearMigrationNotice = useCallback(() => setMigrationNotice(null), []);
 

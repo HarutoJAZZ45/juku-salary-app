@@ -221,8 +221,8 @@ function App() {
   };
 
   // 勤務データの削除処理
-  const handleDeleteEntry = (dateStr: string) => {
-    deleteEntry(dateStr);
+  const handleDeleteEntry = async (dateStr: string) => {
+    await deleteEntry(dateStr);
   };
 
   // 月の移動処理
