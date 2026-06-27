@@ -669,6 +669,7 @@ function App() {
       <RankingModal
         isOpen={isRankingOpen}
         onClose={() => setIsRankingOpen(false)}
+        onOpenProfile={() => setIsAccountOpen(true)}
         settings={settings}
       />
       <LegalDocumentModal

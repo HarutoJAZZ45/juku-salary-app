@@ -68,6 +68,9 @@ export const ja: Translation = {
         enableRanking: 'ランキング（スコア公開）に参加する',
         enableRankingDesc: '他のユーザーが見るランキング掲示板に、プロフィールとコマ数・出勤数が公開されます。',
         unranked: '現在ランキング設定はオフです。参加するにはプロフィールの設定からオンにしてください！',
+        accessRestricted: 'ランキング参加者限定です',
+        accessRestrictedDesc: 'ランキングへ参加していない場合、ほかの参加者の順位やスコアは閲覧できません。プロフィール設定から参加できます。',
+        openProfileSettings: 'プロフィール設定を開く',
         noData: 'まだ誰もランキングに参加していません。'
     },
     tax: {

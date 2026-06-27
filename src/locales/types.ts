@@ -69,6 +69,9 @@ export interface Translation {
         enableRanking: string;
         enableRankingDesc: string;
         unranked: string;
+        accessRestricted: string;
+        accessRestrictedDesc: string;
+        openProfileSettings: string;
         noData: string;
     };
     app: {

@@ -23,11 +23,13 @@ const AVATAR_MAP: Record<string, LucideIcon> = {
 interface RankingModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onOpenProfile: () => void;
     settings: UserSettings;
 }
 
-export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, settings }) => {
+export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onOpenProfile, settings }) => {
     const { t } = useTranslation();
+    const isOptedIn = settings.profile?.isPublicRankingEnabled === true;
     const [periodType, setPeriodType] = useState<'monthly' | 'yearly'>('monthly');
     const [targetKey, setTargetKey] = useState<string>('');
     const [category, setCategory] = useState<'classes' | 'days'>('classes');
@@ -69,7 +71,11 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
     }, [isOpen, settings.closingDay, periodType, recentMonths, recentYears]);
 
     useEffect(() => {
-        if (!isOpen || !targetKey) return;
+        if (!isOpen || !isOptedIn || !targetKey) {
+            setRankings([]);
+            setIsLoading(false);
+            return;
+        }
 
         const loadRankings = async () => {
             setIsLoading(true);
@@ -105,11 +111,9 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
         };
 
         loadRankings();
-    }, [isOpen, periodType, targetKey, category]);
+    }, [isOpen, isOptedIn, periodType, targetKey, category]);
 
     if (!isOpen) return null;
-
-    const isOptedIn = settings.profile?.isPublicRankingEnabled;
 
     return (
         <div style={{
@@ -134,12 +138,58 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
                     </div>
                 </div>
 
-                {!isOptedIn && (
-                    <div style={{ background: '#fffbeb', padding: '12px 16px', borderBottom: '1px solid #fef3c7', fontSize: '13px', color: '#b45309', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                        <Shield size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-                        <span>{t.ranking.unranked}</span>
+                {!isOptedIn ? (
+                    <div style={{
+                        padding: '32px 24px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        textAlign: 'center',
+                        gap: '14px',
+                        background: '#fffbeb',
+                    }}>
+                        <div style={{
+                            width: '56px',
+                            height: '56px',
+                            borderRadius: '18px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: '#fef3c7',
+                            color: '#b45309',
+                        }}>
+                            <Shield size={28} />
+                        </div>
+                        <div>
+                            <h2 style={{ margin: '0 0 8px', fontSize: '18px', color: '#92400e' }}>
+                                {t.ranking.accessRestricted}
+                            </h2>
+                            <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.7, color: '#b45309' }}>
+                                {t.ranking.accessRestrictedDesc}
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                onClose();
+                                onOpenProfile();
+                            }}
+                            style={{
+                                width: '100%',
+                                padding: '12px 16px',
+                                border: 'none',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+                                color: 'white',
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                            }}
+                        >
+                            {t.ranking.openProfileSettings}
+                        </button>
                     </div>
-                )}
+                ) : (
+                    <>
 
                 {/* Controls */}
                 <div style={{ padding: '16px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
@@ -261,6 +311,8 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, set
                         </div>
                     )}
                 </div>
+                    </>
+                )}
             </div>
         </div>
     );
