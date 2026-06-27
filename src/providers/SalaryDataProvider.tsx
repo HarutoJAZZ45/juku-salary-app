@@ -215,7 +215,11 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
         if (user) {
             try {
                 const userRef = doc(db, 'users', user.uid);
-                await setDoc(userRef, { entries: rest, config: settings });
+                await setDoc(userRef, {
+                    entries: rest,
+                    config: settings,
+                    updatedAt: new Date().toISOString(),
+                }, { merge: true });
                 const { updateRankingStats } = await import('../utils/ranking');
                 await updateRankingStats(user.uid, rest, settings);
             } catch (error) {

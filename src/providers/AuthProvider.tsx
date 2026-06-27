@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 entries,
                 config,
                 updatedAt: new Date().toISOString(),
-            });
+            }, { merge: true });
         },
         loadDataFromCloud: async (targetUser?: User | null) => {
             const currentUser = targetUser || user;
