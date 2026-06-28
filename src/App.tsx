@@ -20,7 +20,6 @@ import type { WorkEntry } from './types';
 import { useTranslation } from './contexts/LanguageContext';
 import { getEventBadges } from './utils/badges';
 import { calculateLevelData, TITLES } from './utils/levelSystem';
-import type { LegalDocumentType } from './legal/policies';
 import { Navigate, useLocation, useNavigate } from 'react-router';
 
 const AnalyticsModal = lazy(() =>
@@ -112,7 +111,6 @@ function App() {
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [openLegalDocument, setOpenLegalDocument] = useState<LegalDocumentType | null>(null);
 
   // 一括編集モードの状態管理
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -184,6 +182,22 @@ function App() {
     if (location.pathname !== '/news') return;
     localStorage.setItem('lastReadNewsId', LATEST_NEWS_ID);
   }, [location.pathname]);
+
+  const legalDocumentType = location.pathname === '/terms'
+    ? 'terms'
+    : location.pathname === '/privacy'
+      ? 'privacy'
+      : null;
+
+  if (legalDocumentType) {
+    return (
+      <LegalDocumentModal
+        type={legalDocumentType}
+        displayMode="page"
+        onClose={() => navigate('/home')}
+      />
+    );
+  }
 
   // 認証状態の確認完了までローディング表示
   if (authLoading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'gray' }}>Loading...</div>;
@@ -408,7 +422,7 @@ function App() {
             </button>
 
             <button
-              onClick={() => { setOpenLegalDocument('terms'); setIsMenuOpen(false); }}
+              onClick={() => { navigate('/terms'); setIsMenuOpen(false); }}
               className="menu-item"
               style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
             >
@@ -417,7 +431,7 @@ function App() {
             </button>
 
             <button
-              onClick={() => { setOpenLegalDocument('privacy'); setIsMenuOpen(false); }}
+              onClick={() => { navigate('/privacy'); setIsMenuOpen(false); }}
               className="menu-item"
               style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
             >
@@ -733,10 +747,6 @@ function App() {
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
-      />
-      <LegalDocumentModal
-        type={openLegalDocument}
-        onClose={() => setOpenLegalDocument(null)}
       />
       <Analytics />
     </>
