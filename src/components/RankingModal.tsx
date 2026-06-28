@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trophy, Shield, User, Zap, Coffee, Camera, Book, Music, Smile, Shirt, Star, Dribbble } from 'lucide-react';
+import { ArrowLeft, X, Trophy, Shield, User, Zap, Coffee, Camera, Book, Music, Smile, Shirt, Star, Dribbble } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { RankingData, UserSettings } from '../types';
@@ -25,11 +25,13 @@ interface RankingModalProps {
     onClose: () => void;
     onOpenProfile: () => void;
     settings: UserSettings;
+    displayMode?: 'modal' | 'page';
 }
 
-export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onOpenProfile, settings }) => {
+export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onOpenProfile, settings, displayMode = 'modal' }) => {
     const { t } = useTranslation();
     const isOptedIn = settings.profile?.isPublicRankingEnabled === true;
+    const isPage = displayMode === 'page';
     const [periodType, setPeriodType] = useState<'monthly' | 'yearly'>('monthly');
     const [targetKey, setTargetKey] = useState<string>('');
     const [category, setCategory] = useState<'classes' | 'days'>('classes');
@@ -117,21 +119,36 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onO
 
     return (
         <div style={{
-            position: 'fixed', inset: 0, zIndex: 2000,
-            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+            position: isPage ? 'static' : 'fixed',
+            inset: isPage ? undefined : 0,
+            zIndex: isPage ? undefined : 2000,
+            minHeight: isPage ? 'calc(100dvh - 40px)' : undefined,
+            background: isPage ? 'transparent' : 'rgba(0,0,0,0.6)',
+            backdropFilter: isPage ? undefined : 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: isPage ? 0 : '16px',
             animation: 'fadeIn 0.2s'
         }}>
             <div style={{
-                background: 'white', borderRadius: '24px',
-                width: '100%', maxWidth: '420px',
+                background: isPage ? 'rgba(255,255,255,0.88)' : 'white',
+                borderRadius: '24px',
+                width: '100%', maxWidth: isPage ? '520px' : '420px',
                 overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-                display: 'flex', flexDirection: 'column', maxHeight: '90vh'
+                display: 'flex', flexDirection: 'column',
+                maxHeight: isPage ? undefined : '90vh'
             }}>
                 {/* Header */}
                 <div style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)', padding: '20px', color: 'white', position: 'relative' }}>
-                    <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', padding: '8px', cursor: 'pointer', display: 'flex' }}>
-                        <X size={18} className="text-white" />
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        aria-label={isPage ? 'ホームへ戻る' : 'ランキングを閉じる'}
+                        style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', padding: '8px', cursor: 'pointer', display: 'flex' }}
+                    >
+                        {isPage
+                            ? <ArrowLeft size={18} color="white" />
+                            : <X size={18} color="white" />
+                        }
                     </button>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '20px', fontWeight: 'bold' }}>
                         <Trophy size={24} /> {t.ranking.title}

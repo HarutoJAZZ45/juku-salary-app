@@ -12,7 +12,6 @@ import { TaxMonitor } from './components/TaxMonitor';
 import { DataManagementModal } from './components/DataManagementModal';
 import { AccountModal } from './components/AccountModal';
 import { AuthModal } from './components/AuthModal';
-import { RankingModal } from './components/RankingModal';
 import { LegalConsentGate } from './components/LegalConsentGate';
 import { LegalDocumentModal } from './components/LegalDocumentModal';
 import { useAuth } from './hooks/useAuth';
@@ -28,6 +27,9 @@ import { Navigate, useLocation, useNavigate } from 'react-router';
 
 const AnalyticsModal = lazy(() =>
   import('./components/AnalyticsModal').then(module => ({ default: module.AnalyticsModal }))
+);
+const RankingModal = lazy(() =>
+  import('./components/RankingModal').then(module => ({ default: module.RankingModal }))
 );
 
 function LoginRequiredScreen() {
@@ -107,7 +109,6 @@ function App() {
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [isRankingOpen, setIsRankingOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openLegalDocument, setOpenLegalDocument] = useState<LegalDocumentType | null>(null);
 
@@ -242,7 +243,7 @@ function App() {
     setCurrentViewDate(new Date());
   };
 
-  if (!['/home', '/settings', '/analytics'].includes(location.pathname)) {
+  if (!['/home', '/settings', '/analytics', '/ranking'].includes(location.pathname)) {
     return <Navigate to="/home" replace />;
   }
 
@@ -271,6 +272,30 @@ function App() {
             onClose={() => navigate('/home')}
           />
         </Suspense>
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
+  if (location.pathname === '/ranking') {
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+          <RankingModal
+            isOpen
+            displayMode="page"
+            onClose={() => navigate('/home')}
+            onOpenProfile={() => setIsAccountOpen(true)}
+            settings={settings}
+          />
+        </Suspense>
+        <AccountModal
+          isOpen={isAccountOpen}
+          onClose={() => setIsAccountOpen(false)}
+          entries={entries}
+          settings={settings}
+          onUpdateSettings={updateSettings}
+        />
         <Analytics />
       </LegalConsentGate>
     );
@@ -397,7 +422,7 @@ function App() {
           >
             <Info size={20} />
           </button>
-          <button onClick={() => setIsRankingOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
+          <button onClick={() => navigate('/ranking')} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
             <Trophy size={20} fill="#fbbf24" stroke="#d97706" />
           </button>
           {/* ログインボタン: 未ログイン→紫「Login」/ メールログイン→イニシャル緑 / Googleログイン→アバター+緑ドット */}
@@ -691,12 +716,6 @@ function App() {
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
-      />
-      <RankingModal
-        isOpen={isRankingOpen}
-        onClose={() => setIsRankingOpen(false)}
-        onOpenProfile={() => setIsAccountOpen(true)}
-        settings={settings}
       />
       <LegalDocumentModal
         type={openLegalDocument}
