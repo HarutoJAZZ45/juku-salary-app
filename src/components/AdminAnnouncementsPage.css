@@ -1,0 +1,124 @@
+body.announcement-admin-active {
+  display: block;
+}
+
+body.announcement-admin-active #root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-announcements-layout {
+  width: 100%;
+  max-width: 1540px;
+  margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(280px, 1fr);
+  gap: 20px;
+  align-items: start;
+  box-sizing: border-box;
+}
+
+.admin-announcements-editor,
+.admin-announcements-list {
+  min-width: 0;
+}
+
+.admin-announcements-editor {
+  position: sticky;
+  top: 16px;
+}
+
+.admin-announcements-list {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+}
+
+.admin-announcements-form {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px 18px;
+  align-items: start;
+}
+
+.admin-field-id {
+  grid-column: span 5;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.admin-field-title {
+  grid-column: span 7;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.admin-field-options {
+  grid-column: span 5;
+  grid-row: 2;
+  min-width: 0;
+}
+
+.admin-field-image {
+  grid-column: span 7;
+  grid-row: 2;
+  min-width: 0;
+}
+
+.admin-field-body,
+.admin-field-message,
+.admin-field-actions {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.admin-field-body {
+  grid-row: 3;
+}
+
+.admin-field-body textarea {
+  min-height: 190px;
+}
+
+.admin-field-actions {
+  min-width: 220px;
+  justify-self: end;
+}
+
+@media (max-width: 900px) {
+  .admin-announcements-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-announcements-editor,
+  .admin-announcements-list {
+    position: static;
+  }
+
+  .admin-announcements-list {
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-announcements-layout {
+    padding: 12px;
+  }
+
+  .admin-field-id,
+  .admin-field-title,
+  .admin-field-options,
+  .admin-field-image {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .admin-field-body {
+    grid-row: auto;
+  }
+}

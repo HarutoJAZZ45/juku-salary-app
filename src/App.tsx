@@ -13,9 +13,9 @@ import { AuthModal } from './components/AuthModal';
 import { LegalConsentGate } from './components/LegalConsentGate';
 import { LegalDocumentModal } from './components/LegalDocumentModal';
 import { useAuth } from './hooks/useAuth';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy, CalendarDays, ShieldCheck, FileText } from 'lucide-react';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy, CalendarDays, ShieldCheck, FileText, Megaphone, X } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
-import { LATEST_NEWS_ID } from './data/newsMeta';
+import { fetchLatestAnnouncement, isAnnouncementAdmin } from './services/announcements';
 import type { WorkEntry } from './types';
 import { useTranslation } from './contexts/LanguageContext';
 import { getEventBadges } from './utils/badges';
@@ -33,6 +33,9 @@ const AccountModal = lazy(() =>
 );
 const NewsModal = lazy(() =>
   import('./components/NewsModal').then(module => ({ default: module.NewsModal }))
+);
+const AdminAnnouncementsPage = lazy(() =>
+  import('./components/AdminAnnouncementsPage').then(module => ({ default: module.AdminAnnouncementsPage }))
 );
 
 function LoginRequiredScreen() {
@@ -117,9 +120,13 @@ function App() {
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
 
   // バッジと通知のロジック
+  const [latestNewsId, setLatestNewsId] = useState<string | null>(null);
+  const [announcementAdminUid, setAnnouncementAdminUid] = useState<string | null>(null);
+  const hasAnnouncementAdminAccess = announcementAdminUid === user?.uid;
   const hasUnreadNews = (
-    location.pathname !== '/news' &&
-    localStorage.getItem('lastReadNewsId') !== LATEST_NEWS_ID
+    latestNewsId !== null &&
+    !location.pathname.startsWith('/news') &&
+    localStorage.getItem('lastReadNewsId') !== latestNewsId
   );
   const [showHelpHint, setShowHelpHint] = useState(() => !localStorage.getItem('hasSeenHelp'));
 
@@ -179,9 +186,51 @@ function App() {
   };
 
   useEffect(() => {
-    if (location.pathname !== '/news') return;
-    localStorage.setItem('lastReadNewsId', LATEST_NEWS_ID);
-  }, [location.pathname]);
+    if (!user) return;
+
+    let isActive = true;
+    const loadLatestAnnouncement = async () => {
+      try {
+        const latest = await fetchLatestAnnouncement();
+        if (isActive && latest) {
+          setLatestNewsId(latest.id);
+        }
+      } catch (error) {
+        console.info('Firestore announcements are not available yet; using legacy news.', error);
+      }
+    };
+
+    void loadLatestAnnouncement();
+    return () => {
+      isActive = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    let isActive = true;
+    const checkAdminAccess = async () => {
+      try {
+        const allowed = await isAnnouncementAdmin(user.uid);
+        if (isActive) setAnnouncementAdminUid(allowed ? user.uid : null);
+      } catch {
+        if (isActive) setAnnouncementAdminUid(null);
+      }
+    };
+
+    void checkAdminAccess();
+    return () => {
+      isActive = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (!location.pathname.startsWith('/news')) return;
+    if (latestNewsId) {
+      localStorage.setItem('lastReadNewsId', latestNewsId);
+    }
+  }, [latestNewsId, location.pathname]);
 
   const legalDocumentType = location.pathname === '/terms'
     ? 'terms'
@@ -261,8 +310,23 @@ function App() {
     setCurrentViewDate(new Date());
   };
 
-  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/news'].includes(location.pathname)) {
+  const isNewsPath = location.pathname === '/news' || /^\/news\/[^/]+$/.test(location.pathname);
+
+  const isAdminAnnouncementsPath = location.pathname === '/admin/announcements';
+
+  if (!['/home', '/settings', '/analytics', '/ranking', '/profile'].includes(location.pathname) && !isNewsPath && !isAdminAnnouncementsPath) {
     return <Navigate to="/home" replace />;
+  }
+
+  if (isAdminAnnouncementsPath) {
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+          <AdminAnnouncementsPage onClose={() => navigate('/home')} />
+        </Suspense>
+        <Analytics />
+      </LegalConsentGate>
+    );
   }
 
   if (location.pathname === '/settings') {
@@ -330,14 +394,25 @@ function App() {
     );
   }
 
-  if (location.pathname === '/news') {
+  if (isNewsPath) {
+    let selectedNewsId: string | null = null;
+    if (location.pathname !== '/news') {
+      try {
+        selectedNewsId = decodeURIComponent(location.pathname.slice('/news/'.length));
+      } catch {
+        return <Navigate to="/news" replace />;
+      }
+    }
+
     return (
       <LegalConsentGate user={user}>
         <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
           <NewsModal
             isOpen
             displayMode="page"
-            onClose={() => navigate('/home')}
+            selectedId={selectedNewsId}
+            onSelect={id => navigate(`/news/${encodeURIComponent(id)}`)}
+            onClose={() => navigate(selectedNewsId ? '/news' : '/home')}
           />
         </Suspense>
         <Analytics />
@@ -392,6 +467,17 @@ function App() {
               </div>
               {t.app.newsTitle}
             </button>
+
+            {hasAnnouncementAdminAccess && (
+              <button
+                onClick={() => { navigate('/admin/announcements'); setIsMenuOpen(false); }}
+                className="menu-item"
+                style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: '#eff6ff', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#1d4ed8', fontWeight: 700 }}
+              >
+                <Megaphone size={18} />
+                お知らせ管理
+              </button>
+            )}
 
             <button
               onClick={() => { navigate('/settings'); setIsMenuOpen(false); }}
@@ -592,23 +678,31 @@ function App() {
       )}
 
       {isHelpOpen && (
-        <div className="glass-panel" style={{ padding: '16px', marginBottom: '24px', fontSize: '13px', lineHeight: '1.6', position: 'relative' }}>
-          <button onClick={() => setIsHelpOpen(false)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none' }}><Info size={16} color="gray" /></button>
+        <div className="glass-panel" style={{ padding: '16px 18px', marginBottom: '20px', fontSize: '13px', lineHeight: '1.65', position: 'relative' }}>
+          <button
+            onClick={() => setIsHelpOpen(false)}
+            aria-label="ヘルプを閉じる"
+            style={{ position: 'absolute', top: '10px', right: '10px', padding: '4px', display: 'flex', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+          >
+            <X size={17} />
+          </button>
 
-          <strong>{t.app.helpUsage}</strong><br />
-          1. {t.app.helpStep1}<br />
-          2. {t.app.helpStep2}<br />
-          3. {t.app.helpStep3}<br />
-          4. {t.app.helpStep4}<br />
-          <div style={{ marginTop: '12px', padding: '12px', background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', border: '1px solid #bae6fd', borderRadius: '12px', color: '#0369a1', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ fontSize: '20px' }}>📱</div>
-            <div>{t.app.helpStep5}</div>
-          </div>
-          <br />
-          <strong>{t.app.helpSave}</strong><br />
-          {t.app.helpSaveBody}
-          <div style={{ marginTop: '16px', padding: '8px', background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: '8px', color: '#be123c', fontWeight: 'bold' }}>
-            ※確実にデータを同期させたい場合は、ログインメニューから「クラウドへ保存」「クラウドから復元」を用いて手動で同期してください。
+          <strong style={{ display: 'block', marginBottom: '8px', paddingRight: '28px', fontSize: '14px', color: '#1e293b' }}>
+            基本的な使い方
+          </strong>
+          <ol style={{ margin: 0, paddingLeft: '20px', color: '#475569' }}>
+            <li>カレンダーの日付を押し、勤務内容やコマ数を登録します。</li>
+            <li>登録済みの日付を押すと、内容の編集や削除ができます。</li>
+            <li>画面上部で、その月の給与見込みと勤務状況を確認できます。</li>
+            <li style={{ textDecoration: 'underline', textUnderlineOffset: '3px', textDecorationThickness: '1px' }}>
+              給与単価や締め日は、右上メニューの「設定」から変更できます。
+            </li>
+          </ol>
+          <div style={{ marginTop: '12px', padding: '10px 12px', border: '1px solid #93c5fd', borderRadius: '10px', background: '#eff6ff', color: '#1e40af' }}>
+            <strong style={{ display: 'block', marginBottom: '3px', fontSize: '13px' }}>ホーム画面への追加がおすすめです</strong>
+            <span style={{ fontSize: '12px' }}>
+              ブラウザの共有またはメニューから「ホーム画面に追加」を選ぶと、アプリのようにすぐ開けます。
+            </span>
           </div>
         </div>
       )}
