@@ -1,18 +1,20 @@
 import React from 'react';
-import { X, Calendar } from 'lucide-react';
+import { ArrowLeft, X, Calendar } from 'lucide-react';
 import { NEWS_ITEMS } from '../data/news';
 import { useTranslation } from '../contexts/LanguageContext';
 
 interface NewsModalProps {
     isOpen: boolean;
     onClose: () => void;
+    displayMode?: 'modal' | 'page';
 }
 
 // ニュースモーダル
 // アプリからのお知らせや更新情報を表示する
-export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
+export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose, displayMode = 'modal' }) => {
     const { t } = useTranslation();
     const [filter, setFilter] = React.useState<'all' | 'important' | 'update'>('all');
+    const isPage = displayMode === 'page';
 
     if (!isOpen) return null;
 
@@ -44,16 +46,25 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
 
     return (
         <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+            position: isPage ? 'static' : 'fixed',
+            top: isPage ? undefined : 0,
+            left: isPage ? undefined : 0,
+            right: isPage ? undefined : 0,
+            bottom: isPage ? undefined : 0,
+            minHeight: isPage ? 'calc(100dvh - 40px)' : undefined,
+            background: isPage ? 'transparent' : 'rgba(0,0,0,0.5)',
+            backdropFilter: isPage ? undefined : 'blur(4px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 1100, animation: 'fadeIn 0.2s'
-        }} onClick={onClose}>
+            zIndex: isPage ? undefined : 1100,
+            animation: 'fadeIn 0.2s'
+        }} onClick={isPage ? undefined : onClose}>
             <div style={{
-                background: 'white',
-                width: '90%', maxWidth: '500px', maxHeight: '80vh',
+                background: isPage ? 'rgba(255,255,255,0.88)' : 'white',
+                width: '100%',
+                maxWidth: '500px',
+                maxHeight: isPage ? undefined : '80vh',
                 borderRadius: '24px',
-                overflow: 'hidden',
+                overflow: isPage ? 'visible' : 'hidden',
                 display: 'flex', flexDirection: 'column',
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
             }} onClick={e => e.stopPropagation()}>
@@ -67,8 +78,16 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <h3 style={{ margin: 0, fontSize: '18px', color: '#334155' }}>{t.app.newsTitle} 🔔</h3>
-                        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-                            <X size={24} color="#64748b" />
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            aria-label={isPage ? 'ホームへ戻る' : 'お知らせを閉じる'}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex' }}
+                        >
+                            {isPage
+                                ? <ArrowLeft size={24} color="#64748b" />
+                                : <X size={24} color="#64748b" />
+                            }
                         </button>
                     </div>
 
@@ -120,7 +139,7 @@ export const NewsModal: React.FC<NewsModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Content List */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+                <div style={{ flex: 1, overflowY: isPage ? 'visible' : 'auto', padding: '16px' }}>
                     {filteredItems.length === 0 ? (
                         <p style={{ textAlign: 'center', color: '#64748b', marginTop: '32px' }}>{t.app.newsEmpty}</p>
                     ) : (

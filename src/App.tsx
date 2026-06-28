@@ -6,7 +6,6 @@ import { SummaryCard } from './components/SummaryCard';
 import { WorkModal } from './components/WorkModal';
 import { FeedbackModal } from './components/FeedbackModal';
 import { SettingsModal } from './components/SettingsModal';
-import { NewsModal } from './components/NewsModal';
 import { BadgeHelpModal } from './components/BadgeHelpModal';
 import { TaxMonitor } from './components/TaxMonitor';
 import { DataManagementModal } from './components/DataManagementModal';
@@ -16,7 +15,7 @@ import { LegalDocumentModal } from './components/LegalDocumentModal';
 import { useAuth } from './hooks/useAuth';
 import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy, CalendarDays, ShieldCheck, FileText } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
-import { NEWS_ITEMS } from './data/news';
+import { LATEST_NEWS_ID } from './data/newsMeta';
 import type { WorkEntry } from './types';
 import { useTranslation } from './contexts/LanguageContext';
 import { getEventBadges } from './utils/badges';
@@ -32,6 +31,9 @@ const RankingModal = lazy(() =>
 );
 const AccountModal = lazy(() =>
   import('./components/AccountModal').then(module => ({ default: module.AccountModal }))
+);
+const NewsModal = lazy(() =>
+  import('./components/NewsModal').then(module => ({ default: module.NewsModal }))
 );
 
 function LoginRequiredScreen() {
@@ -105,7 +107,6 @@ function App() {
   const [isWorkModalOpen, setIsWorkModalOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const [isNewsOpen, setIsNewsOpen] = useState(false);
 
   const [isBadgeHelpOpen, setIsBadgeHelpOpen] = useState(false);
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
@@ -118,9 +119,10 @@ function App() {
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
 
   // バッジと通知のロジック
-  const [hasUnreadNews, setHasUnreadNews] = useState(() => (
-    NEWS_ITEMS.length > 0 && localStorage.getItem('lastReadNewsId') !== NEWS_ITEMS[0].id
-  ));
+  const hasUnreadNews = (
+    location.pathname !== '/news' &&
+    localStorage.getItem('lastReadNewsId') !== LATEST_NEWS_ID
+  );
   const [showHelpHint, setShowHelpHint] = useState(() => !localStorage.getItem('hasSeenHelp'));
 
   // 称号・バッジの獲得状況監視
@@ -175,12 +177,13 @@ function App() {
   }, [entries, settings, isLoaded, updateSettings]);
 
   const handleOpenNews = () => {
-    setIsNewsOpen(true);
-    setHasUnreadNews(false);
-    if (NEWS_ITEMS.length > 0) {
-      localStorage.setItem('lastReadNewsId', NEWS_ITEMS[0].id);
-    }
+    navigate('/news');
   };
+
+  useEffect(() => {
+    if (location.pathname !== '/news') return;
+    localStorage.setItem('lastReadNewsId', LATEST_NEWS_ID);
+  }, [location.pathname]);
 
   // 認証状態の確認完了までローディング表示
   if (authLoading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'gray' }}>Loading...</div>;
@@ -244,7 +247,7 @@ function App() {
     setCurrentViewDate(new Date());
   };
 
-  if (!['/home', '/settings', '/analytics', '/ranking', '/profile'].includes(location.pathname)) {
+  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/news'].includes(location.pathname)) {
     return <Navigate to="/home" replace />;
   }
 
@@ -306,6 +309,21 @@ function App() {
             entries={entries}
             settings={settings}
             onUpdateSettings={updateSettings}
+          />
+        </Suspense>
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
+  if (location.pathname === '/news') {
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+          <NewsModal
+            isOpen
+            displayMode="page"
+            onClose={() => navigate('/home')}
           />
         </Suspense>
         <Analytics />
@@ -700,11 +718,6 @@ function App() {
       <FeedbackModal
         isOpen={isFeedbackOpen}
         onClose={() => setIsFeedbackOpen(false)}
-      />
-
-      <NewsModal
-        isOpen={isNewsOpen}
-        onClose={() => setIsNewsOpen(false)}
       />
 
       <BadgeHelpModal

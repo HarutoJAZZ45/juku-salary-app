@@ -1,4 +1,5 @@
 import type { Language } from '../locales/types';
+import { LATEST_NEWS_ID } from './newsMeta';
 
 export interface NewsItem {
     id: string;
@@ -12,7 +13,7 @@ export interface NewsItem {
 
 export const NEWS_ITEMS: NewsItem[] = [
     {
-        id: '20260421-03',
+        id: LATEST_NEWS_ID,
         date: '2026-04-21',
         title: {
             ja: 'このアプリをご友人にご紹介ください🤝',
