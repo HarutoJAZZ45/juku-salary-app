@@ -10,7 +10,6 @@ import { NewsModal } from './components/NewsModal';
 import { BadgeHelpModal } from './components/BadgeHelpModal';
 import { TaxMonitor } from './components/TaxMonitor';
 import { DataManagementModal } from './components/DataManagementModal';
-import { AccountModal } from './components/AccountModal';
 import { AuthModal } from './components/AuthModal';
 import { LegalConsentGate } from './components/LegalConsentGate';
 import { LegalDocumentModal } from './components/LegalDocumentModal';
@@ -30,6 +29,9 @@ const AnalyticsModal = lazy(() =>
 );
 const RankingModal = lazy(() =>
   import('./components/RankingModal').then(module => ({ default: module.RankingModal }))
+);
+const AccountModal = lazy(() =>
+  import('./components/AccountModal').then(module => ({ default: module.AccountModal }))
 );
 
 function LoginRequiredScreen() {
@@ -107,7 +109,6 @@ function App() {
 
   const [isBadgeHelpOpen, setIsBadgeHelpOpen] = useState(false);
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
-  const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openLegalDocument, setOpenLegalDocument] = useState<LegalDocumentType | null>(null);
@@ -243,7 +244,7 @@ function App() {
     setCurrentViewDate(new Date());
   };
 
-  if (!['/home', '/settings', '/analytics', '/ranking'].includes(location.pathname)) {
+  if (!['/home', '/settings', '/analytics', '/ranking', '/profile'].includes(location.pathname)) {
     return <Navigate to="/home" replace />;
   }
 
@@ -285,17 +286,28 @@ function App() {
             isOpen
             displayMode="page"
             onClose={() => navigate('/home')}
-            onOpenProfile={() => setIsAccountOpen(true)}
+            onOpenProfile={() => navigate('/profile')}
             settings={settings}
           />
         </Suspense>
-        <AccountModal
-          isOpen={isAccountOpen}
-          onClose={() => setIsAccountOpen(false)}
-          entries={entries}
-          settings={settings}
-          onUpdateSettings={updateSettings}
-        />
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
+  if (location.pathname === '/profile') {
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+          <AccountModal
+            isOpen
+            displayMode="page"
+            onClose={() => navigate('/home')}
+            entries={entries}
+            settings={settings}
+            onUpdateSettings={updateSettings}
+          />
+        </Suspense>
         <Analytics />
       </LegalConsentGate>
     );
@@ -476,7 +488,7 @@ function App() {
               </>
             )}
           </button>
-          <button onClick={() => setIsAccountOpen(true)} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>
+          <button onClick={() => navigate('/profile')} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>
             <User size={20} />
             {(() => {
               const lastSeen = JSON.parse(localStorage.getItem('lastSeenTitles') || '[]');
@@ -703,14 +715,6 @@ function App() {
       <DataManagementModal
         isOpen={isDataManagementOpen}
         onClose={() => setIsDataManagementOpen(false)}
-      />
-
-      <AccountModal
-        isOpen={isAccountOpen}
-        onClose={() => setIsAccountOpen(false)}
-        entries={entries}
-        settings={settings}
-        onUpdateSettings={updateSettings}
       />
 
       <AuthModal

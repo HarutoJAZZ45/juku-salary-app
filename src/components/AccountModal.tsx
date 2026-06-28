@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { X, Trophy, Star, User, Edit2, Save, Palette, Shirt, Zap, Coffee, Camera, Book, Music, Smile, Dribbble, Flame, Calendar } from 'lucide-react';
+import { ArrowLeft, X, Trophy, Star, User, Edit2, Save, Palette, Shirt, Zap, Coffee, Camera, Book, Music, Smile, Dribbble, Flame, Calendar } from 'lucide-react';
 import type { UserSettings, WorkEntry } from '../types';
 import { calculateLevelData } from '../utils/levelSystem';
 import { calculateTotalBadges } from '../utils/badges';
@@ -11,6 +11,7 @@ interface AccountModalProps {
     entries: Record<string, WorkEntry>;
     settings: UserSettings;
     onUpdateSettings: (settings: UserSettings) => void;
+    displayMode?: 'modal' | 'page';
 }
 
 // プリセットテーマカラー
@@ -42,8 +43,10 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     onClose,
     entries,
     settings,
-    onUpdateSettings
+    onUpdateSettings,
+    displayMode = 'modal'
 }) => {
+    const isPage = displayMode === 'page';
     // レベルデータの計算（メモ化）
     const levelData = useMemo(() => {
         if (!isOpen) return null;
@@ -101,17 +104,24 @@ export const AccountModal: React.FC<AccountModalProps> = ({
 
     return (
         <div style={{
-            position: 'fixed', inset: 0, zIndex: 2000,
-            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+            position: isPage ? 'static' : 'fixed',
+            inset: isPage ? undefined : 0,
+            zIndex: isPage ? undefined : 2000,
+            minHeight: isPage ? 'calc(100dvh - 40px)' : undefined,
+            background: isPage ? 'transparent' : 'rgba(0,0,0,0.6)',
+            backdropFilter: isPage ? undefined : 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: isPage ? 0 : '16px',
             animation: 'fadeIn 0.2s'
         }}>
             <div style={{
-                background: 'white', borderRadius: '16px',
-                width: '100%', maxWidth: '400px',
+                background: isPage ? 'rgba(255,255,255,0.88)' : 'white',
+                borderRadius: '16px',
+                width: '100%', maxWidth: isPage ? '520px' : '400px',
                 overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                 transform: 'scale(1)', transition: 'all 0.2s',
-                maxHeight: '90vh', overflowY: 'auto'
+                maxHeight: isPage ? undefined : '90vh',
+                overflowY: isPage ? 'visible' : 'auto'
             }}>
                 {/* Header with gradient background */}
                 <div style={{
@@ -121,14 +131,19 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                     transition: 'background 0.3s ease'
                 }}>
                     <button
+                        type="button"
                         onClick={onClose}
+                        aria-label={isPage ? 'ホームへ戻る' : 'プロフィールを閉じる'}
                         style={{
                             position: 'absolute', top: '16px', right: '16px',
                             background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%',
                             padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
                         }}
                     >
-                        <X className="w-5 h-5 text-white" />
+                        {isPage
+                            ? <ArrowLeft className="w-5 h-5 text-white" />
+                            : <X className="w-5 h-5 text-white" />
+                        }
                     </button>
 
                     <button
