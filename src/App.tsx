@@ -25,6 +25,7 @@ import { useTranslation } from './contexts/LanguageContext';
 import { getEventBadges } from './utils/badges';
 import { calculateLevelData, TITLES } from './utils/levelSystem';
 import type { LegalDocumentType } from './legal/policies';
+import { Navigate, useLocation, useNavigate } from 'react-router';
 
 function LoginRequiredScreen() {
   return (
@@ -82,6 +83,8 @@ function LoginRequiredScreen() {
  */
 function App() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
   // 給与データのカスタムフック（読み込み、更新、削除、設定）
   const { entries, settings, migrationNotice, updateEntry, deleteEntry, updateSettings, clearMigrationNotice, isLoaded } = useSalaryData();
 
@@ -93,7 +96,6 @@ function App() {
   // モーダル（ポップアップ）の表示状態管理
   const [selectedDate, setSelectedDate] = useState<Date | Date[] | null>(null);
   const [isWorkModalOpen, setIsWorkModalOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isNewsOpen, setIsNewsOpen] = useState(false);
@@ -238,6 +240,25 @@ function App() {
     setCurrentViewDate(new Date());
   };
 
+  if (location.pathname !== '/home' && location.pathname !== '/settings') {
+    return <Navigate to="/home" replace />;
+  }
+
+  if (location.pathname === '/settings') {
+    return (
+      <LegalConsentGate user={user}>
+        <SettingsModal
+          isOpen
+          displayMode="page"
+          settings={settings}
+          onClose={() => navigate('/home')}
+          onSave={updateSettings}
+        />
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
   return (
     <LegalConsentGate user={user}>
     <>
@@ -287,7 +308,7 @@ function App() {
             </button>
 
             <button
-              onClick={() => { setIsSettingsOpen(true); setIsMenuOpen(false); }}
+              onClick={() => { navigate('/settings'); setIsMenuOpen(false); }}
               className="menu-item"
               style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
             >
@@ -621,13 +642,6 @@ function App() {
           }}
         />
       )}
-
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        settings={settings}
-        onClose={() => setIsSettingsOpen(false)}
-        onSave={updateSettings}
-      />
 
       <FeedbackModal
         isOpen={isFeedbackOpen}

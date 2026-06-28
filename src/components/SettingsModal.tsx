@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
 import type { UserSettings, Campus } from '../types';
-import { X, Save, Settings, Info } from 'lucide-react';
+import { ArrowLeft, X, Save, Settings, Info } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
 
 interface SettingsModalProps {
     isOpen: boolean;
     settings: UserSettings;
     onClose: () => void;
-    onSave: (newSettings: UserSettings) => void;
+    onSave: (newSettings: UserSettings) => void | Promise<void>;
+    displayMode?: 'modal' | 'page';
 }
 
 const CAMPUSES: Campus[] = ['平岡', '新札幌', '月寒', '円山', '北大前'];
 
 // 設定モーダル
 // 時給、交通費、校舎などの基本設定を変更する
-export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, onClose, onSave }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, onClose, onSave, displayMode = 'modal' }) => {
     const { t } = useTranslation();
     const [formData, setFormData] = useState<UserSettings>(settings);
+    const [isSaving, setIsSaving] = useState(false);
+    const isPage = displayMode === 'page';
 
     if (!isOpen) return null;
 
@@ -34,34 +37,58 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
         }));
     };
 
-    const handleSave = () => {
-        onSave(formData);
-        onClose();
+    const handleSave = async () => {
+        if (isSaving) return;
+
+        setIsSaving(true);
+        try {
+            await onSave(formData);
+            onClose();
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
         <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)',
+            position: isPage ? 'static' : 'fixed',
+            top: isPage ? undefined : 0,
+            left: isPage ? undefined : 0,
+            right: isPage ? undefined : 0,
+            bottom: isPage ? undefined : 0,
+            minHeight: isPage ? 'calc(100dvh - 40px)' : undefined,
+            background: isPage ? 'transparent' : 'rgba(0,0,0,0.3)',
+            backdropFilter: isPage ? undefined : 'blur(4px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 1000, animation: 'fadeIn 0.2s'
-        }} onClick={onClose}>
+            zIndex: isPage ? undefined : 1000,
+            animation: 'fadeIn 0.2s'
+        }} onClick={isPage ? undefined : onClose}>
             <div style={{
-                background: 'white',
-                width: '90%', maxWidth: '360px',
+                background: isPage ? 'rgba(255,255,255,0.88)' : 'white',
+                width: '100%',
+                maxWidth: isPage ? '520px' : '360px',
                 borderRadius: '24px',
-                padding: '24px',
+                padding: 'clamp(18px, 5vw, 24px)',
                 boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                 display: 'flex', flexDirection: 'column', gap: '20px',
-                maxHeight: '85vh', overflowY: 'auto'
+                maxHeight: isPage ? undefined : '85vh',
+                overflowY: isPage ? 'visible' : 'auto'
             }} onClick={e => e.stopPropagation()}>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Settings size={20} /> {t.settings.title}
                     </h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                        <X size={24} color="#64748b" />
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        aria-label={isPage ? 'ホームへ戻る' : '設定を閉じる'}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex' }}
+                    >
+                        {isPage
+                            ? <ArrowLeft size={24} color="#64748b" />
+                            : <X size={24} color="#64748b" />
+                        }
                     </button>
                 </div>
 
@@ -216,8 +243,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                     <input type="number" value={formData.annualLimit} onChange={e => handleChange('annualLimit', Number(e.target.value))} />
                 </div>
 
-                <button className="glass-btn" onClick={handleSave} style={{ width: '100%', marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <Save size={18} /> {t.settings.saveButton}
+                <button
+                    className="glass-btn"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    style={{ width: '100%', marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: isSaving ? 0.7 : 1 }}
+                >
+                    <Save size={18} /> {isSaving ? '保存中...' : t.settings.saveButton}
                 </button>
             </div>
         </div>

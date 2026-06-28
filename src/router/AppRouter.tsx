@@ -3,8 +3,7 @@ import App from '../App';
 
 export const AppRouter = () => (
   <Routes>
-    <Route path="/home" element={<App />} />
     <Route path="/" element={<Navigate to="/home" replace />} />
-    <Route path="*" element={<Navigate to="/home" replace />} />
+    <Route path="/*" element={<App />} />
   </Routes>
 );
