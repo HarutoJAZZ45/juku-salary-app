@@ -8,12 +8,11 @@ import { FeedbackModal } from './components/FeedbackModal';
 import { SettingsModal } from './components/SettingsModal';
 import { BadgeHelpModal } from './components/BadgeHelpModal';
 import { TaxMonitor } from './components/TaxMonitor';
-import { DataManagementModal } from './components/DataManagementModal';
 import { AuthModal } from './components/AuthModal';
 import { LegalConsentGate } from './components/LegalConsentGate';
 import { LegalDocumentModal } from './components/LegalDocumentModal';
 import { useAuth } from './hooks/useAuth';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, Database, User, Cloud, Trophy, CalendarDays, ShieldCheck, FileText, Megaphone, X } from 'lucide-react';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, User, Cloud, Trophy, CalendarDays, ShieldCheck, FileText, Megaphone, X } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { fetchLatestAnnouncement, isAnnouncementAdmin } from './services/announcements';
 import type { WorkEntry } from './types';
@@ -111,7 +110,6 @@ function App() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   const [isBadgeHelpOpen, setIsBadgeHelpOpen] = useState(false);
-  const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -499,15 +497,6 @@ function App() {
             </button>
 
             <button
-              onClick={() => { setIsDataManagementOpen(true); setIsMenuOpen(false); }}
-              className="menu-item"
-              style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
-            >
-              <Database size={18} />
-              {t.dataManagement.title}
-            </button>
-
-            <button
               onClick={() => { navigate('/terms'); setIsMenuOpen(false); }}
               className="menu-item"
               style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
@@ -831,11 +820,6 @@ function App() {
       <BadgeHelpModal
         isOpen={isBadgeHelpOpen}
         onClose={() => setIsBadgeHelpOpen(false)}
-      />
-
-      <DataManagementModal
-        isOpen={isDataManagementOpen}
-        onClose={() => setIsDataManagementOpen(false)}
       />
 
       <AuthModal
