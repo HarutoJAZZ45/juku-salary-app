@@ -89,8 +89,9 @@ publicProfiles/{uid}
   - `privacyVersion`
 - Review the terms of service and privacy policy whenever features change user data handling, public profile behavior, rankings, follows, admin operations, or external service usage.
 - Firestore-backed announcements so news can be added without code changes.
+  - Redesign the user experience like an email inbox: show a compact title list first, then open a dedicated detail page when an item is tapped.
 - Admin-only announcement and badge management.
-- Yearly salary settings as a required model, with migration from the current default salary settings into the current fiscal year.
+- Keep yearly salary settings optional. Years without an override continue to use the default salary settings, and duplicate or unreasonable year entries should be prevented.
 - Monthly ranking winner badges.
 - Public profile pages from ranking entries.
 - Follow/follower features.
@@ -101,13 +102,12 @@ publicProfiles/{uid}
 
 1. Login-required shell and localStorage-to-Firestore migration.
 2. Terms/privacy pages and first-login consent.
-3. Required yearly salary settings with safe migration.
-4. Route-based page structure.
-5. Firestore-backed announcements.
-6. Public profiles and ranking profile views.
-7. Monthly ranking winner badges.
-8. Follow/follower features.
-9. Account deletion and privacy controls.
+3. Route-based page structure.
+4. Firestore-backed announcements.
+5. Public profiles and ranking profile views.
+6. Monthly ranking winner badges.
+7. Follow/follower features.
+8. Account deletion and privacy controls.
 
 ## Versioning milestones
 
@@ -120,7 +120,6 @@ Suggested future tags:
 
 - `ver2-auth-required`
 - `ver2-terms-privacy`
-- `ver2-yearly-salary-required`
 - `ver2-routing`
 - `ver2-announcements`
 - `ver2-profile-ranking`
