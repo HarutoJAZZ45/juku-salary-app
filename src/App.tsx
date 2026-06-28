@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { useSalaryData } from './hooks/useSalaryData';
 import { Analytics } from "@vercel/analytics/react";
 import { CalendarGrid } from './components/CalendarGrid';
@@ -9,7 +9,6 @@ import { SettingsModal } from './components/SettingsModal';
 import { NewsModal } from './components/NewsModal';
 import { BadgeHelpModal } from './components/BadgeHelpModal';
 import { TaxMonitor } from './components/TaxMonitor';
-import { AnalyticsModal } from './components/AnalyticsModal';
 import { DataManagementModal } from './components/DataManagementModal';
 import { AccountModal } from './components/AccountModal';
 import { AuthModal } from './components/AuthModal';
@@ -26,6 +25,10 @@ import { getEventBadges } from './utils/badges';
 import { calculateLevelData, TITLES } from './utils/levelSystem';
 import type { LegalDocumentType } from './legal/policies';
 import { Navigate, useLocation, useNavigate } from 'react-router';
+
+const AnalyticsModal = lazy(() =>
+  import('./components/AnalyticsModal').then(module => ({ default: module.AnalyticsModal }))
+);
 
 function LoginRequiredScreen() {
   return (
@@ -101,7 +104,6 @@ function App() {
   const [isNewsOpen, setIsNewsOpen] = useState(false);
 
   const [isBadgeHelpOpen, setIsBadgeHelpOpen] = useState(false);
-  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isDataManagementOpen, setIsDataManagementOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -240,7 +242,7 @@ function App() {
     setCurrentViewDate(new Date());
   };
 
-  if (location.pathname !== '/home' && location.pathname !== '/settings') {
+  if (!['/home', '/settings', '/analytics'].includes(location.pathname)) {
     return <Navigate to="/home" replace />;
   }
 
@@ -254,6 +256,21 @@ function App() {
           onClose={() => navigate('/home')}
           onSave={updateSettings}
         />
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
+  if (location.pathname === '/analytics') {
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+          <AnalyticsModal
+            isOpen
+            displayMode="page"
+            onClose={() => navigate('/home')}
+          />
+        </Suspense>
         <Analytics />
       </LegalConsentGate>
     );
@@ -318,7 +335,7 @@ function App() {
 
             {/* 統計グラフ - ハンバーガーメニュー内 */}
             <button
-              onClick={() => { setIsAnalyticsOpen(true); setIsMenuOpen(false); }}
+              onClick={() => { navigate('/analytics'); setIsMenuOpen(false); }}
               className="menu-item"
               style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', width: '100%', textAlign: 'left', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#334155' }}
             >
@@ -656,11 +673,6 @@ function App() {
       <BadgeHelpModal
         isOpen={isBadgeHelpOpen}
         onClose={() => setIsBadgeHelpOpen(false)}
-      />
-
-      <AnalyticsModal
-        isOpen={isAnalyticsOpen}
-        onClose={() => setIsAnalyticsOpen(false)}
       />
 
       <DataManagementModal

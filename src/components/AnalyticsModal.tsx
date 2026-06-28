@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, TrendingUp } from 'lucide-react';
+import { ArrowLeft, X, TrendingUp } from 'lucide-react';
 import { useTranslation } from '../contexts/LanguageContext';
 import { useSalaryData } from '../hooks/useSalaryData';
 import { calculateDailyTotal, parseLocalDate } from '../utils/calculator';
@@ -9,13 +9,15 @@ import { format } from 'date-fns';
 interface AnalyticsModalProps {
     isOpen: boolean;
     onClose: () => void;
+    displayMode?: 'modal' | 'page';
 }
 
 // 分析モーダルコンポーネント
 // 月ごとの給与推移や勤務時間をグラフで表示する
-export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose }) => {
+export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose, displayMode = 'modal' }) => {
     const { t } = useTranslation();
     const { entries, settings } = useSalaryData();
+    const isPage = displayMode === 'page';
 
     if (!isOpen) return null;
 
@@ -63,16 +65,25 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose 
 
     return (
         <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+            position: isPage ? 'static' : 'fixed',
+            top: isPage ? undefined : 0,
+            left: isPage ? undefined : 0,
+            right: isPage ? undefined : 0,
+            bottom: isPage ? undefined : 0,
+            minHeight: isPage ? 'calc(100dvh - 40px)' : undefined,
+            background: isPage ? 'transparent' : 'rgba(0,0,0,0.5)',
+            backdropFilter: isPage ? undefined : 'blur(4px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 1100, animation: 'fadeIn 0.2s'
-        }} onClick={onClose}>
+            zIndex: isPage ? undefined : 1100,
+            animation: 'fadeIn 0.2s'
+        }} onClick={isPage ? undefined : onClose}>
             <div style={{
-                background: 'white',
-                width: '95%', maxWidth: '800px', maxHeight: '90vh',
+                background: isPage ? 'rgba(255,255,255,0.88)' : 'white',
+                width: '100%',
+                maxWidth: '800px',
+                maxHeight: isPage ? undefined : '90vh',
                 borderRadius: '24px',
-                overflow: 'hidden',
+                overflow: isPage ? 'visible' : 'hidden',
                 display: 'flex', flexDirection: 'column',
                 boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
             }} onClick={e => e.stopPropagation()}>
@@ -83,19 +94,27 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose 
                         <TrendingUp size={20} color="#3b82f6" />
                         {t.analytics?.title || 'Report'}
                     </h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                        <X size={24} color="#64748b" />
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        aria-label={isPage ? 'ホームへ戻る' : '統計を閉じる'}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex' }}
+                    >
+                        {isPage
+                            ? <ArrowLeft size={24} color="#64748b" />
+                            : <X size={24} color="#64748b" />
+                        }
                     </button>
                 </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+                <div style={{ flex: 1, overflowY: isPage ? 'visible' : 'auto', padding: 'clamp(14px, 5vw, 24px)' }}>
 
                     {/* Income Chart */}
                     <div style={{ marginBottom: '32px' }}>
                         <h4 style={{ color: '#64748b', marginBottom: '16px' }}>{t.analytics?.monthlyIncome} (Year {currentYear})</h4>
                         <div style={{ height: '300px', width: '100%' }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                <BarChart data={data} margin={{ top: 5, right: 8, left: 0, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                     <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                                     <YAxis tick={{ fontSize: 12 }} tickFormatter={formatYAxis} width={60} />
@@ -133,7 +152,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose 
                         <h4 style={{ color: '#64748b', marginBottom: '16px' }}>{t.analytics?.classCount}</h4>
                         <div style={{ height: '250px', width: '100%' }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                <BarChart data={data} margin={{ top: 5, right: 8, left: 0, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                     <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                                     <YAxis tick={{ fontSize: 12 }} />
