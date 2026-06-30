@@ -400,6 +400,9 @@ function App() {
             settings={settings}
             onUpdateSettings={updateSettings}
             onOpenBadgeStats={() => navigate('/profile/badges')}
+            onOpenConnections={kind => navigate(
+              `/profile/view/${encodeURIComponent(user.uid)}/${kind}`,
+            )}
           />
         </Suspense>
         <Analytics />
