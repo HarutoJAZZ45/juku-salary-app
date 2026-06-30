@@ -69,3 +69,19 @@ test('給与バッジの情報を公開プロフィールへ含めない', () =>
   assert.deepEqual(Object.keys(profile.badgeSummary).sort(), ['event', 'streak']);
   assert.equal('earnings' in profile.badgeSummary, false);
 });
+
+test('旧データの想定外プロフィール値を公開前に正規化する', () => {
+  const profile = buildPublicProfile('user-1', entries, {
+    ...settings,
+    profile: {
+      ...settings.profile,
+      name: '長'.repeat(40),
+      avatarId: 'unknown-avatar',
+      themeColor: 'unknown-theme',
+    },
+  });
+
+  assert.equal(profile.displayName.length, 30);
+  assert.equal(profile.avatarId, 'user');
+  assert.equal('themeColor' in profile, false);
+});
