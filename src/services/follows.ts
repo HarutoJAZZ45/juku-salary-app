@@ -15,6 +15,7 @@ import {
 import { db } from '../lib/firebase';
 import type { PublicProfile } from '../types';
 import {
+  buildFollowActivityUpdate,
   getFollowUidField,
   makeFollowId,
   type FollowListKind,
@@ -23,6 +24,8 @@ import { fetchPublicProfile } from './publicProfiles';
 
 const COLLECTION_NAME = 'follows';
 const LIST_LIMIT = 50;
+const ACTIVITY_BATCH_SIZE = 8;
+const followActivityCache = new Map<string, boolean>();
 
 export interface FollowCounts {
   followers: number;
@@ -32,8 +35,18 @@ export interface FollowCounts {
 export const fetchFollowCounts = async (uid: string): Promise<FollowCounts> => {
   const follows = collection(db, COLLECTION_NAME);
   const [followers, following] = await Promise.all([
-    getCountFromServer(query(follows, where('targetUid', '==', uid))),
-    getCountFromServer(query(follows, where('followerUid', '==', uid))),
+    getCountFromServer(query(
+      follows,
+      where('targetUid', '==', uid),
+      where('followerActive', '==', true),
+      where('targetActive', '==', true),
+    )),
+    getCountFromServer(query(
+      follows,
+      where('followerUid', '==', uid),
+      where('followerActive', '==', true),
+      where('targetActive', '==', true),
+    )),
   ]);
 
   return {
@@ -50,7 +63,9 @@ export const fetchIsFollowing = async (
   const snapshot = await getDoc(
     doc(db, COLLECTION_NAME, makeFollowId(followerUid, targetUid)),
   );
-  return snapshot.exists();
+  if (!snapshot.exists()) return false;
+  const data = snapshot.data();
+  return data.followerActive !== false && data.targetActive !== false;
 };
 
 export const followUser = async (
@@ -66,6 +81,8 @@ export const followUser = async (
     {
       followerUid,
       targetUid,
+      followerActive: true,
+      targetActive: true,
       createdAt: serverTimestamp(),
     },
   );
@@ -87,6 +104,8 @@ export const fetchFollowProfiles = async (
   const snapshot = await getDocs(query(
     collection(db, COLLECTION_NAME),
     where(filterField, '==', uid),
+    where('followerActive', '==', true),
+    where('targetActive', '==', true),
     limit(LIST_LIMIT),
   ));
 
@@ -99,21 +118,36 @@ export const fetchFollowProfiles = async (
   return profiles.filter((profile): profile is PublicProfile => profile !== null);
 };
 
-export const deleteFollowRelationships = async (uid: string): Promise<void> => {
+export const syncFollowRelationshipsActive = async (
+  uid: string,
+  active: boolean,
+  force = false,
+): Promise<void> => {
   if (!uid) return;
+  if (!force && followActivityCache.get(uid) === active) return;
+
   const follows = collection(db, COLLECTION_NAME);
   const [asFollower, asTarget] = await Promise.all([
     getDocs(query(follows, where('followerUid', '==', uid))),
     getDocs(query(follows, where('targetUid', '==', uid))),
   ]);
-  const references = new Map(
-    [...asFollower.docs, ...asTarget.docs].map(item => [item.id, item.ref]),
+  const documents = new Map(
+    [...asFollower.docs, ...asTarget.docs].map(item => [item.id, item]),
   );
-  const allReferences = [...references.values()];
+  const updates = [...documents.values()].flatMap(item => {
+    const nextData = buildFollowActivityUpdate(item.data(), uid, active);
+    return nextData
+      ? [{ reference: item.ref, data: nextData }]
+      : [];
+  });
 
-  for (let offset = 0; offset < allReferences.length; offset += 450) {
+  for (let offset = 0; offset < updates.length; offset += ACTIVITY_BATCH_SIZE) {
     const batch = writeBatch(db);
-    allReferences.slice(offset, offset + 450).forEach(reference => batch.delete(reference));
+    updates.slice(offset, offset + ACTIVITY_BATCH_SIZE).forEach(update => {
+      batch.update(update.reference, update.data);
+    });
     await batch.commit();
   }
+
+  followActivityCache.set(uid, active);
 };

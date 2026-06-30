@@ -25,8 +25,8 @@ import { calculateTotalBadges } from '../utils/badges';
 import { useTranslation } from '../contexts/LanguageContext';
 import { useAuth } from '../hooks/useAuth';
 import {
-    deleteFollowRelationships,
     fetchFollowCounts,
+    syncFollowRelationshipsActive,
     type FollowCounts,
 } from '../services/follows';
 import type { FollowListKind } from '../utils/follows';
@@ -38,7 +38,7 @@ interface AccountModalProps {
     onClose: () => void;
     entries: Record<string, WorkEntry>;
     settings: UserSettings;
-    onUpdateSettings: (settings: UserSettings) => void;
+    onUpdateSettings: (settings: UserSettings) => void | Promise<void>;
     onOpenBadgeStats?: () => void;
     onOpenConnections?: (kind: FollowListKind) => void;
     displayMode?: 'modal' | 'page';
@@ -148,7 +148,7 @@ export const AccountModal = ({
         ? t.titles[profile.activeTitle as keyof typeof t.titles] || profile.activeTitle
         : '称号未設定';
 
-    const updateProfile = (updates: Partial<UserProfile>) => {
+    const updateProfile = (updates: Partial<UserProfile>) => (
         onUpdateSettings({
             ...settings,
             profile: {
@@ -157,8 +157,8 @@ export const AccountModal = ({
                 ...profile,
                 ...updates,
             },
-        });
-    };
+        })
+    );
 
     const openEditor = () => {
         setEditName(profile?.name || 'ゲスト講師');
@@ -171,7 +171,7 @@ export const AccountModal = ({
     };
 
     const saveProfile = () => {
-        updateProfile({
+        void updateProfile({
             name: editName.trim() || 'ゲスト講師',
             themeColor: editTheme,
             avatarId: editAvatar,
@@ -185,9 +185,12 @@ export const AccountModal = ({
         setIsUpdatingParticipation(true);
         try {
             if (!enabled && user) {
-                await deleteFollowRelationships(user.uid);
+                await syncFollowRelationshipsActive(user.uid, false, true);
             }
-            updateProfile({ isPublicRankingEnabled: enabled });
+            await updateProfile({ isPublicRankingEnabled: enabled });
+            if (enabled && user) {
+                await syncFollowRelationshipsActive(user.uid, true, true);
+            }
         } catch (error) {
             console.error('[Follow] Relationship cleanup error:', error);
             window.alert('ランキング参加の変更に失敗しました。通信状態を確認して、もう一度お試しください。');

@@ -4,6 +4,7 @@ import type { WorkEntry, UserSettings, RankingData } from '../types';
 import { getFiscalYear, getPeriodRange, parseLocalDate } from './calculator';
 import { calculateLevelData } from './levelSystem';
 import { syncPublicProfile } from '../services/publicProfiles';
+import { syncFollowRelationshipsActive } from '../services/follows';
 
 export const updateRankingStats = async (uid: string | undefined, entries: Record<string, WorkEntry>, settings: UserSettings) => {
     if (!uid) return;
@@ -13,6 +14,9 @@ export const updateRankingStats = async (uid: string | undefined, entries: Recor
     if (!settings.profile?.isPublicRankingEnabled) {
         // ランキング不参加の場合は、ランキングコレクションからデータを削除
         const rankRef = doc(db, 'rankings', uid);
+        await syncFollowRelationshipsActive(uid, false).catch(error => {
+            console.error('[Follow] Deactivation error:', error);
+        });
         await Promise.all([
             deleteDoc(rankRef).catch(() => undefined),
             syncPublicProfile(uid, entries, settings).catch(() => undefined),
@@ -72,5 +76,8 @@ export const updateRankingStats = async (uid: string | undefined, entries: Recor
         setDoc(rankRef, cleanData).catch(e => console.error("[Ranking] Ranking sync error: ", e)),
         syncPublicProfile(uid, entries, settings).catch(e => console.error("[PublicProfile] Sync error: ", e)),
     ]);
+    await syncFollowRelationshipsActive(uid, true).catch(error => {
+        console.error('[Follow] Reactivation error:', error);
+    });
     console.log('[Ranking] Ranking data saved successfully.');
 };
