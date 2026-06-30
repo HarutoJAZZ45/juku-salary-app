@@ -59,15 +59,16 @@ test('公開プロフィールには許可した項目だけを含める', () =>
   assert.equal('email' in profile, false);
 });
 
-test('給与バッジの情報を公開プロフィールへ含めない', () => {
+test('給与バッジは金額や内訳ではなく合計個数だけを公開する', () => {
   const highPaySettings = {
     ...settings,
     teachingHourlyRate: 200000,
   };
   const profile = buildPublicProfile('user-1', entries, highPaySettings);
 
-  assert.deepEqual(Object.keys(profile.badgeSummary).sort(), ['event', 'streak']);
-  assert.equal('earnings' in profile.badgeSummary, false);
+  assert.deepEqual(Object.keys(profile.badgeSummary).sort(), ['earnings', 'event', 'streak']);
+  assert.equal(profile.badgeSummary.earnings, 1);
+  assert.equal('totalEarnings' in profile, false);
 });
 
 test('旧データの想定外プロフィール値を公開前に正規化する', () => {

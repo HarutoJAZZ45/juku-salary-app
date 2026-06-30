@@ -67,6 +67,7 @@ export const fetchPublicProfile = async (uid: string): Promise<PublicProfile | n
     totalClasses: Math.max(0, Math.floor(data.totalClasses)),
     badgeSummary: {
       streak: Math.max(0, Math.floor(Number(data.badgeSummary?.streak) || 0)),
+      earnings: Math.max(0, Math.floor(Number(data.badgeSummary?.earnings) || 0)),
       event: Math.max(0, Math.floor(Number(data.badgeSummary?.event) || 0)),
     },
     ...(updatedAt instanceof Timestamp ? { updatedAtMs: updatedAt.toMillis() } : {}),

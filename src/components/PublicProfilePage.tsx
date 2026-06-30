@@ -100,7 +100,10 @@ export function PublicProfilePage({ uid, onClose }: PublicProfilePageProps) {
   const titleLabel = profile.activeTitle
     ? t.titles[profile.activeTitle as keyof typeof t.titles] || profile.activeTitle
     : '称号未設定';
-  const publicBadgeTotal = profile.badgeSummary.streak + profile.badgeSummary.event;
+  const publicBadgeTotal =
+    profile.badgeSummary.streak
+    + profile.badgeSummary.earnings
+    + profile.badgeSummary.event;
 
   return (
     <div className="public-profile-page">
@@ -161,6 +164,13 @@ export function PublicProfilePage({ uid, onClose }: PublicProfilePageProps) {
             </span>
             <strong>{profile.badgeSummary.streak}</strong>
             <small>連勤</small>
+          </div>
+          <div>
+            <span className="public-profile-badge-icon public-profile-badge-icon--earnings">
+              <Trophy size={20} />
+            </span>
+            <strong>{profile.badgeSummary.earnings}</strong>
+            <small>給与達成</small>
           </div>
           <div>
             <span className="public-profile-badge-icon public-profile-badge-icon--event">

@@ -111,6 +111,7 @@ export interface PublicProfile {
   totalClasses: number;
   badgeSummary: {
     streak: number;
+    earnings: number;
     event: number;
   };
   updatedAtMs?: number;

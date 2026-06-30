@@ -165,7 +165,7 @@
 .public-profile-badges {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
@@ -188,6 +188,11 @@
 .public-profile-badge-icon--streak {
   color: #e11d48;
   background: #fff1f2;
+}
+
+.public-profile-badge-icon--earnings {
+  color: #d97706;
+  background: #fffbeb;
 }
 
 .public-profile-badge-icon--event {

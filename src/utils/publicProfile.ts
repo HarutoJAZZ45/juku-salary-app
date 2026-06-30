@@ -47,6 +47,7 @@ export const buildPublicProfile = (
     totalClasses: levelData.totalClasses,
     badgeSummary: {
       streak: badgeStatistics.totals.streak,
+      earnings: badgeStatistics.totals.earnings,
       event: badgeStatistics.totals.event,
     },
   };
