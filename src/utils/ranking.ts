@@ -2,6 +2,7 @@ import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { WorkEntry, UserSettings, RankingData } from '../types';
 import { getFiscalYear, getPeriodRange, parseLocalDate } from './calculator';
+import { syncPublicProfile } from '../services/publicProfiles';
 
 export const updateRankingStats = async (uid: string | undefined, entries: Record<string, WorkEntry>, settings: UserSettings) => {
     if (!uid) return;
@@ -11,7 +12,10 @@ export const updateRankingStats = async (uid: string | undefined, entries: Recor
     if (!settings.profile?.isPublicRankingEnabled) {
         // ランキング不参加の場合は、ランキングコレクションからデータを削除
         const rankRef = doc(db, 'rankings', uid);
-        await deleteDoc(rankRef).catch(() => { });
+        await Promise.all([
+            deleteDoc(rankRef).catch(() => undefined),
+            syncPublicProfile(uid, entries, settings).catch(() => undefined),
+        ]);
         console.log('[Ranking] Ranking opt-out: deleted ranking data.');
         return;
     }
@@ -61,6 +65,9 @@ export const updateRankingStats = async (uid: string | undefined, entries: Recor
     const cleanData = JSON.parse(JSON.stringify(rankingData));
 
     const rankRef = doc(db, 'rankings', uid);
-    await setDoc(rankRef, cleanData).catch(e => console.error("[Ranking] Ranking sync error: ", e));
+    await Promise.all([
+        setDoc(rankRef, cleanData).catch(e => console.error("[Ranking] Ranking sync error: ", e)),
+        syncPublicProfile(uid, entries, settings).catch(e => console.error("[PublicProfile] Sync error: ", e)),
+    ]);
     console.log('[Ranking] Ranking data saved successfully.');
 };
