@@ -99,14 +99,24 @@
     background: #f8fafc;
 }
 
-.monthly-badge-card--streak .monthly-badge-card__icon {
-    color: #e11d48;
-    background: #fff1f2;
+.monthly-badge-card--bronze .monthly-badge-card__icon {
+    color: #9a3412;
+    background: #fff7ed;
 }
 
-.monthly-badge-card--earnings .monthly-badge-card__icon {
+.monthly-badge-card--silver .monthly-badge-card__icon {
+    color: #475569;
+    background: #f8fafc;
+}
+
+.monthly-badge-card--gold .monthly-badge-card__icon {
     color: #a16207;
     background: #fefce8;
+}
+
+.monthly-badge-card--platinum .monthly-badge-card__icon {
+    color: #6d28d9;
+    background: #f5f3ff;
 }
 
 .monthly-badge-card--event .monthly-badge-card__icon {
