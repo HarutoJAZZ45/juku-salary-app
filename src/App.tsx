@@ -10,6 +10,7 @@ import { TaxMonitor } from './components/TaxMonitor';
 import { AuthModal } from './components/AuthModal';
 import { LegalConsentGate } from './components/LegalConsentGate';
 import { LegalDocumentModal } from './components/LegalDocumentModal';
+import { LoadingScreen } from './components/LoadingScreen';
 import { useAuth } from './hooks/useAuth';
 import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, User, Cloud, Trophy, CalendarDays, ShieldCheck, FileText, Megaphone, X } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
@@ -254,13 +255,13 @@ function App() {
   }
 
   // 認証状態の確認完了までローディング表示
-  if (authLoading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'gray' }}>Loading...</div>;
+  if (authLoading) return <LoadingScreen />;
 
   // 未ログイン時はホーム画面を表示しない
   if (!user) return <LoginRequiredScreen />;
 
   // データの読み込み完了までローディング表示
-  if (!isLoaded) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'gray' }}>Loading...</div>;
+  if (!isLoaded) return <LoadingScreen />;
 
   // カレンダーの日付クリック時の処理
   const handleDayClick = (day: Date) => {
@@ -328,7 +329,7 @@ function App() {
   if (isAdminAnnouncementsPath) {
     return (
       <LegalConsentGate user={user}>
-        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+        <Suspense fallback={<LoadingScreen />}>
           <AdminAnnouncementsPage onClose={() => navigate('/home')} />
         </Suspense>
         <Analytics />
@@ -354,7 +355,7 @@ function App() {
   if (location.pathname === '/analytics') {
     return (
       <LegalConsentGate user={user}>
-        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+        <Suspense fallback={<LoadingScreen />}>
           <AnalyticsModal
             isOpen
             displayMode="page"
@@ -369,7 +370,7 @@ function App() {
   if (location.pathname === '/ranking') {
     return (
       <LegalConsentGate user={user}>
-        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+        <Suspense fallback={<LoadingScreen />}>
           <RankingModal
             isOpen
             displayMode="page"
@@ -386,7 +387,7 @@ function App() {
   if (location.pathname === '/profile') {
     return (
       <LegalConsentGate user={user}>
-        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+        <Suspense fallback={<LoadingScreen />}>
           <AccountModal
             isOpen
             displayMode="page"
@@ -405,7 +406,7 @@ function App() {
   if (location.pathname === '/profile/badges') {
     return (
       <LegalConsentGate user={user}>
-        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+        <Suspense fallback={<LoadingScreen />}>
           <BadgeStatsPage
             entries={entries}
             settings={settings}
@@ -427,7 +428,7 @@ function App() {
 
     return (
       <LegalConsentGate user={user}>
-        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+        <Suspense fallback={<LoadingScreen />}>
           <PublicProfilePage
             uid={publicProfileUid}
             onClose={() => navigate('/ranking')}
@@ -441,7 +442,7 @@ function App() {
   if (monthlyBadgeMatch) {
     return (
       <LegalConsentGate user={user}>
-        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+        <Suspense fallback={<LoadingScreen />}>
           <MonthlyBadgePage
             entries={entries}
             settings={settings}
@@ -466,7 +467,7 @@ function App() {
 
     return (
       <LegalConsentGate user={user}>
-        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+        <Suspense fallback={<LoadingScreen />}>
           <NewsModal
             isOpen
             displayMode="page"
