@@ -23,6 +23,8 @@ import type { UserProfile, UserSettings, WorkEntry } from '../types';
 import { calculateLevelData } from '../utils/levelSystem';
 import { calculateTotalBadges } from '../utils/badges';
 import { useTranslation } from '../contexts/LanguageContext';
+import { useAuth } from '../hooks/useAuth';
+import { deleteFollowRelationships } from '../services/follows';
 import './AccountModal.css';
 
 interface AccountModalProps {
@@ -80,6 +82,7 @@ export const AccountModal = ({
     displayMode = 'modal',
 }: AccountModalProps) => {
     const { t } = useTranslation();
+    const { user } = useAuth();
     const isPage = displayMode === 'page';
     const profile = settings.profile;
 
@@ -100,6 +103,7 @@ export const AccountModal = ({
     const [lastSeenTitles, setLastSeenTitles] = useState<string[]>(() => (
         JSON.parse(localStorage.getItem('lastSeenTitles') || '[]')
     ));
+    const [isUpdatingParticipation, setIsUpdatingParticipation] = useState(false);
 
     if (!isOpen) return null;
 
@@ -142,6 +146,22 @@ export const AccountModal = ({
             activeTitle: editTitle,
         });
         setIsEditing(false);
+    };
+
+    const updateRankingParticipation = async (enabled: boolean) => {
+        if (isUpdatingParticipation) return;
+        setIsUpdatingParticipation(true);
+        try {
+            if (!enabled && user) {
+                await deleteFollowRelationships(user.uid);
+            }
+            updateProfile({ isPublicRankingEnabled: enabled });
+        } catch (error) {
+            console.error('[Follow] Relationship cleanup error:', error);
+            window.alert('ランキング参加の変更に失敗しました。通信状態を確認して、もう一度お試しください。');
+        } finally {
+            setIsUpdatingParticipation(false);
+        }
     };
 
     return (
@@ -351,7 +371,8 @@ export const AccountModal = ({
                         <input
                             type="checkbox"
                             checked={profile?.isPublicRankingEnabled || false}
-                            onChange={event => updateProfile({ isPublicRankingEnabled: event.target.checked })}
+                            disabled={isUpdatingParticipation}
+                            onChange={event => void updateRankingParticipation(event.target.checked)}
                         />
                         <span />
                     </label>

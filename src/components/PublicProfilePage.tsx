@@ -16,13 +16,23 @@ import {
   Zap,
 } from 'lucide-react';
 import { fetchPublicProfile } from '../services/publicProfiles';
+import {
+  fetchFollowCounts,
+  fetchIsFollowing,
+  followUser,
+  unfollowUser,
+  type FollowCounts,
+} from '../services/follows';
 import type { PublicProfile } from '../types';
 import { useTranslation } from '../contexts/LanguageContext';
+import { useAuth } from '../hooks/useAuth';
+import type { FollowListKind } from '../utils/follows';
 import './PublicProfilePage.css';
 
 interface PublicProfilePageProps {
   uid: string;
   onClose: () => void;
+  onOpenConnections: (kind: FollowListKind) => void;
 }
 
 const AVATARS: Record<string, ComponentType<{ size?: number; strokeWidth?: number }>> = {
@@ -48,10 +58,19 @@ const THEMES: Record<string, { from: string; to: string }> = {
   slate: { from: '#475569', to: '#1e293b' },
 };
 
-export function PublicProfilePage({ uid, onClose }: PublicProfilePageProps) {
+export function PublicProfilePage({
+  uid,
+  onClose,
+  onOpenConnections,
+}: PublicProfilePageProps) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
+  const [followCounts, setFollowCounts] = useState<FollowCounts | null>(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [socialStatus, setSocialStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [isFollowSaving, setIsFollowSaving] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -73,6 +92,60 @@ export function PublicProfilePage({ uid, onClose }: PublicProfilePageProps) {
       isActive = false;
     };
   }, [uid]);
+
+  useEffect(() => {
+    if (!user) return;
+    let isActive = true;
+
+    const loadSocialData = async () => {
+      setSocialStatus('loading');
+      try {
+        const [counts, following] = await Promise.all([
+          fetchFollowCounts(uid),
+          user.uid === uid
+            ? Promise.resolve(false)
+            : fetchIsFollowing(user.uid, uid),
+        ]);
+        if (!isActive) return;
+        setFollowCounts(counts);
+        setIsFollowing(following);
+        setSocialStatus('ready');
+      } catch (error) {
+        console.error('[Follow] Load error:', error);
+        if (isActive) setSocialStatus('error');
+      }
+    };
+
+    void loadSocialData();
+    return () => {
+      isActive = false;
+    };
+  }, [uid, user]);
+
+  const toggleFollow = async () => {
+    if (!user || user.uid === uid || isFollowSaving) return;
+    setIsFollowSaving(true);
+    try {
+      if (isFollowing) {
+        await unfollowUser(user.uid, uid);
+      } else {
+        await followUser(user.uid, uid);
+      }
+      setIsFollowing(previous => !previous);
+      setFollowCounts(previous => previous
+        ? {
+            ...previous,
+            followers: Math.max(0, previous.followers + (isFollowing ? -1 : 1)),
+          }
+        : previous);
+      setSocialStatus('ready');
+    } catch (error) {
+      console.error('[Follow] Update error:', error);
+      setSocialStatus('error');
+    } finally {
+      setIsFollowSaving(false);
+    }
+  };
 
   if (status !== 'ready' || !profile) {
     return (
@@ -133,6 +206,32 @@ export function PublicProfilePage({ uid, onClose }: PublicProfilePageProps) {
           <div className="public-profile-title">{titleLabel}</div>
         </div>
       </section>
+
+      <section className="public-profile-social" aria-label="フォロー情報">
+        <button type="button" onClick={() => onOpenConnections('following')}>
+          <strong>{followCounts?.following ?? '—'}</strong>
+          <span>フォロー中</span>
+        </button>
+        <button type="button" onClick={() => onOpenConnections('followers')}>
+          <strong>{followCounts?.followers ?? '—'}</strong>
+          <span>フォロワー</span>
+        </button>
+        {user?.uid !== uid && (
+          <button
+            type="button"
+            className={`public-profile-follow-button${isFollowing ? ' is-following' : ''}`}
+            disabled={isFollowSaving || socialStatus === 'loading'}
+            onClick={() => void toggleFollow()}
+          >
+            {isFollowSaving ? '更新中...' : isFollowing ? 'フォロー中' : 'フォローする'}
+          </button>
+        )}
+      </section>
+      {socialStatus === 'error' && (
+        <p className="public-profile-social-error">
+          フォロー情報を更新できませんでした。通信状態を確認してください。
+        </p>
+      )}
 
       <section className="public-profile-stats">
         <div>

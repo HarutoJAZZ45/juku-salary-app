@@ -36,6 +36,9 @@ const BadgeStatsPage = lazy(() =>
 const PublicProfilePage = lazy(() =>
   import('./components/PublicProfilePage').then(module => ({ default: module.PublicProfilePage }))
 );
+const FollowConnectionsPage = lazy(() =>
+  import('./components/FollowConnectionsPage').then(module => ({ default: module.FollowConnectionsPage }))
+);
 const MonthlyBadgePage = lazy(() =>
   import('./components/MonthlyBadgePage').then(module => ({ default: module.MonthlyBadgePage }))
 );
@@ -319,10 +322,11 @@ function App() {
   const isNewsPath = location.pathname === '/news' || /^\/news\/[^/]+$/.test(location.pathname);
   const monthlyBadgeMatch = location.pathname.match(/^\/badges\/month\/(\d{4}-(?:0[1-9]|1[0-2]))$/);
   const publicProfileMatch = location.pathname.match(/^\/profile\/view\/([^/]+)$/);
+  const publicConnectionsMatch = location.pathname.match(/^\/profile\/view\/([^/]+)\/(followers|following)$/);
 
   const isAdminAnnouncementsPath = location.pathname === '/admin/announcements';
 
-  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/profile/badges'].includes(location.pathname) && !isNewsPath && !monthlyBadgeMatch && !publicProfileMatch && !isAdminAnnouncementsPath) {
+  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/profile/badges'].includes(location.pathname) && !isNewsPath && !monthlyBadgeMatch && !publicProfileMatch && !publicConnectionsMatch && !isAdminAnnouncementsPath) {
     return <Navigate to="/home" replace />;
   }
 
@@ -418,6 +422,32 @@ function App() {
     );
   }
 
+  if (publicConnectionsMatch) {
+    let connectionsUid = '';
+    try {
+      connectionsUid = decodeURIComponent(publicConnectionsMatch[1]);
+    } catch {
+      return <Navigate to="/ranking" replace />;
+    }
+    const connectionKind = publicConnectionsMatch[2] as 'followers' | 'following';
+    const encodedUid = encodeURIComponent(connectionsUid);
+
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<LoadingScreen />}>
+          <FollowConnectionsPage
+            uid={connectionsUid}
+            kind={connectionKind}
+            onClose={() => navigate(`/profile/view/${encodedUid}`)}
+            onChangeKind={kind => navigate(`/profile/view/${encodedUid}/${kind}`)}
+            onOpenProfile={profileUid => navigate(`/profile/view/${encodeURIComponent(profileUid)}`)}
+          />
+        </Suspense>
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
   if (publicProfileMatch) {
     let publicProfileUid = '';
     try {
@@ -432,6 +462,9 @@ function App() {
           <PublicProfilePage
             uid={publicProfileUid}
             onClose={() => navigate('/ranking')}
+            onOpenConnections={kind => navigate(
+              `/profile/view/${encodeURIComponent(publicProfileUid)}/${kind}`,
+            )}
           />
         </Suspense>
         <Analytics />

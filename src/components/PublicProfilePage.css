@@ -105,11 +105,78 @@
 }
 
 .public-profile-stats,
+.public-profile-social,
 .public-profile-card,
 .public-profile-state {
   border: 1px solid #e2e8f0;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.public-profile-social {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(118px, 1.2fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.public-profile-social > button {
+  min-width: 0;
+  min-height: 46px;
+  border: 0;
+  border-radius: 12px;
+  color: #334155;
+  background: transparent;
+  cursor: pointer;
+}
+
+.public-profile-social > button:not(.public-profile-follow-button):hover {
+  background: #f8fafc;
+}
+
+.public-profile-social strong,
+.public-profile-social span {
+  display: block;
+}
+
+.public-profile-social strong {
+  font-size: 16px;
+}
+
+.public-profile-social span {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.public-profile-follow-button {
+  padding: 0 12px;
+  color: #fff !important;
+  background: #334155 !important;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.public-profile-follow-button.is-following {
+  border: 1px solid #cbd5e1;
+  color: #475569 !important;
+  background: #fff !important;
+}
+
+.public-profile-follow-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.public-profile-social-error {
+  margin: 8px 6px 0;
+  color: #b91c1c;
+  font-size: 10px;
+  text-align: center;
 }
 
 .public-profile-stats {
