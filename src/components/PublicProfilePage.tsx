@@ -27,6 +27,7 @@ import type { PublicProfile } from '../types';
 import { useTranslation } from '../contexts/LanguageContext';
 import { useAuth } from '../hooks/useAuth';
 import type { FollowListKind } from '../utils/follows';
+import { getProfileTheme } from '../utils/profileTheme';
 import './PublicProfilePage.css';
 
 interface PublicProfilePageProps {
@@ -47,15 +48,6 @@ const AVATARS: Record<string, ComponentType<{ size?: number; strokeWidth?: numbe
   shirt: Shirt,
   star: Star,
   basketball: Dribbble,
-};
-
-const THEMES: Record<string, { from: string; to: string }> = {
-  indigo: { from: '#4f46e5', to: '#7c3aed' },
-  emerald: { from: '#059669', to: '#0d9488' },
-  rose: { from: '#e11d48', to: '#be185d' },
-  amber: { from: '#d97706', to: '#ea580c' },
-  blue: { from: '#2563eb', to: '#0284c7' },
-  slate: { from: '#475569', to: '#1e293b' },
 };
 
 export function PublicProfilePage({
@@ -168,7 +160,7 @@ export function PublicProfilePage({
     );
   }
 
-  const theme = THEMES[profile.themeColor || 'indigo'] ?? THEMES.indigo;
+  const theme = getProfileTheme(profile.themeColor);
   const Avatar = AVATARS[profile.avatarId] ?? User;
   const titleLabel = profile.activeTitle
     ? t.titles[profile.activeTitle as keyof typeof t.titles] || profile.activeTitle

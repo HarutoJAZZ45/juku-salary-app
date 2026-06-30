@@ -5,6 +5,7 @@ import { db } from '../lib/firebase';
 import type { RankingData, UserSettings } from '../types';
 import { useTranslation } from '../contexts/LanguageContext';
 import type { LucideIcon } from 'lucide-react';
+import { getProfileTheme } from '../utils/profileTheme';
 
 // アバターアイコンのマッピング
 const AVATAR_MAP: Record<string, LucideIcon> = {
@@ -272,6 +273,7 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onO
                             {rankings.map((user, index) => {
                                 const stats = periodType === 'monthly' ? user.monthly[targetKey] : user.yearly[targetKey];
                                 const score = stats ? stats[category] : 0;
+                                const theme = getProfileTheme(user.themeColor);
 
                                 return (
                                     <button
@@ -292,9 +294,7 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onO
                                             width: '40px',
                                             height: '40px',
                                             borderRadius: '50%',
-                                            background: user.themeColor
-                                                ? `linear-gradient(135deg, ${user.themeColor}, #ffffff)`
-                                                : '#ffffff',
+                                            background: `linear-gradient(135deg, ${theme.from}22, #ffffff)`,
                                             flexShrink: 0,
                                             display: 'flex',
                                             alignItems: 'center',
@@ -304,7 +304,7 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onO
                                         }}>
                                             {(() => {
                                                 const IconComp = AVATAR_MAP[user.avatarId || 'user'] || User;
-                                                return <IconComp size={24} stroke="#fbbf24" strokeWidth={2.5} />;
+                                                return <IconComp size={24} stroke={theme.from} strokeWidth={2.5} />;
                                             })()}
                                         </div>
 
@@ -313,7 +313,7 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onO
                                                 {user.name}
                                             </div>
                                             {user.activeTitle && (
-                                                <div style={{ fontSize: '11px', color: user.themeColor || '#64748b', fontWeight: 600 }}>
+                                                <div style={{ fontSize: '11px', color: theme.from, fontWeight: 600 }}>
                                                     {t.titles[user.activeTitle as keyof typeof t.titles] || user.activeTitle}
                                                 </div>
                                             )}

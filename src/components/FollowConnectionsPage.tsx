@@ -17,6 +17,7 @@ import { fetchFollowCounts, fetchFollowProfiles, type FollowCounts } from '../se
 import { fetchPublicProfile } from '../services/publicProfiles';
 import type { PublicProfile } from '../types';
 import type { FollowListKind } from '../utils/follows';
+import { getProfileTheme } from '../utils/profileTheme';
 import './FollowConnectionsPage.css';
 
 interface FollowConnectionsPageProps {
@@ -39,15 +40,6 @@ const AVATARS: Record<string, ComponentType<{ size?: number; strokeWidth?: numbe
   shirt: Shirt,
   star: Star,
   basketball: Dribbble,
-};
-
-const THEME_COLORS: Record<string, string> = {
-  indigo: '#4f46e5',
-  emerald: '#059669',
-  rose: '#e11d48',
-  amber: '#d97706',
-  blue: '#2563eb',
-  slate: '#475569',
 };
 
 export function FollowConnectionsPage({
@@ -139,7 +131,7 @@ export function FollowConnectionsPage({
         )}
         {status === 'ready' && profiles.map(profile => {
           const Avatar = AVATARS[profile.avatarId] ?? User;
-          const themeColor = THEME_COLORS[profile.themeColor || 'indigo'] ?? THEME_COLORS.indigo;
+          const themeColor = getProfileTheme(profile.themeColor).from;
           return (
             <button
               type="button"
