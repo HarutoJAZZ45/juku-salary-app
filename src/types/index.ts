@@ -97,6 +97,26 @@ export interface RankingData {
 }
 
 /**
+ * ログイン済みユーザー間で共有する公開プロフィール
+ * 給与額・勤務日・メールアドレスなどの非公開情報は含めない
+ */
+export interface PublicProfile {
+  uid: string;
+  displayName: string;
+  avatarId: string;
+  themeColor?: string;
+  activeTitle?: string;
+  affiliation: Campus;
+  level: number;
+  totalClasses: number;
+  badgeSummary: {
+    streak: number;
+    event: number;
+  };
+  updatedAtMs?: number;
+}
+
+/**
  * レベル・経験値データ
  */
 export interface LevelData {

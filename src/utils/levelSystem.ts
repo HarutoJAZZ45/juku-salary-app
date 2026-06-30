@@ -1,5 +1,5 @@
 import type { WorkEntry, LevelData, UserSettings } from '../types';
-import { calculateDailyTotal } from './calculator';
+import { calculateDailyTotal } from './calculator.ts';
 
 // レベルごとの必要XP計算 (nレベルに到達するのに必要な累積XP)
 // 式: Level = 1 + sqrt(XP / 100) -> XP = 100 * (Level - 1)^2
