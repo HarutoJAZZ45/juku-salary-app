@@ -91,6 +91,7 @@ export interface RankingData {
   avatarId: string;
   themeColor?: string;
   activeTitle?: string;
+  level?: number;
   monthly: Record<string, RankingStats>; // key: "2024-04"
   yearly: Record<string, RankingStats>;  // key: "2024"
   updatedAt?: number;
@@ -109,6 +110,7 @@ export interface PublicProfile {
   affiliation: Campus;
   level: number;
   totalClasses: number;
+  totalWorkDays?: number;
   badgeSummary: {
     streak: number;
     earnings: number;

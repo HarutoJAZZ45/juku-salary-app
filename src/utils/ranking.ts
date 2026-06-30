@@ -2,6 +2,7 @@ import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { WorkEntry, UserSettings, RankingData } from '../types';
 import { getFiscalYear, getPeriodRange, parseLocalDate } from './calculator';
+import { calculateLevelData } from './levelSystem';
 import { syncPublicProfile } from '../services/publicProfiles';
 
 export const updateRankingStats = async (uid: string | undefined, entries: Record<string, WorkEntry>, settings: UserSettings) => {
@@ -21,6 +22,7 @@ export const updateRankingStats = async (uid: string | undefined, entries: Recor
     }
 
     const profile = settings.profile;
+    const level = calculateLevelData(entries, settings).level;
 
     const rankingData: RankingData = {
         uid,
@@ -28,6 +30,7 @@ export const updateRankingStats = async (uid: string | undefined, entries: Recor
         avatarId: profile.avatarId || 'user',
         themeColor: profile.themeColor,
         activeTitle: profile.activeTitle,
+        level,
         monthly: {},
         yearly: {},
         updatedAt: Date.now()

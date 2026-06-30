@@ -65,6 +65,9 @@ export const fetchPublicProfile = async (uid: string): Promise<PublicProfile | n
     affiliation,
     level: Math.max(1, Math.floor(data.level)),
     totalClasses: Math.max(0, Math.floor(data.totalClasses)),
+    ...(typeof data.totalWorkDays === 'number'
+      ? { totalWorkDays: Math.max(0, Math.floor(data.totalWorkDays)) }
+      : {}),
     badgeSummary: {
       streak: Math.max(0, Math.floor(Number(data.badgeSummary?.streak) || 0)),
       earnings: Math.max(0, Math.floor(Number(data.badgeSummary?.earnings) || 0)),

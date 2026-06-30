@@ -28,6 +28,7 @@ import { useTranslation } from '../contexts/LanguageContext';
 import { useAuth } from '../hooks/useAuth';
 import type { FollowListKind } from '../utils/follows';
 import { getProfileTheme } from '../utils/profileTheme';
+import { ProfileHotChart } from './ProfileHotChart';
 import './PublicProfilePage.css';
 
 interface PublicProfilePageProps {
@@ -235,8 +236,8 @@ export function PublicProfilePage({
           <span>担当コマ</span>
         </div>
         <div>
-          <strong>{publicBadgeTotal}</strong>
-          <span>公開バッジ</span>
+          <strong>{profile.totalWorkDays?.toLocaleString() ?? '—'}</strong>
+          <span>勤務日</span>
         </div>
       </section>
 
@@ -272,6 +273,8 @@ export function PublicProfilePage({
           </div>
         </div>
       </section>
+
+      <ProfileHotChart uid={uid} />
 
       <div className="public-profile-note">
         <Trophy size={15} />

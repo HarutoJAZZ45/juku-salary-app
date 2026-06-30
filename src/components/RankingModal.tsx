@@ -6,6 +6,7 @@ import type { RankingData, UserSettings } from '../types';
 import { useTranslation } from '../contexts/LanguageContext';
 import type { LucideIcon } from 'lucide-react';
 import { getProfileTheme } from '../utils/profileTheme';
+import { sortRankingsByScore } from '../utils/rankingHotChart';
 
 // アバターアイコンのマッピング
 const AVATAR_MAP: Record<string, LucideIcon> = {
@@ -97,15 +98,13 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onO
                     }
                 });
 
-                // 並び替え
-                data.sort((a, b) => {
-                    const statsA = periodType === 'monthly' ? a.monthly[targetKey] : a.yearly[targetKey];
-                    const statsB = periodType === 'monthly' ? b.monthly[targetKey] : b.yearly[targetKey];
-                    return (statsB?.[category] || 0) - (statsA?.[category] || 0);
-                });
-
                 // Top 50 に制限
-                setRankings(data.slice(0, 50));
+                setRankings(sortRankingsByScore(
+                    data,
+                    periodType,
+                    targetKey,
+                    category,
+                ).slice(0, 50));
             } catch (err) {
                 console.error("Failed to load rankings:", err);
             } finally {

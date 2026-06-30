@@ -30,6 +30,7 @@ import {
     type FollowCounts,
 } from '../services/follows';
 import type { FollowListKind } from '../utils/follows';
+import { ProfileHotChart } from './ProfileHotChart';
 import './AccountModal.css';
 
 interface AccountModalProps {
@@ -402,6 +403,13 @@ export const AccountModal = ({
                         </div>
                     </div>
                 </section>
+
+                {user && (
+                    <ProfileHotChart
+                        uid={user.uid}
+                        enabled={profile?.isPublicRankingEnabled === true}
+                    />
+                )}
 
                 <section className="profile-card profile-ranking-card">
                     <div className="profile-ranking-copy">
