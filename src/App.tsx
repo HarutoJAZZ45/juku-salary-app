@@ -32,6 +32,9 @@ const AccountModal = lazy(() =>
 const BadgeStatsPage = lazy(() =>
   import('./components/BadgeStatsPage').then(module => ({ default: module.BadgeStatsPage }))
 );
+const PublicProfilePage = lazy(() =>
+  import('./components/PublicProfilePage').then(module => ({ default: module.PublicProfilePage }))
+);
 const MonthlyBadgePage = lazy(() =>
   import('./components/MonthlyBadgePage').then(module => ({ default: module.MonthlyBadgePage }))
 );
@@ -314,10 +317,11 @@ function App() {
 
   const isNewsPath = location.pathname === '/news' || /^\/news\/[^/]+$/.test(location.pathname);
   const monthlyBadgeMatch = location.pathname.match(/^\/badges\/month\/(\d{4}-(?:0[1-9]|1[0-2]))$/);
+  const publicProfileMatch = location.pathname.match(/^\/profile\/view\/([^/]+)$/);
 
   const isAdminAnnouncementsPath = location.pathname === '/admin/announcements';
 
-  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/profile/badges'].includes(location.pathname) && !isNewsPath && !monthlyBadgeMatch && !isAdminAnnouncementsPath) {
+  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/profile/badges'].includes(location.pathname) && !isNewsPath && !monthlyBadgeMatch && !publicProfileMatch && !isAdminAnnouncementsPath) {
     return <Navigate to="/home" replace />;
   }
 
@@ -370,7 +374,7 @@ function App() {
             isOpen
             displayMode="page"
             onClose={() => navigate('/home')}
-            onOpenProfile={() => navigate('/profile')}
+            onOpenProfile={uid => navigate(uid ? `/profile/view/${encodeURIComponent(uid)}` : '/profile')}
             settings={settings}
           />
         </Suspense>
@@ -406,6 +410,27 @@ function App() {
             entries={entries}
             settings={settings}
             onClose={() => navigate('/profile')}
+          />
+        </Suspense>
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
+  if (publicProfileMatch) {
+    let publicProfileUid = '';
+    try {
+      publicProfileUid = decodeURIComponent(publicProfileMatch[1]);
+    } catch {
+      return <Navigate to="/ranking" replace />;
+    }
+
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+          <PublicProfilePage
+            uid={publicProfileUid}
+            onClose={() => navigate('/ranking')}
           />
         </Suspense>
         <Analytics />

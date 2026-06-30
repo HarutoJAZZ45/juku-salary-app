@@ -23,7 +23,7 @@ const AVATAR_MAP: Record<string, LucideIcon> = {
 interface RankingModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onOpenProfile: () => void;
+    onOpenProfile: (uid?: string) => void;
     settings: UserSettings;
     displayMode?: 'modal' | 'page';
 }
@@ -274,7 +274,12 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onO
                                 const score = stats ? stats[category] : 0;
 
                                 return (
-                                    <div key={user.uid} style={{ background: 'white', borderRadius: '12px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
+                                    <button
+                                        key={user.uid}
+                                        type="button"
+                                        onClick={() => onOpenProfile(user.uid)}
+                                        style={{ width: '100%', border: 'none', background: 'white', borderRadius: '12px', padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden', cursor: 'pointer', textAlign: 'left' }}
+                                    >
                                         {index < 3 && (
                                             <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '4px', background: index === 0 ? '#fbbf24' : index === 1 ? '#94a3b8' : '#b45309' }} />
                                         )}
@@ -322,7 +327,7 @@ export const RankingModal: React.FC<RankingModalProps> = ({ isOpen, onClose, onO
                                                 </span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </button>
                                 );
                             })}
                         </div>
