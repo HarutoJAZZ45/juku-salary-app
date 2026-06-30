@@ -49,11 +49,13 @@ test('公開プロフィールには許可した項目だけを含める', () =>
     'level',
     'themeColor',
     'totalClasses',
+    'totalWorkDays',
     'uid',
   ]);
   assert.equal(profile.displayName, 'テスト講師');
   assert.equal(profile.affiliation, '新札幌');
   assert.equal(profile.totalClasses, 2);
+  assert.equal(profile.totalWorkDays, 1);
   assert.equal('entries' in profile, false);
   assert.equal('totalEarnings' in profile, false);
   assert.equal('email' in profile, false);

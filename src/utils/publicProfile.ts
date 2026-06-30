@@ -45,6 +45,7 @@ export const buildPublicProfile = (
     affiliation: settings.defaultCampus,
     level: levelData.level,
     totalClasses: levelData.totalClasses,
+    totalWorkDays: levelData.totalWorkDays,
     badgeSummary: {
       streak: badgeStatistics.totals.streak,
       earnings: badgeStatistics.totals.earnings,
