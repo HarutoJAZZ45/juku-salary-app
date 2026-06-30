@@ -1,4 +1,4 @@
-import { useMemo, useState, type ComponentType } from 'react';
+import { useEffect, useMemo, useState, type ComponentType } from 'react';
 import {
     ArrowLeft,
     BookOpen,
@@ -24,7 +24,12 @@ import { calculateLevelData } from '../utils/levelSystem';
 import { calculateTotalBadges } from '../utils/badges';
 import { useTranslation } from '../contexts/LanguageContext';
 import { useAuth } from '../hooks/useAuth';
-import { deleteFollowRelationships } from '../services/follows';
+import {
+    deleteFollowRelationships,
+    fetchFollowCounts,
+    type FollowCounts,
+} from '../services/follows';
+import type { FollowListKind } from '../utils/follows';
 import './AccountModal.css';
 
 interface AccountModalProps {
@@ -34,6 +39,7 @@ interface AccountModalProps {
     settings: UserSettings;
     onUpdateSettings: (settings: UserSettings) => void;
     onOpenBadgeStats?: () => void;
+    onOpenConnections?: (kind: FollowListKind) => void;
     displayMode?: 'modal' | 'page';
 }
 
@@ -79,6 +85,7 @@ export const AccountModal = ({
     settings,
     onUpdateSettings,
     onOpenBadgeStats,
+    onOpenConnections,
     displayMode = 'modal',
 }: AccountModalProps) => {
     const { t } = useTranslation();
@@ -104,6 +111,30 @@ export const AccountModal = ({
         JSON.parse(localStorage.getItem('lastSeenTitles') || '[]')
     ));
     const [isUpdatingParticipation, setIsUpdatingParticipation] = useState(false);
+    const [followCounts, setFollowCounts] = useState<FollowCounts | null>(null);
+
+    useEffect(() => {
+        if (!user || !profile?.isPublicRankingEnabled) {
+            setFollowCounts(null);
+            return;
+        }
+
+        let isActive = true;
+        const loadFollowCounts = async () => {
+            try {
+                const counts = await fetchFollowCounts(user.uid);
+                if (isActive) setFollowCounts(counts);
+            } catch (error) {
+                console.error('[Follow] MyProfile count load error:', error);
+                if (isActive) setFollowCounts(null);
+            }
+        };
+
+        void loadFollowCounts();
+        return () => {
+            isActive = false;
+        };
+    }, [profile?.isPublicRankingEnabled, user]);
 
     if (!isOpen) return null;
 
@@ -303,6 +334,19 @@ export const AccountModal = ({
                         <span>勤務日</span>
                     </div>
                 </section>
+
+                {profile?.isPublicRankingEnabled && onOpenConnections && (
+                    <section className="profile-social-stats" aria-label="フォロー情報">
+                        <button type="button" onClick={() => onOpenConnections('following')}>
+                            <strong>{followCounts?.following ?? '—'}</strong>
+                            <span>フォロー中</span>
+                        </button>
+                        <button type="button" onClick={() => onOpenConnections('followers')}>
+                            <strong>{followCounts?.followers ?? '—'}</strong>
+                            <span>フォロワー</span>
+                        </button>
+                    </section>
+                )}
 
                 <section className="profile-card profile-level-card">
                     <div className="profile-card-heading">

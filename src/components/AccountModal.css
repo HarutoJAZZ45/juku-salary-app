@@ -176,10 +176,54 @@
 .profile-editor,
 .profile-card,
 .profile-stats,
+.profile-social-stats,
 .profile-ranking-card {
     border: 1px solid rgba(226, 232, 240, 0.95);
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.profile-social-stats {
+    margin-top: 10px;
+    padding: 6px;
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.profile-social-stats button {
+    min-height: 48px;
+    border: 0;
+    border-radius: 11px;
+    color: #334155;
+    background: transparent;
+    cursor: pointer;
+}
+
+.profile-social-stats button:hover {
+    background: #f8fafc;
+}
+
+.profile-social-stats button + button {
+    border-left: 1px solid #e2e8f0;
+    border-radius: 0 11px 11px 0;
+}
+
+.profile-social-stats strong,
+.profile-social-stats span {
+    display: block;
+}
+
+.profile-social-stats strong {
+    font-size: 17px;
+}
+
+.profile-social-stats span {
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
 }
 
 .profile-editor {
