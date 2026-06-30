@@ -77,6 +77,12 @@ export function BadgeStatsPage({ entries, settings, onClose }: BadgeStatsPagePro
             conditions: eventConditions,
         },
     ] as const;
+    const ownedCategoryStats = categoryStats
+        .map(category => ({
+            ...category,
+            conditions: category.conditions.filter(condition => condition.count > 0),
+        }))
+        .filter(category => category.count > 0 && category.conditions.length > 0);
 
     return (
         <div className="badge-stats-page">
@@ -101,56 +107,70 @@ export function BadgeStatsPage({ entries, settings, onClose }: BadgeStatsPagePro
                 </div>
             </section>
 
-            <section className="badge-stats-overview" aria-label="種類別獲得数">
-                {categoryStats.map(category => {
-                    return (
-                        <div key={category.id}>
-                            <div className={`badge-stats-overview__icon badge-stats-overview__icon--${category.id}`}>
-                                <category.icon size={18} />
-                            </div>
-                            <strong>{category.count}</strong>
-                            <span>{category.label}</span>
-                            <small>獲得回数</small>
-                        </div>
-                    );
-                })}
-            </section>
-
-            <div className="badge-stats-categories">
-                {categoryStats.map(category => (
-                    <section key={category.id} className={`badge-category-card badge-category-card--${category.id}`}>
-                        <div className="badge-category-header">
-                            <div className="badge-category-heading">
-                                <span className="badge-category-icon"><category.icon size={21} /></span>
-                                <div>
-                                    <h2>{category.label}バッジ</h2>
-                                    <p>{category.description}</p>
+            {ownedCategoryStats.length > 0 ? (
+                <>
+                    <section
+                        className="badge-stats-overview"
+                        aria-label="種類別獲得数"
+                        style={{
+                            gridTemplateColumns: `repeat(${ownedCategoryStats.length}, 1fr)`,
+                        }}
+                    >
+                        {ownedCategoryStats.map(category => (
+                            <div key={category.id}>
+                                <div className={`badge-stats-overview__icon badge-stats-overview__icon--${category.id}`}>
+                                    <category.icon size={18} />
                                 </div>
-                            </div>
-                            <div className="badge-category-count">
                                 <strong>{category.count}</strong>
-                                <span>獲得</span>
+                                <span>{category.label}</span>
+                                <small>獲得回数</small>
                             </div>
-                        </div>
+                        ))}
+                    </section>
 
-                        <div className="badge-condition-list">
-                            {category.conditions.map(condition => (
-                                <div key={condition.id} className="badge-condition-row">
-                                    <span className={`badge-tier-mark badge-tier-mark--${condition.tier}`} />
-                                    <div className="badge-condition-copy">
-                                        <strong>{condition.label}</strong>
-                                        <p>{condition.description}</p>
+                    <div className="badge-stats-categories">
+                        {ownedCategoryStats.map(category => (
+                            <section key={category.id} className={`badge-category-card badge-category-card--${category.id}`}>
+                                <div className="badge-category-header">
+                                    <div className="badge-category-heading">
+                                        <span className="badge-category-icon"><category.icon size={21} /></span>
+                                        <div>
+                                            <h2>{category.label}バッジ</h2>
+                                            <p>{category.description}</p>
+                                        </div>
                                     </div>
-                                    <div className="badge-condition-count">
-                                        <strong>{condition.count}</strong>
-                                        <span>個</span>
+                                    <div className="badge-category-count">
+                                        <strong>{category.count}</strong>
+                                        <span>獲得</span>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </section>
-                ))}
-            </div>
+
+                                <div className="badge-condition-list">
+                                    {category.conditions.map(condition => (
+                                        <div key={condition.id} className="badge-condition-row">
+                                            <span className={`badge-tier-mark badge-tier-mark--${condition.tier}`} />
+                                            <div className="badge-condition-copy">
+                                                <strong>{condition.label}</strong>
+                                                <p>{condition.description}</p>
+                                            </div>
+                                            <div className="badge-condition-count">
+                                                <strong>{condition.count}</strong>
+                                                <span>個</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        ))}
+                    </div>
+                </>
+            ) : (
+                <section className="badge-stats-empty">
+                    <Sparkles size={24} />
+                    <h2>獲得したバッジはまだありません</h2>
+                    <p>勤務記録に応じて、獲得したバッジだけがここに表示されます。</p>
+                </section>
+            )}
 
             <div className="badge-stats-note">
                 バッジ数は現在の勤務記録と給与設定から自動計算されます。
