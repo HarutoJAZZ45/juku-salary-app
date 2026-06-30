@@ -7,6 +7,7 @@ import { db } from '../lib/firebase';
 import { PRIVACY_VERSION, TERMS_VERSION } from '../legal/policies';
 import type { LegalDocumentType } from '../legal/policies';
 import { LegalDocumentModal } from './LegalDocumentModal';
+import { LoadingScreen } from './LoadingScreen';
 import { useAuth } from '../hooks/useAuth';
 
 interface LegalConsentGateProps {
@@ -92,11 +93,7 @@ export const LegalConsentGate = ({ user, children }: LegalConsentGateProps) => {
     if (status === 'accepted') return <>{children}</>;
 
     if (status === 'loading') {
-        return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#64748b' }}>
-                同意状況を確認しています...
-            </div>
-        );
+        return <LoadingScreen />;
     }
 
     return (
