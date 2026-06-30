@@ -3,7 +3,6 @@ import {
   deleteDoc,
   doc,
   getCountFromServer,
-  getDoc,
   getDocs,
   limit,
   query,
@@ -17,6 +16,7 @@ import type { PublicProfile } from '../types';
 import {
   buildFollowActivityUpdate,
   getFollowUidField,
+  isFollowRelationshipActive,
   makeFollowId,
   type FollowListKind,
 } from '../utils/follows';
@@ -60,12 +60,14 @@ export const fetchIsFollowing = async (
   targetUid: string,
 ): Promise<boolean> => {
   if (!followerUid || !targetUid || followerUid === targetUid) return false;
-  const snapshot = await getDoc(
-    doc(db, COLLECTION_NAME, makeFollowId(followerUid, targetUid)),
-  );
-  if (!snapshot.exists()) return false;
-  const data = snapshot.data();
-  return data.followerActive !== false && data.targetActive !== false;
+  const snapshot = await getDocs(query(
+    collection(db, COLLECTION_NAME),
+    where('followerUid', '==', followerUid),
+    where('targetUid', '==', targetUid),
+    limit(1),
+  ));
+  if (snapshot.empty) return false;
+  return isFollowRelationshipActive(snapshot.docs[0].data());
 };
 
 export const followUser = async (

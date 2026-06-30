@@ -15,6 +15,9 @@ interface FollowActivityData {
   targetActive?: unknown;
 }
 
+export const isFollowRelationshipActive = (data: FollowActivityData): boolean =>
+  data.followerActive !== false && data.targetActive !== false;
+
 export const buildFollowActivityUpdate = (
   data: FollowActivityData,
   uid: string,

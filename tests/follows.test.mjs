@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildFollowActivityUpdate,
   getFollowUidField,
+  isFollowRelationshipActive,
   makeFollowId,
 } from '../src/utils/follows.ts';
 
@@ -50,4 +51,16 @@ test('新形式では本人側の休止フラグだけを変更する', () => {
     targetActive: false,
   });
   assert.equal(buildFollowActivityUpdate(relationship, 'user-c', false), null);
+});
+
+test('フォロー文書が有効な場合だけフォロー中として扱う', () => {
+  assert.equal(isFollowRelationshipActive({}), true);
+  assert.equal(isFollowRelationshipActive({
+    followerActive: true,
+    targetActive: true,
+  }), true);
+  assert.equal(isFollowRelationshipActive({
+    followerActive: true,
+    targetActive: false,
+  }), false);
 });
