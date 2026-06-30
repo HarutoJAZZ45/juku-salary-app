@@ -323,10 +323,11 @@ function App() {
   const monthlyBadgeMatch = location.pathname.match(/^\/badges\/month\/(\d{4}-(?:0[1-9]|1[0-2]))$/);
   const publicProfileMatch = location.pathname.match(/^\/profile\/view\/([^/]+)$/);
   const publicConnectionsMatch = location.pathname.match(/^\/profile\/view\/([^/]+)\/(followers|following)$/);
+  const myConnectionsMatch = location.pathname.match(/^\/profile\/connections\/(followers|following)$/);
 
   const isAdminAnnouncementsPath = location.pathname === '/admin/announcements';
 
-  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/profile/badges'].includes(location.pathname) && !isNewsPath && !monthlyBadgeMatch && !publicProfileMatch && !publicConnectionsMatch && !isAdminAnnouncementsPath) {
+  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/profile/badges'].includes(location.pathname) && !isNewsPath && !monthlyBadgeMatch && !publicProfileMatch && !publicConnectionsMatch && !myConnectionsMatch && !isAdminAnnouncementsPath) {
     return <Navigate to="/home" replace />;
   }
 
@@ -400,9 +401,7 @@ function App() {
             settings={settings}
             onUpdateSettings={updateSettings}
             onOpenBadgeStats={() => navigate('/profile/badges')}
-            onOpenConnections={kind => navigate(
-              `/profile/view/${encodeURIComponent(user.uid)}/${kind}`,
-            )}
+            onOpenConnections={kind => navigate(`/profile/connections/${kind}`)}
           />
         </Suspense>
         <Analytics />
@@ -418,6 +417,28 @@ function App() {
             entries={entries}
             settings={settings}
             onClose={() => navigate('/profile')}
+          />
+        </Suspense>
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
+  if (myConnectionsMatch) {
+    const connectionKind = myConnectionsMatch[1] as 'followers' | 'following';
+
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<LoadingScreen />}>
+          <FollowConnectionsPage
+            uid={user.uid}
+            kind={connectionKind}
+            onClose={() => navigate(-1)}
+            onChangeKind={kind => navigate(
+              `/profile/connections/${kind}`,
+              { replace: true },
+            )}
+            onOpenProfile={profileUid => navigate(`/profile/view/${encodeURIComponent(profileUid)}`)}
           />
         </Suspense>
         <Analytics />
@@ -441,8 +462,11 @@ function App() {
           <FollowConnectionsPage
             uid={connectionsUid}
             kind={connectionKind}
-            onClose={() => navigate(`/profile/view/${encodedUid}`)}
-            onChangeKind={kind => navigate(`/profile/view/${encodedUid}/${kind}`)}
+            onClose={() => navigate(-1)}
+            onChangeKind={kind => navigate(
+              `/profile/view/${encodedUid}/${kind}`,
+              { replace: true },
+            )}
             onOpenProfile={profileUid => navigate(`/profile/view/${encodeURIComponent(profileUid)}`)}
           />
         </Suspense>
@@ -464,7 +488,7 @@ function App() {
         <Suspense fallback={<LoadingScreen />}>
           <PublicProfilePage
             uid={publicProfileUid}
-            onClose={() => navigate('/ranking')}
+            onClose={() => navigate(-1)}
             onOpenConnections={kind => navigate(
               `/profile/view/${encodeURIComponent(publicProfileUid)}/${kind}`,
             )}
