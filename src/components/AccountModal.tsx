@@ -1,9 +1,29 @@
-import React, { useState, useMemo } from 'react';
-import { ArrowLeft, X, Trophy, Star, User, Edit2, Save, Palette, Shirt, Zap, Coffee, Camera, Book, Music, Smile, Dribbble, Flame, Calendar } from 'lucide-react';
-import type { UserSettings, WorkEntry } from '../types';
+import { useMemo, useState, type ComponentType } from 'react';
+import {
+    ArrowLeft,
+    BookOpen,
+    CalendarDays,
+    Camera,
+    Check,
+    Coffee,
+    Dribbble,
+    Edit3,
+    Flame,
+    Music,
+    Shirt,
+    Smile,
+    Sparkles,
+    Star,
+    Trophy,
+    User,
+    X,
+    Zap,
+} from 'lucide-react';
+import type { UserProfile, UserSettings, WorkEntry } from '../types';
 import { calculateLevelData } from '../utils/levelSystem';
 import { calculateTotalBadges } from '../utils/badges';
 import { useTranslation } from '../contexts/LanguageContext';
+import './AccountModal.css';
 
 interface AccountModalProps {
     isOpen: boolean;
@@ -11,508 +31,335 @@ interface AccountModalProps {
     entries: Record<string, WorkEntry>;
     settings: UserSettings;
     onUpdateSettings: (settings: UserSettings) => void;
+    onOpenBadgeStats?: () => void;
     displayMode?: 'modal' | 'page';
 }
 
-// プリセットテーマカラー
-const THEME_COLORS = [
-    { id: 'indigo', name: 'Indigo', from: '#4f46e5', to: '#7e22ce' },
-    { id: 'emerald', name: 'Emerald', from: '#10b981', to: '#059669' },
-    { id: 'rose', name: 'Rose', from: '#f43f5e', to: '#be123c' },
-    { id: 'amber', name: 'Amber', from: '#f59e0b', to: '#d97706' },
-    { id: 'blue', name: 'Blue', from: '#3b82f6', to: '#2563eb' },
-    { id: 'slate', name: 'Slate', from: '#475569', to: '#1e293b' },
+interface ThemePreset {
+    id: string;
+    name: string;
+    from: string;
+    to: string;
+}
+
+interface AvatarPreset {
+    id: string;
+    icon: ComponentType<{ size?: number; strokeWidth?: number }>;
+    label: string;
+}
+
+const THEME_COLORS: ThemePreset[] = [
+    { id: 'indigo', name: 'インディゴ', from: '#4f46e5', to: '#7c3aed' },
+    { id: 'emerald', name: 'エメラルド', from: '#059669', to: '#0d9488' },
+    { id: 'rose', name: 'ローズ', from: '#e11d48', to: '#be185d' },
+    { id: 'amber', name: 'アンバー', from: '#d97706', to: '#ea580c' },
+    { id: 'blue', name: 'ブルー', from: '#2563eb', to: '#0284c7' },
+    { id: 'slate', name: 'スレート', from: '#475569', to: '#1e293b' },
 ];
 
-// プリセットアバターアイコン
-const AVATARS = [
-    { id: 'user', icon: User, label: 'Default' },
-    { id: 'zap', icon: Zap, label: 'Energy' },
-    { id: 'coffee', icon: Coffee, label: 'Coffee' },
-    { id: 'camera', icon: Camera, label: 'Photo' },
-    { id: 'book', icon: Book, label: 'Study' },
-    { id: 'music', icon: Music, label: 'Music' },
-    { id: 'smile', icon: Smile, label: 'Smile' },
-    { id: 'shirt', icon: Shirt, label: 'Jersey' },
-    { id: 'star', icon: Star, label: 'Star' },
-    { id: 'basketball', icon: Dribbble, label: 'Basketball' },
+const AVATARS: AvatarPreset[] = [
+    { id: 'user', icon: User, label: 'スタンダード' },
+    { id: 'zap', icon: Zap, label: 'エネルギー' },
+    { id: 'coffee', icon: Coffee, label: 'コーヒー' },
+    { id: 'camera', icon: Camera, label: 'カメラ' },
+    { id: 'book', icon: BookOpen, label: 'ブック' },
+    { id: 'music', icon: Music, label: 'ミュージック' },
+    { id: 'smile', icon: Smile, label: 'スマイル' },
+    { id: 'shirt', icon: Shirt, label: 'シャツ' },
+    { id: 'star', icon: Star, label: 'スター' },
+    { id: 'basketball', icon: Dribbble, label: 'ボール' },
 ];
 
-export const AccountModal: React.FC<AccountModalProps> = ({
+export const AccountModal = ({
     isOpen,
     onClose,
     entries,
     settings,
     onUpdateSettings,
-    displayMode = 'modal'
-}) => {
-    const isPage = displayMode === 'page';
-    // レベルデータの計算（メモ化）
-    const levelData = useMemo(() => {
-        if (!isOpen) return null;
-        return calculateLevelData(entries, settings);
-    }, [isOpen, entries, settings]);
-
-    // 獲得バッジ総数
-    const totalBadges = useMemo(() => {
-        if (!isOpen) return { streak: 0, earnings: 0, event: 0 };
-        return calculateTotalBadges(entries, settings);
-    }, [isOpen, entries, settings]);
-
+    onOpenBadgeStats,
+    displayMode = 'modal',
+}: AccountModalProps) => {
     const { t } = useTranslation();
+    const isPage = displayMode === 'page';
+    const profile = settings.profile;
 
-    const [isEditingName, setIsEditingName] = useState(false);
-    const [editName, setEditName] = useState(settings.profile?.name || 'ゲスト講師');
-    const [showCustomize, setShowCustomize] = useState(false);
-    const [isEditingTheme, setIsEditingTheme] = useState(false);
-    const [isEditingAvatar, setIsEditingAvatar] = useState(false);
-    const [isEditingTitle, setIsEditingTitle] = useState(false);
-
-    // 編集中の値のバッファ
-    const [tempTheme, setTempTheme] = useState(settings.profile?.themeColor || 'indigo');
-    const [tempAvatar, setTempAvatar] = useState(settings.profile?.avatarId || 'user');
-    const [tempTitle, setTempTitle] = useState(settings.profile?.activeTitle);
-
-    const [lastSeenTitlesState, setLastSeenTitlesState] = useState<string[]>(() =>
-        JSON.parse(localStorage.getItem('lastSeenTitles') || '[]')
+    const levelData = useMemo(
+        () => calculateLevelData(entries, settings),
+        [entries, settings],
+    );
+    const badgeCounts = useMemo(
+        () => calculateTotalBadges(entries, settings),
+        [entries, settings],
     );
 
-    const hasNewTitles = useMemo(() => {
-        const current = settings.profile?.unlockedTitles || [];
-        return current.some(t => !lastSeenTitlesState.includes(t));
-    }, [settings.profile?.unlockedTitles, lastSeenTitlesState]);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editName, setEditName] = useState(profile?.name || 'ゲスト講師');
+    const [editTheme, setEditTheme] = useState(profile?.themeColor || 'indigo');
+    const [editAvatar, setEditAvatar] = useState(profile?.avatarId || 'user');
+    const [editTitle, setEditTitle] = useState(profile?.activeTitle);
+    const [lastSeenTitles, setLastSeenTitles] = useState<string[]>(() => (
+        JSON.parse(localStorage.getItem('lastSeenTitles') || '[]')
+    ));
 
-    const handleUpdateProfile = (updates: Partial<typeof settings.profile>) => {
+    if (!isOpen) return null;
+
+    const currentTheme = THEME_COLORS.find(item => item.id === profile?.themeColor) ?? THEME_COLORS[0];
+    const CurrentAvatar = AVATARS.find(item => item.id === profile?.avatarId)?.icon ?? User;
+    const unlockedTitles = profile?.unlockedTitles ?? [];
+    const hasNewTitles = unlockedTitles.some(title => !lastSeenTitles.includes(title));
+    const totalBadgeCount = badgeCounts.streak + badgeCounts.earnings + badgeCounts.event;
+    const titleLabel = profile?.activeTitle
+        ? t.titles[profile.activeTitle as keyof typeof t.titles] || profile.activeTitle
+        : '称号未設定';
+
+    const updateProfile = (updates: Partial<UserProfile>) => {
         onUpdateSettings({
             ...settings,
             profile: {
-                ...settings.profile!,
-                ...updates
-            }
+                name: profile?.name || 'ゲスト講師',
+                avatarId: profile?.avatarId || 'user',
+                ...profile,
+                ...updates,
+            },
         });
     };
 
-    const handleSaveName = () => {
-        handleUpdateProfile({ name: editName });
-        setIsEditingName(false);
+    const openEditor = () => {
+        setEditName(profile?.name || 'ゲスト講師');
+        setEditTheme(profile?.themeColor || 'indigo');
+        setEditAvatar(profile?.avatarId || 'user');
+        setEditTitle(profile?.activeTitle);
+        setIsEditing(true);
+        localStorage.setItem('lastSeenTitles', JSON.stringify(unlockedTitles));
+        setLastSeenTitles(unlockedTitles);
     };
 
-    if (!isOpen || !levelData) return null;
-
-    const currentTheme = THEME_COLORS.find(c => c.id === settings.profile?.themeColor) || THEME_COLORS[0];
-    const CurrentAvatarIcon = AVATARS.find(a => a.id === settings.profile?.avatarId)?.icon || User;
+    const saveProfile = () => {
+        updateProfile({
+            name: editName.trim() || 'ゲスト講師',
+            themeColor: editTheme,
+            avatarId: editAvatar,
+            activeTitle: editTitle,
+        });
+        setIsEditing(false);
+    };
 
     return (
-        <div style={{
-            position: isPage ? 'static' : 'fixed',
-            inset: isPage ? undefined : 0,
-            zIndex: isPage ? undefined : 2000,
-            minHeight: isPage ? 'calc(100dvh - 40px)' : undefined,
-            background: isPage ? 'transparent' : 'rgba(0,0,0,0.6)',
-            backdropFilter: isPage ? undefined : 'blur(4px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: isPage ? 0 : '16px',
-            animation: 'fadeIn 0.2s'
-        }}>
-            <div style={{
-                background: isPage ? 'rgba(255,255,255,0.88)' : 'white',
-                borderRadius: '16px',
-                width: '100%', maxWidth: isPage ? '520px' : '400px',
-                overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                transform: 'scale(1)', transition: 'all 0.2s',
-                maxHeight: isPage ? undefined : '90vh',
-                overflowY: isPage ? 'visible' : 'auto'
-            }}>
-                {/* Header with gradient background */}
-                <div style={{
-                    position: 'relative',
-                    background: `linear-gradient(135deg, ${currentTheme.from} 0%, ${currentTheme.to} 100%)`,
-                    padding: '24px', color: 'white', textAlign: 'center',
-                    transition: 'background 0.3s ease'
-                }}>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        aria-label={isPage ? 'ホームへ戻る' : 'プロフィールを閉じる'}
-                        style={{
-                            position: 'absolute', top: '16px', right: '16px',
-                            background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%',
-                            padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}
-                    >
-                        {isPage
-                            ? <ArrowLeft className="w-5 h-5 text-white" />
-                            : <X className="w-5 h-5 text-white" />
-                        }
+        <div className={`profile-shell ${isPage ? 'profile-shell--page' : 'profile-shell--modal'}`}>
+            <div className="profile-page">
+                <header className="profile-navigation">
+                    <button type="button" className="profile-icon-button" onClick={onClose} aria-label="ホームへ戻る">
+                        {isPage ? <ArrowLeft size={21} /> : <X size={21} />}
                     </button>
-
-                    <button
-                        onClick={() => {
-                            const newShow = !showCustomize;
-                            setShowCustomize(newShow);
-                        }}
-                        style={{
-                            position: 'absolute', top: '16px', left: '16px',
-                            background: showCustomize ? 'white' : 'rgba(255,255,255,0.2)',
-                            border: 'none', borderRadius: '50%',
-                            padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            transition: 'all 0.2s'
-                        }}
-                        title="Customize"
-                    >
-                        <Palette className={`w-5 h-5 ${showCustomize ? '' : 'text-white'}`} style={{ color: showCustomize ? currentTheme.from : 'white' }} />
-                        {hasNewTitles && (
-                            <span style={{
-                                position: 'absolute', top: -2, right: -2,
-                                width: '10px', height: '10px', background: '#e11d48',
-                                borderRadius: '50%', border: '2px solid white',
-                                boxShadow: '0 0 0 2px rgba(225, 29, 72, 0.2)',
-                                zIndex: 10
-                            }} />
-                        )}
-                    </button>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '8px' }}>
-                        <div style={{
-                            width: '80px', height: '80px', background: 'white', borderRadius: '50%',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                            border: '4px solid rgba(255,255,255,0.5)', marginBottom: '12px',
-                            position: 'relative'
-                        }}>
-                            <CurrentAvatarIcon className={`w-10 h-10`} style={{ color: currentTheme.from }} />
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                            {isEditingName ? (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.2)', padding: '4px', borderRadius: '4px' }}>
-                                    <input
-                                        type="text"
-                                        value={editName}
-                                        onChange={(e) => setEditName(e.target.value)}
-                                        style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', fontSize: '18px', fontWeight: 'bold', width: '160px', textAlign: 'center' }}
-                                        autoFocus
-                                    />
-                                    <button onClick={handleSaveName} style={{ padding: '4px', background: 'none', border: 'none', cursor: 'pointer', color: 'white' }}>
-                                        <Save className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ) : (
-                                <h2 style={{ fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                                    {settings.profile?.name || 'Unknown'}
-                                    <button onClick={() => { setEditName(settings.profile?.name || 'ゲスト講師'); setIsEditingName(true); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white', opacity: 0.8 }}>
-                                        <Edit2 className="w-4 h-4" />
-                                    </button>
-                                </h2>
-                            )}
-                        </div>
-
-                        {/* Current Title Display - Enhanced visibility */}
-                        <div style={{
-                            fontSize: '13px',
-                            background: settings.profile?.activeTitle ? 'rgba(255,215,0,0.25)' : 'rgba(255,255,255,0.2)',
-                            color: settings.profile?.activeTitle ? '#fff' : 'rgba(255,255,255,0.9)',
-                            padding: '4px 14px',
-                            borderRadius: '999px',
-                            fontWeight: 800,
-                            letterSpacing: '0.08em',
-                            border: settings.profile?.activeTitle ? '1.5px solid rgba(255,255,255,0.6)' : '1px solid transparent',
-                            boxShadow: settings.profile?.activeTitle ? '0 2px 10px rgba(0,0,0,0.1)' : 'none',
-                            marginTop: '4px'
-                        }}>
-                            {settings.profile?.activeTitle ? (t.titles[settings.profile.activeTitle as keyof typeof t.titles] || settings.profile.activeTitle) : t.titles.none}
-                        </div>
+                    <div>
+                        <div className="profile-navigation__eyebrow">MY PROFILE</div>
+                        <h1>プロフィール</h1>
                     </div>
-                </div>
+                    <button type="button" className="profile-edit-button" onClick={openEditor}>
+                        <Edit3 size={15} />
+                        編集
+                        {hasNewTitles && <span className="profile-notification-dot" />}
+                    </button>
+                </header>
 
-                {/* Customization Panel */}
-                {showCustomize && (
-                    <div style={{ background: '#f8fafc', padding: '16px', borderBottom: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        {/* Theme Section */}
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Palette className="w-3 h-3" /> Theme Color
-                                </div>
-                                {isEditingTheme ? (
-                                    <button onClick={() => { handleUpdateProfile({ themeColor: tempTheme }); setIsEditingTheme(false); }} style={{ background: currentTheme.from, color: 'white', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Save className="w-3 h-3" /> Save
-                                    </button>
-                                ) : (
-                                    <button onClick={() => { setTempTheme(settings.profile?.themeColor || 'indigo'); setIsEditingTheme(true); }} style={{ background: '#e2e8f0', color: '#475569', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Edit2 className="w-3 h-3" /> Edit
-                                    </button>
-                                )}
+                <section
+                    className="profile-hero"
+                    style={{
+                        '--profile-from': currentTheme.from,
+                        '--profile-to': currentTheme.to,
+                    } as React.CSSProperties}
+                >
+                    <div className="profile-avatar">
+                        <CurrentAvatar size={43} strokeWidth={1.8} />
+                    </div>
+                    <div className="profile-identity">
+                        <h2>{profile?.name || 'ゲスト講師'}</h2>
+                        <div className="profile-affiliation">{settings.defaultCampus}校</div>
+                        <div className="profile-title-chip">{titleLabel}</div>
+                    </div>
+                </section>
+
+                {isEditing && (
+                    <section className="profile-editor" aria-label="プロフィール編集">
+                        <div className="profile-section-heading">
+                            <div>
+                                <span>EDIT PROFILE</span>
+                                <h2>プロフィール編集</h2>
                             </div>
-                            {isEditingTheme ? (
-                                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-                                    {THEME_COLORS.map(color => (
-                                        <button
-                                            key={color.id}
-                                            onClick={() => setTempTheme(color.id)}
-                                            style={{
-                                                width: '32px', height: '32px', borderRadius: '50%',
-                                                background: `linear-gradient(135deg, ${color.from}, ${color.to})`,
-                                                border: tempTheme === color.id ? '2px solid #1e293b' : '2px solid white',
-                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)', flexShrink: 0, cursor: 'pointer'
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: `linear-gradient(135deg, ${currentTheme.from}, ${currentTheme.to})`, border: '2px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }} />
-                            )}
+                            <button type="button" className="profile-icon-button" onClick={() => setIsEditing(false)} aria-label="編集を閉じる">
+                                <X size={19} />
+                            </button>
                         </div>
 
-                        {/* Avatar Section */}
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Shirt className="w-3 h-3" /> Avatar Icon
-                                </div>
-                                {isEditingAvatar ? (
-                                    <button onClick={() => { handleUpdateProfile({ avatarId: tempAvatar }); setIsEditingAvatar(false); }} style={{ background: currentTheme.from, color: 'white', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Save className="w-3 h-3" /> Save
-                                    </button>
-                                ) : (
-                                    <button onClick={() => { setTempAvatar(settings.profile?.avatarId || 'user'); setIsEditingAvatar(true); }} style={{ background: '#e2e8f0', color: '#475569', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Edit2 className="w-3 h-3" /> Edit
-                                    </button>
-                                )}
-                            </div>
-                            {isEditingAvatar ? (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
-                                    {AVATARS.map(avatar => (
+                        <label className="profile-field">
+                            <span>表示名</span>
+                            <input
+                                value={editName}
+                                maxLength={30}
+                                onChange={event => setEditName(event.target.value)}
+                            />
+                        </label>
+
+                        <div className="profile-field">
+                            <span>アイコン</span>
+                            <div className="profile-avatar-grid">
+                                {AVATARS.map(avatar => {
+                                    const AvatarIcon = avatar.icon;
+                                    return (
                                         <button
                                             key={avatar.id}
-                                            onClick={() => setTempAvatar(avatar.id)}
-                                            style={{
-                                                aspectRatio: '1', borderRadius: '8px',
-                                                background: tempAvatar === avatar.id ? '#e2e8f0' : 'white',
-                                                border: tempAvatar === avatar.id ? `2px solid ${currentTheme.from}` : '1px solid #e2e8f0',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                cursor: 'pointer', color: '#475569'
-                                            }}
+                                            type="button"
+                                            className={editAvatar === avatar.id ? 'is-selected' : ''}
+                                            onClick={() => setEditAvatar(avatar.id)}
+                                            aria-label={avatar.label}
                                         >
-                                            <avatar.icon className="w-5 h-5" />
+                                            <AvatarIcon size={23} strokeWidth={1.9} />
+                                            {editAvatar === avatar.id && <Check size={12} className="profile-selected-check" />}
                                         </button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div style={{ width: '36px', height: '36px', background: '#f1f5f9', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: currentTheme.from }}>
-                                    <CurrentAvatarIcon className="w-5 h-5" />
-                                </div>
-                            )}
+                                    );
+                                })}
+                            </div>
                         </div>
 
-                        {/* Title Section */}
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Star className="w-3 h-3" /> Select Title
-                                </div>
-                                {isEditingTitle ? (
+                        <div className="profile-field">
+                            <span>テーマカラー</span>
+                            <div className="profile-theme-grid">
+                                {THEME_COLORS.map(theme => (
                                     <button
-                                        onClick={() => {
-                                            handleUpdateProfile({ activeTitle: tempTitle });
-                                            setIsEditingTitle(false);
-                                        }}
-                                        style={{ background: currentTheme.from, color: 'white', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                        key={theme.id}
+                                        type="button"
+                                        className={editTheme === theme.id ? 'is-selected' : ''}
+                                        onClick={() => setEditTheme(theme.id)}
+                                        aria-label={theme.name}
+                                        style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}
                                     >
-                                        <Save className="w-3 h-3" /> Save
+                                        {editTheme === theme.id && <Check size={14} />}
                                     </button>
-                                ) : (
-                                    <button
-                                        onClick={() => {
-                                            setTempTitle(settings.profile?.activeTitle);
-                                            setIsEditingTitle(true);
-                                            // 称号編集ボタンを押したときにすべての既読を処理
-                                            const current = settings.profile?.unlockedTitles || [];
-                                            localStorage.setItem('lastSeenTitles', JSON.stringify(current));
-                                            setLastSeenTitlesState(current);
-                                        }}
-                                        style={{ background: '#e2e8f0', color: '#475569', border: 'none', borderRadius: '4px', padding: '2px 8px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', position: 'relative' }}
-                                    >
-                                        <Edit2 className="w-3 h-3" /> Edit
-                                        {hasNewTitles && (
-                                            <span style={{
-                                                position: 'absolute', top: -4, right: -4,
-                                                width: '10px', height: '10px', background: '#e11d48',
-                                                borderRadius: '50%', border: '2px solid white'
-                                            }} />
-                                        )}
-                                    </button>
-                                )}
+                                ))}
                             </div>
-                            {isEditingTitle ? (
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                    <button
-                                        onClick={() => setTempTitle(undefined)}
-                                        style={{
-                                            padding: '6px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 600,
-                                            background: tempTitle === undefined ? currentTheme.from : 'white',
-                                            color: tempTitle === undefined ? 'white' : '#64748b',
-                                            border: `1px solid ${tempTitle === undefined ? currentTheme.from : '#e2e8f0'}`,
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        {t.titles.none}
-                                    </button>
-                                    {(settings.profile?.unlockedTitles || []).map(titleId => (
-                                        <button
-                                            key={titleId}
-                                            onClick={() => setTempTitle(titleId)}
-                                            style={{
-                                                padding: '6px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 600,
-                                                background: tempTitle === titleId ? currentTheme.from : 'white',
-                                                color: tempTitle === titleId ? 'white' : '#64748b',
-                                                border: `1px solid ${tempTitle === titleId ? currentTheme.from : '#e2e8f0'}`,
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            {t.titles[titleId as keyof typeof t.titles] || titleId}
-                                        </button>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div style={{ fontSize: '13px', fontWeight: 700, color: currentTheme.from }}>
-                                    {settings.profile?.activeTitle ? (t.titles[settings.profile.activeTitle as keyof typeof t.titles] || settings.profile.activeTitle) : t.titles.none}
-                                </div>
-                            )}
                         </div>
-                    </div>
+
+                        <div className="profile-field">
+                            <span>称号</span>
+                            <div className="profile-title-options">
+                                <button
+                                    type="button"
+                                    className={editTitle === undefined ? 'is-selected' : ''}
+                                    onClick={() => setEditTitle(undefined)}
+                                >
+                                    設定しない
+                                </button>
+                                {unlockedTitles.map(titleId => (
+                                    <button
+                                        key={titleId}
+                                        type="button"
+                                        className={editTitle === titleId ? 'is-selected' : ''}
+                                        onClick={() => setEditTitle(titleId)}
+                                    >
+                                        {t.titles[titleId as keyof typeof t.titles] || titleId}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <button type="button" className="profile-save-button" onClick={saveProfile}>
+                            <Check size={17} />
+                            変更を保存
+                        </button>
+                    </section>
                 )}
 
-                {/* Level Progress and stats section */}
-                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px', padding: '0 8px' }}>
-                            <div style={{ fontSize: '14px', color: '#64748b', fontWeight: 500 }}>Lv.{levelData.level}</div>
-                            <div style={{ color: currentTheme.from, fontWeight: 800, fontSize: '30px', lineHeight: 1 }}>{levelData.level}</div>
-                            <div style={{ fontSize: '14px', color: '#64748b', fontWeight: 500 }}>Lv.{levelData.level + 1}</div>
+                <section className="profile-stats" aria-label="活動実績">
+                    <div>
+                        <strong>{levelData.level}</strong>
+                        <span>レベル</span>
+                    </div>
+                    <div>
+                        <strong>{levelData.totalClasses.toLocaleString()}</strong>
+                        <span>担当コマ</span>
+                    </div>
+                    <div>
+                        <strong>{levelData.totalWorkDays.toLocaleString()}</strong>
+                        <span>勤務日</span>
+                    </div>
+                </section>
+
+                <section className="profile-card profile-level-card">
+                    <div className="profile-card-heading">
+                        <div>
+                            <span>LEVEL PROGRESS</span>
+                            <h2>レベル {levelData.level}</h2>
                         </div>
-                        <div style={{
-                            height: '16px', background: '#f1f5f9', borderRadius: '9999px', overflow: 'hidden',
-                            border: '1px solid #e2e8f0', position: 'relative'
-                        }}>
-                            <div
-                                style={{
-                                    height: '100%', width: `${levelData.progress}%`,
-                                    background: `linear-gradient(to right, ${currentTheme.from}, ${currentTheme.to})`,
-                                    transition: 'width 1s ease-out'
-                                }}
-                            />
+                        <div className="profile-level-percentage">{levelData.progress}%</div>
+                    </div>
+                    <div className="profile-progress-track">
+                        <div
+                            className="profile-progress-value"
+                            style={{
+                                width: `${levelData.progress}%`,
+                                background: `linear-gradient(90deg, ${currentTheme.from}, ${currentTheme.to})`,
+                            }}
+                        />
+                    </div>
+                    <div className="profile-progress-caption">
+                        <span>{levelData.xp.toLocaleString()} XP</span>
+                        <span>次まで {(levelData.nextLevelXp - levelData.xp).toLocaleString()} XP</span>
+                    </div>
+                </section>
+
+                <section className="profile-card">
+                    <div className="profile-card-heading">
+                        <div>
+                            <span>BADGES</span>
+                            <h2>獲得バッジ</h2>
                         </div>
-                        <div style={{ marginTop: '8px', fontSize: '12px', color: '#64748b', fontWeight: 500, textAlign: 'right' }}>
-                            Next: {(levelData.nextLevelXp - levelData.xp).toLocaleString()} XP
+                        <div className="profile-badge-heading-actions">
+                            {onOpenBadgeStats && (
+                                <button type="button" onClick={onOpenBadgeStats}>統計を見る</button>
+                            )}
+                            <div className="profile-badge-total">{totalBadgeCount}</div>
                         </div>
                     </div>
-
-                    {/* Stats Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                        <div style={{
-                            background: '#fff7ed', padding: '16px', borderRadius: '12px',
-                            border: '1px solid #ffedd5', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                            display: 'flex', flexDirection: 'column', alignItems: 'center'
-                        }}>
-                            <div style={{ padding: '8px', background: '#ffedd5', borderRadius: '50%', marginBottom: '8px' }}>
-                                <Trophy className="w-5 h-5 text-orange-600" />
-                            </div>
-                            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>
-                                {Math.floor(levelData.totalEarnings / 10000).toLocaleString()}
-                                <span style={{ fontSize: '14px', fontWeight: 'normal', color: '#64748b', marginLeft: '4px' }}>万</span>
-                            </div>
-                            <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>生涯給与 (推計)</div>
+                    <div className="profile-badge-summary">
+                        <div>
+                            <span className="profile-badge-icon profile-badge-icon--streak"><Flame size={19} /></span>
+                            <strong>{badgeCounts.streak}</strong>
+                            <small>連勤</small>
                         </div>
-
-                        <div style={{
-                            background: '#eff6ff', padding: '16px', borderRadius: '12px',
-                            border: '1px solid #dbeafe', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                            display: 'flex', flexDirection: 'column', alignItems: 'center'
-                        }}>
-                            <div style={{ padding: '8px', background: '#dbeafe', borderRadius: '50%', marginBottom: '8px' }}>
-                                <Star className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>
-                                {levelData.totalClasses.toLocaleString()}
-                            </div>
-                            <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>担当コマ数</div>
+                        <div>
+                            <span className="profile-badge-icon profile-badge-icon--earnings"><Trophy size={19} /></span>
+                            <strong>{badgeCounts.earnings}</strong>
+                            <small>給与</small>
                         </div>
-
-                        <div style={{
-                            background: '#ecfdf5', padding: '16px', borderRadius: '12px',
-                            border: '1px solid #d1fae5', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                            gridColumn: 'span 2', display: 'flex', flexDirection: 'column', alignItems: 'center'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', width: '100%' }}>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>{levelData.totalWorkDays}</div>
-                                    <div style={{ fontSize: '12px', color: '#64748b' }}>出勤日数</div>
-                                </div>
-                                <div style={{ height: '32px', width: '1px', background: '#a7f3d0' }}></div>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>{levelData.xp.toLocaleString()}</div>
-                                    <div style={{ fontSize: '12px', color: '#64748b' }}>Total XP</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 獲得バッジ */}
-                        <div style={{
-                            background: '#fdf4ff', padding: '16px', borderRadius: '12px',
-                            border: '1px solid #fae8ff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                            gridColumn: 'span 2', display: 'flex', flexDirection: 'column', alignItems: 'center'
-                        }}>
-                            <div style={{ fontSize: '12px', color: '#a21caf', fontWeight: 600, textTransform: 'uppercase', marginBottom: '12px', letterSpacing: '0.05em' }}>獲得バッジ</div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0 12px' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>
-                                        <Flame className="w-5 h-5 text-rose-500" />
-                                        {totalBadges.streak}
-                                    </div>
-                                    <div style={{ fontSize: '12px', color: '#64748b' }}>連勤</div>
-                                </div>
-                                <div style={{ width: '1px', background: '#fae8ff' }}></div>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>
-                                        <Trophy className="w-5 h-5 text-yellow-500" />
-                                        {totalBadges.earnings}
-                                    </div>
-                                    <div style={{ fontSize: '12px', color: '#64748b' }}>給与</div>
-                                </div>
-                                <div style={{ width: '1px', background: '#fae8ff' }}></div>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>
-                                        <Calendar className="w-5 h-5 text-blue-500" />
-                                        {totalBadges.event}
-                                    </div>
-                                    <div style={{ fontSize: '12px', color: '#64748b' }}>イベント</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Ranking Participation Section */}
-                        <div style={{ marginTop: '16px', border: '1px solid #fef3c7', borderRadius: '12px', padding: '16px', background: '#fffbeb', gridColumn: 'span 2' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <div style={{ flex: 1, paddingRight: '12px' }}>
-                                    <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#92400e', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <Trophy size={14} /> {t.ranking.enableRanking}
-                                    </div>
-                                    <div style={{ fontSize: '11px', color: '#b45309', lineHeight: '1.4' }}>
-                                        {t.ranking.enableRankingDesc}
-                                    </div>
-                                </div>
-                                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', marginTop: '4px' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.profile?.isPublicRankingEnabled || false}
-                                        onChange={(e) => handleUpdateProfile({ isPublicRankingEnabled: e.target.checked })}
-                                        style={{ width: '18px', height: '18px', accentColor: '#f59e0b' }}
-                                    />
-                                </label>
-                            </div>
+                        <div>
+                            <span className="profile-badge-icon profile-badge-icon--event"><CalendarDays size={19} /></span>
+                            <strong>{badgeCounts.event}</strong>
+                            <small>イベント</small>
                         </div>
                     </div>
+                </section>
+
+                <section className="profile-card profile-ranking-card">
+                    <div className="profile-ranking-copy">
+                        <span className="profile-ranking-icon"><Trophy size={19} /></span>
+                        <div>
+                            <h2>ランキング参加</h2>
+                            <p>参加者だけがランキングを閲覧できます。</p>
+                        </div>
+                    </div>
+                    <label className="profile-switch">
+                        <input
+                            type="checkbox"
+                            checked={profile?.isPublicRankingEnabled || false}
+                            onChange={event => updateProfile({ isPublicRankingEnabled: event.target.checked })}
+                        />
+                        <span />
+                    </label>
+                </section>
+
+                <div className="profile-privacy-note">
+                    <Sparkles size={16} />
+                    給与額や勤務日の詳細はプロフィールに公開されません。
                 </div>
             </div>
         </div>

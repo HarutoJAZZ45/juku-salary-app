@@ -6,7 +6,6 @@ import { SummaryCard } from './components/SummaryCard';
 import { WorkModal } from './components/WorkModal';
 import { FeedbackModal } from './components/FeedbackModal';
 import { SettingsModal } from './components/SettingsModal';
-import { BadgeHelpModal } from './components/BadgeHelpModal';
 import { TaxMonitor } from './components/TaxMonitor';
 import { AuthModal } from './components/AuthModal';
 import { LegalConsentGate } from './components/LegalConsentGate';
@@ -29,6 +28,12 @@ const RankingModal = lazy(() =>
 );
 const AccountModal = lazy(() =>
   import('./components/AccountModal').then(module => ({ default: module.AccountModal }))
+);
+const BadgeStatsPage = lazy(() =>
+  import('./components/BadgeStatsPage').then(module => ({ default: module.BadgeStatsPage }))
+);
+const MonthlyBadgePage = lazy(() =>
+  import('./components/MonthlyBadgePage').then(module => ({ default: module.MonthlyBadgePage }))
 );
 const NewsModal = lazy(() =>
   import('./components/NewsModal').then(module => ({ default: module.NewsModal }))
@@ -109,7 +114,6 @@ function App() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
-  const [isBadgeHelpOpen, setIsBadgeHelpOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -309,10 +313,11 @@ function App() {
   };
 
   const isNewsPath = location.pathname === '/news' || /^\/news\/[^/]+$/.test(location.pathname);
+  const monthlyBadgeMatch = location.pathname.match(/^\/badges\/month\/(\d{4}-(?:0[1-9]|1[0-2]))$/);
 
   const isAdminAnnouncementsPath = location.pathname === '/admin/announcements';
 
-  if (!['/home', '/settings', '/analytics', '/ranking', '/profile'].includes(location.pathname) && !isNewsPath && !isAdminAnnouncementsPath) {
+  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/profile/badges'].includes(location.pathname) && !isNewsPath && !monthlyBadgeMatch && !isAdminAnnouncementsPath) {
     return <Navigate to="/home" replace />;
   }
 
@@ -385,6 +390,38 @@ function App() {
             entries={entries}
             settings={settings}
             onUpdateSettings={updateSettings}
+            onOpenBadgeStats={() => navigate('/profile/badges')}
+          />
+        </Suspense>
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
+  if (location.pathname === '/profile/badges') {
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+          <BadgeStatsPage
+            entries={entries}
+            settings={settings}
+            onClose={() => navigate('/profile')}
+          />
+        </Suspense>
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
+  if (monthlyBadgeMatch) {
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>読み込み中...</div>}>
+          <MonthlyBadgePage
+            entries={entries}
+            settings={settings}
+            monthKey={monthlyBadgeMatch[1]}
+            onClose={() => navigate('/home')}
           />
         </Suspense>
         <Analytics />
@@ -701,7 +738,7 @@ function App() {
         entries={entries}
         settings={settings}
         currentDate={currentViewDate}
-        onBadgeClick={() => setIsBadgeHelpOpen(true)}
+        onBadgeClick={monthKey => navigate(`/badges/month/${monthKey}`)}
       />
 
 
@@ -815,11 +852,6 @@ function App() {
       <FeedbackModal
         isOpen={isFeedbackOpen}
         onClose={() => setIsFeedbackOpen(false)}
-      />
-
-      <BadgeHelpModal
-        isOpen={isBadgeHelpOpen}
-        onClose={() => setIsBadgeHelpOpen(false)}
       />
 
       <AuthModal

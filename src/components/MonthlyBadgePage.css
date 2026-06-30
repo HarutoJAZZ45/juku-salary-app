@@ -1,0 +1,153 @@
+.monthly-badges-page {
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    padding-bottom: 28px;
+    color: #0f172a;
+}
+
+.monthly-badges-navigation {
+    min-height: 62px;
+    padding: 10px 4px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+}
+
+.monthly-badges-navigation button {
+    width: 38px;
+    height: 38px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: #475569;
+    background: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+}
+
+.monthly-badges-navigation span,
+.monthly-badges-hero span {
+    display: block;
+    margin-bottom: 2px;
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+
+.monthly-badges-navigation h1 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.monthly-badges-hero {
+    padding: 18px;
+    border-radius: 20px;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 11px;
+    color: white;
+    background: #334155;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+}
+
+.monthly-badges-hero span {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.monthly-badges-hero strong {
+    font-size: 14px;
+}
+
+.monthly-badges-total {
+    padding: 5px 8px;
+    border-radius: 999px;
+    color: white;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.monthly-badges-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.monthly-badge-card {
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 7px 20px rgba(15, 23, 42, 0.05);
+}
+
+.monthly-badge-card__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: #475569;
+    background: #f8fafc;
+}
+
+.monthly-badge-card--streak .monthly-badge-card__icon {
+    color: #e11d48;
+    background: #fff1f2;
+}
+
+.monthly-badge-card--earnings .monthly-badge-card__icon {
+    color: #a16207;
+    background: #fefce8;
+}
+
+.monthly-badge-card--event .monthly-badge-card__icon {
+    color: #be185d;
+    background: #fdf2f8;
+}
+
+.monthly-badge-card > div > span {
+    display: block;
+    margin-bottom: 2px;
+    color: #94a3b8;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.monthly-badge-card h2 {
+    margin: 0 0 3px;
+    font-size: 13px;
+}
+
+.monthly-badge-card p {
+    margin: 0;
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.monthly-badge-card > strong {
+    color: #334155;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.monthly-badges-empty {
+    margin-top: 14px;
+    padding: 48px 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    color: #64748b;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 12px;
+    text-align: center;
+}

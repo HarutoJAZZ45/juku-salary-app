@@ -1,6 +1,6 @@
 import { differenceInDays, parseISO, startOfMonth, addMonths } from 'date-fns';
 import type { WorkEntry, UserSettings } from '../types';
-import { getPeriodRange, calculateDailyTotal } from './calculator';
+import { getPeriodRange, calculateDailyTotal, parseLocalDate } from './calculator.ts';
 
 export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
 
@@ -13,6 +13,24 @@ export interface Badge {
     descriptionKey: string; // 説明文の翻訳キー
     icon: string;
 }
+
+export interface BadgeStatistics {
+    streak: Record<BadgeTier, number>;
+    earnings: Record<BadgeTier, number>;
+    events: Record<string, number>;
+    totals: {
+        streak: number;
+        earnings: number;
+        event: number;
+    };
+}
+
+const createEmptyTierCounts = (): Record<BadgeTier, number> => ({
+    bronze: 0,
+    silver: 0,
+    gold: 0,
+    platinum: 0,
+});
 
 /**
  * 期間内の勤務データから「連勤バッジ（Streak Badges）」を判定してリストにして返します。
@@ -106,6 +124,37 @@ export const getEventBadges = (entries: Record<string, WorkEntry>): Badge[] => {
     return foundBadges;
 };
 
+export const getBadgesForPeriod = (
+    entries: Record<string, WorkEntry>,
+    settings: UserSettings,
+    currentDate: Date,
+): Badge[] => {
+    const period = getPeriodRange(currentDate, settings.closingDay);
+    const periodEntries = Object.values(entries).filter(entry => {
+        const entryDate = parseLocalDate(entry.date);
+        return entryDate >= period.start && entryDate <= period.end;
+    });
+    const periodTotal = periodEntries.reduce(
+        (sum, entry) => sum + calculateDailyTotal(entry, settings),
+        0,
+    );
+    const badges: Badge[] = [
+        ...getStreakBadges(periodEntries, period.start, period.end),
+    ];
+    const earningsBadge = getEarningsBadge(periodTotal);
+    if (earningsBadge) badges.push(earningsBadge);
+
+    const eventBadges = getEventBadges(entries).filter(badge => {
+        if (badge.id === 'event-newyear-2026') {
+            const eventDate = parseLocalDate('2026-01-02');
+            return eventDate >= period.start && eventDate <= period.end;
+        }
+        return false;
+    });
+    badges.push(...eventBadges);
+    return badges;
+};
+
 /**
  * 全期間のデータを走査し、毎月の締め日ごとに区切って「これまで獲得した全バッジの数」を集計します。
  * Profile画面などで、獲得バッジの総数を種類別（連勤、給与、イベント）に表示するために使用されます。
@@ -114,12 +163,23 @@ export const getEventBadges = (entries: Record<string, WorkEntry>): Badge[] => {
  * @param {UserSettings} settings - 給与計算・締め日設定
  * @returns {{ streak: number, earnings: number, event: number }} バッジ種類別の獲得総数
  */
-export const calculateTotalBadges = (entries: Record<string, WorkEntry>, settings: UserSettings): { streak: number, earnings: number, event: number } => {
-    let streakCount = 0;
-    let earningsCount = 0;
+export const calculateBadgeStatistics = (
+    entries: Record<string, WorkEntry>,
+    settings: UserSettings,
+): BadgeStatistics => {
+    const streak = createEmptyTierCounts();
+    const earnings = createEmptyTierCounts();
+    const events: Record<string, number> = {};
     const entryDates = Object.keys(entries).sort();
 
-    if (entryDates.length === 0) return { streak: 0, earnings: 0, event: 0 };
+    if (entryDates.length === 0) {
+        return {
+            streak,
+            earnings,
+            events,
+            totals: { streak: 0, earnings: 0, event: 0 },
+        };
+    }
 
     // 最初のエントリの日付から現在の翌月までを範囲とする（漏れがないように）
     const startDate = parseISO(entryDates[0]);
@@ -144,10 +204,13 @@ export const calculateTotalBadges = (entries: Record<string, WorkEntry>, setting
         });
 
         // 獲得バッジ判定
-        streakCount += getStreakBadges(periodEntries, start, end).length;
+        getStreakBadges(periodEntries, start, end).forEach(badge => {
+            streak[badge.tier] += 1;
+        });
 
-        if (getEarningsBadge(periodTotalPay)) {
-            earningsCount++;
+        const earningsBadge = getEarningsBadge(periodTotalPay);
+        if (earningsBadge) {
+            earnings[earningsBadge.tier] += 1;
         }
 
         // 次の月へ
@@ -155,7 +218,29 @@ export const calculateTotalBadges = (entries: Record<string, WorkEntry>, setting
     }
 
     // イベントバッジは全期間で一度だけ判定（または日付固定なので別途集計）
-    const eventCount = getEventBadges(entries).length;
+    getEventBadges(entries).forEach(badge => {
+        events[badge.id] = (events[badge.id] ?? 0) + 1;
+    });
 
-    return { streak: streakCount, earnings: earningsCount, event: eventCount };
+    const streakTotal = Object.values(streak).reduce((sum, count) => sum + count, 0);
+    const earningsTotal = Object.values(earnings).reduce((sum, count) => sum + count, 0);
+    const eventTotal = Object.values(events).reduce((sum, count) => sum + count, 0);
+
+    return {
+        streak,
+        earnings,
+        events,
+        totals: {
+            streak: streakTotal,
+            earnings: earningsTotal,
+            event: eventTotal,
+        },
+    };
+};
+
+export const calculateTotalBadges = (
+    entries: Record<string, WorkEntry>,
+    settings: UserSettings,
+): { streak: number, earnings: number, event: number } => {
+    return calculateBadgeStatistics(entries, settings).totals;
 };

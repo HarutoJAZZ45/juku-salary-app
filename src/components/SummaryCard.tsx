@@ -1,16 +1,16 @@
 import React, { useMemo } from 'react';
+import { format } from 'date-fns';
 import type { UserSettings, WorkEntry } from '../types';
 import { calculateDailyTotal, formatCurrency, getPeriodRange, parseLocalDate } from '../utils/calculator';
 import { useTranslation } from '../contexts/LanguageContext';
-import { getStreakBadges, getEarningsBadge, getEventBadges } from '../utils/badges';
-import type { Badge } from '../utils/badges';
+import { getBadgesForPeriod } from '../utils/badges';
 import { BadgeDisplay } from './BadgeDisplay';
 
 interface SummaryCardProps {
     entries: Record<string, WorkEntry>;
     settings: UserSettings;
     currentDate: Date;
-    onBadgeClick?: () => void;
+    onBadgeClick?: (monthKey: string) => void;
 }
 
 // サマリーカードコンポーネント
@@ -49,28 +49,8 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
 
     // バッジ獲得状況の判定
     const badges = useMemo(() => {
-        const earnedBadges: Badge[] = [];
-
-        // 連続勤務バッジ (複数獲得可能)
-        const streakBadges = getStreakBadges(stats.periodEntries, period.start, period.end);
-        earnedBadges.push(...streakBadges);
-
-        // 収入バッジ
-        const earnedBadge = getEarningsBadge(stats.total);
-        if (earnedBadge) earnedBadges.push(earnedBadge);
-
-        // イベントバッジ (期間内に該当する日付があるもの)
-        const eventBadges = getEventBadges(entries).filter(b => {
-            if (b.id === 'event-newyear-2026') {
-                const eventDate = parseLocalDate('2026-01-02');
-                return eventDate >= period.start && eventDate <= period.end;
-            }
-            return false;
-        });
-        earnedBadges.push(...eventBadges);
-
-        return earnedBadges;
-    }, [stats.total, stats.periodEntries, period, entries]);
+        return getBadgesForPeriod(entries, settings, currentDate);
+    }, [entries, settings, currentDate]);
 
     return (
         <div className="glass-panel" style={{
@@ -90,7 +70,10 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({ entries, settings, cur
                 </div>
                 {badges.length > 0 && (
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '12px' }}>
-                        <BadgeDisplay badges={badges} onClick={onBadgeClick} />
+                        <BadgeDisplay
+                            badges={badges}
+                            onClick={onBadgeClick ? () => onBadgeClick(format(currentDate, 'yyyy-MM')) : undefined}
+                        />
                     </div>
                 )}
             </div>
