@@ -231,6 +231,67 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, settings, 
                             </div>
                         ))}
                     </div>
+
+                    <div style={{
+                        marginTop: '16px',
+                        paddingTop: '14px',
+                        borderTop: '1px solid #e2e8f0',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'space-between',
+                        gap: '14px',
+                    }}>
+                        <div>
+                            <div style={{ fontSize: '13px', fontWeight: 650, color: '#334155' }}>
+                                地下鉄定期サジェスト
+                            </div>
+                            <div style={{ marginTop: '4px', fontSize: '11px', lineHeight: 1.55, color: '#64748b' }}>
+                                平岡・新札幌への登録済みシフトから、お得な1か月定期の期間を提案します。
+                            </div>
+                        </div>
+                        <label style={{
+                            position: 'relative',
+                            width: '44px',
+                            height: '24px',
+                            flex: '0 0 44px',
+                            cursor: 'pointer',
+                        }}>
+                            <input
+                                type="checkbox"
+                                checked={formData.commuterPassSuggestionEnabled === true}
+                                onChange={event => setFormData(previous => ({
+                                    ...previous,
+                                    commuterPassSuggestionEnabled: event.target.checked,
+                                }))}
+                                aria-label="地下鉄定期サジェストを使用する"
+                                style={{
+                                    position: 'absolute',
+                                    opacity: 0,
+                                    width: '1px',
+                                    height: '1px',
+                                    margin: 0,
+                                }}
+                            />
+                            <span style={{
+                                position: 'absolute',
+                                inset: 0,
+                                borderRadius: '999px',
+                                background: formData.commuterPassSuggestionEnabled ? '#0460a7' : '#cbd5e1',
+                                transition: 'background 0.2s ease',
+                            }} />
+                            <span style={{
+                                position: 'absolute',
+                                top: '3px',
+                                left: formData.commuterPassSuggestionEnabled ? '23px' : '3px',
+                                width: '18px',
+                                height: '18px',
+                                borderRadius: '50%',
+                                background: '#fff',
+                                boxShadow: '0 1px 3px rgba(15, 23, 42, 0.25)',
+                                transition: 'left 0.2s ease',
+                            }} />
+                        </label>
+                    </div>
                 </div>
 
                 <div className="input-group">

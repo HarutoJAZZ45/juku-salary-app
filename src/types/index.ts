@@ -38,6 +38,7 @@ export interface UserSettings {
   transportCost: number;      // デフォルト交通費
   campusTransportRates: Record<Campus, number>; // 校舎ごとのデフォルト交通費
   defaultCampus: Campus;      // 所属校舎（ホームスクール）
+  commuterPassSuggestionEnabled?: boolean; // 地下鉄1か月定期の購入サジェスト
 
   // 年度別の時給オーバーライド
   yearSpecificRates?: Record<number, {

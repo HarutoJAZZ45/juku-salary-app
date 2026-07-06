@@ -1,0 +1,231 @@
+.commuter-pass-page {
+  width: 100%;
+  max-width: 520px;
+  min-height: calc(100dvh - 40px);
+  margin: 0 auto;
+  padding: 4px 0 28px;
+  color: #334155;
+}
+
+.commuter-pass-page__navigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.commuter-pass-page__navigation button {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dbe5ee;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #475569;
+  cursor: pointer;
+}
+
+.commuter-pass-page__navigation span {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+.commuter-pass-page__navigation h1 {
+  margin: 2px 0 0;
+  color: #1e293b;
+  font-size: 19px;
+}
+
+.commuter-pass-page__guide {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #dbe5ee;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #0460a7;
+}
+
+.commuter-pass-page__guide svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.commuter-pass-page__guide p {
+  margin: 0;
+  color: #475569;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.commuter-pass-page__best,
+.commuter-pass-page__results,
+.commuter-pass-page__empty {
+  margin-top: 14px;
+  border: 1px solid #dbe5ee;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.commuter-pass-page__best {
+  padding: 15px;
+}
+
+.commuter-pass-page__best > span {
+  color: #0460a7;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.commuter-pass-page__best > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.commuter-pass-page__best h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 17px;
+}
+
+.commuter-pass-page__best strong {
+  flex: 0 0 auto;
+  color: #087f5b;
+  font-size: 14px;
+}
+
+.commuter-pass-page__best p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.commuter-pass-page__best p span {
+  margin-left: 12px;
+}
+
+.commuter-pass-page__results {
+  padding: 14px;
+}
+
+.commuter-pass-page__results-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.commuter-pass-page__results-title h2 {
+  margin: 0;
+  color: #334155;
+  font-size: 13px;
+}
+
+.commuter-pass-page__results-title span {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.commuter-pass-page__list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 2px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.commuter-pass-page__list article:last-child {
+  border-bottom: 0;
+}
+
+.commuter-pass-page__list article.is-best {
+  color: #0460a7;
+}
+
+.commuter-pass-page__period {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.commuter-pass-page__period strong {
+  font-size: 12px;
+}
+
+.commuter-pass-page__period span {
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: #eaf3f9;
+  color: #0460a7;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.commuter-pass-page__list p {
+  margin: 4px 0 0;
+  color: #94a3b8;
+  font-size: 9px;
+}
+
+.commuter-pass-page__list p span {
+  margin-left: 7px;
+}
+
+.commuter-pass-page__amount {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.commuter-pass-page__amount strong,
+.commuter-pass-page__amount span {
+  display: block;
+}
+
+.commuter-pass-page__amount strong {
+  color: #087f5b;
+  font-size: 12px;
+}
+
+.commuter-pass-page__amount span {
+  margin-top: 1px;
+  color: #94a3b8;
+  font-size: 8px;
+}
+
+.commuter-pass-page__empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.commuter-pass-page__empty h2 {
+  margin: 12px 0 0;
+  color: #475569;
+  font-size: 15px;
+}
+
+.commuter-pass-page__empty p {
+  margin: 6px 0 0;
+  font-size: 11px;
+}
+
+@media (max-width: 370px) {
+  .commuter-pass-page__best > div {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
