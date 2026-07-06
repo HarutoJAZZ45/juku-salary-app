@@ -13,7 +13,7 @@ import { LegalConsentGate } from './components/LegalConsentGate';
 import { LegalDocumentModal } from './components/LegalDocumentModal';
 import { LoadingScreen } from './components/LoadingScreen';
 import { useAuth } from './hooks/useAuth';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, User, Cloud, Trophy, CalendarDays, ShieldCheck, FileText, Megaphone, X } from 'lucide-react';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, User, LogOut, Trophy, CalendarDays, ShieldCheck, FileText, Megaphone, X } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { fetchLatestAnnouncement, isAnnouncementAdmin } from './services/announcements';
 import type { WorkEntry } from './types';
@@ -115,7 +115,7 @@ function App() {
   const { entries, settings, migrationNotice, updateEntry, deleteEntry, updateSettings, clearMigrationNotice, isLoaded } = useSalaryData();
 
   // 認証のカスタムフック
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
 
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
 
@@ -125,7 +125,6 @@ function App() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // 一括編集モードの状態管理
@@ -321,6 +320,18 @@ function App() {
   // 今日に戻る処理
   const handleGoToToday = () => {
     setCurrentViewDate(new Date());
+  };
+
+  const handleLogout = async () => {
+    if (!window.confirm('ログアウトしますか？')) return;
+
+    setIsMenuOpen(false);
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      window.alert('ログアウトできませんでした。時間をおいてもう一度お試しください。');
+    }
   };
 
   const isNewsPath = location.pathname === '/news' || /^\/news\/[^/]+$/.test(location.pathname);
@@ -668,6 +679,31 @@ function App() {
               <MessageSquare size={18} />
               Feedback
             </button>
+
+            <button
+              onClick={() => void handleLogout()}
+              className="menu-item"
+              style={{
+                marginTop: '4px',
+                padding: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                background: 'none',
+                border: 'none',
+                borderTop: '1px solid #e2e8f0',
+                width: '100%',
+                textAlign: 'left',
+                borderRadius: '0 0 8px 8px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                color: '#e11d48',
+                fontWeight: 600,
+              }}
+            >
+              <LogOut size={18} />
+              ログアウト
+            </button>
           </div>
         </div>
       )}
@@ -689,57 +725,6 @@ function App() {
           </button>
           <button onClick={() => navigate('/ranking')} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}>
             <Trophy size={20} fill="#fbbf24" stroke="#d97706" />
-          </button>
-          {/* ログインボタン: 未ログイン→紫「Login」/ メールログイン→イニシャル緑 / Googleログイン→アバター+緑ドット */}
-          <button
-            onClick={() => setIsAuthOpen(true)}
-            className="glass-btn"
-            style={{
-              padding: user ? '6px 8px' : '6px 12px',
-              background: user ? 'rgba(255,255,255,0.5)' : 'var(--primary)',
-              color: user ? 'var(--text-main)' : 'white',
-              boxShadow: user ? 'none' : '0 2px 8px rgba(99,102,241,0.35)',
-              position: 'relative',
-              display: 'flex', alignItems: 'center', gap: '6px',
-              borderRadius: '10px', fontWeight: 600, fontSize: '13px',
-              transition: 'all 0.2s'
-            }}
-          >
-            {user && user.photoURL ? (
-              // Googleログイン: アバター画像 + 緑ドット
-              <>
-                <img src={user.photoURL} alt="User" style={{ width: 20, height: 20, borderRadius: '50%' }} />
-                <span style={{
-                  position: 'absolute', bottom: '5px', right: '5px',
-                  width: '7px', height: '7px', background: '#22c55e',
-                  borderRadius: '50%', border: '1.5px solid white'
-                }} />
-              </>
-            ) : user ? (
-              // メールログイン: イニシャルアバター（緑）+ 緑ドット
-              <>
-                <span style={{
-                  width: 22, height: 22, borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #6366f1, #3b82f6)',
-                  color: 'white', fontSize: '11px', fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0, textTransform: 'uppercase'
-                }}>
-                  {(user.displayName?.[0] ?? user.email?.[0] ?? '?')}
-                </span>
-                <span style={{
-                  position: 'absolute', bottom: '5px', right: '5px',
-                  width: '7px', height: '7px', background: '#22c55e',
-                  borderRadius: '50%', border: '1.5px solid white'
-                }} />
-              </>
-            ) : (
-              // 未ログイン: Cloud + "Login"
-              <>
-                <Cloud size={16} />
-                <span>Login</span>
-              </>
-            )}
           </button>
           <button onClick={() => navigate('/profile')} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>
             <User size={20} />
@@ -971,10 +956,6 @@ function App() {
         onClose={() => setIsFeedbackOpen(false)}
       />
 
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-      />
       <Analytics />
     </>
     </LegalConsentGate>
