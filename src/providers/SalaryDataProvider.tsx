@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS: UserSettings = {
         '北大前': 500,
     },
     defaultCampus: '平岡',
+    commuterPassSuggestionEnabled: false,
     closingDay: 15,
     paymentMonthLag: 0,
     annualLimit: 1030000,

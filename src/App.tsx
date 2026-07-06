@@ -7,6 +7,7 @@ import { WorkModal } from './components/WorkModal';
 import { FeedbackModal } from './components/FeedbackModal';
 import { SettingsModal } from './components/SettingsModal';
 import { TaxMonitor } from './components/TaxMonitor';
+import { CommuterPassSuggestionCard } from './components/CommuterPassSuggestionCard';
 import { AuthModal } from './components/AuthModal';
 import { LegalConsentGate } from './components/LegalConsentGate';
 import { LegalDocumentModal } from './components/LegalDocumentModal';
@@ -47,6 +48,9 @@ const NewsModal = lazy(() =>
 );
 const AdminAnnouncementsPage = lazy(() =>
   import('./components/AdminAnnouncementsPage').then(module => ({ default: module.AdminAnnouncementsPage }))
+);
+const CommuterPassSuggestionPage = lazy(() =>
+  import('./components/CommuterPassSuggestionPage').then(module => ({ default: module.CommuterPassSuggestionPage }))
 );
 
 function LoginRequiredScreen() {
@@ -327,7 +331,7 @@ function App() {
 
   const isAdminAnnouncementsPath = location.pathname === '/admin/announcements';
 
-  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/profile/badges'].includes(location.pathname) && !isNewsPath && !monthlyBadgeMatch && !publicProfileMatch && !publicConnectionsMatch && !myConnectionsMatch && !isAdminAnnouncementsPath) {
+  if (!['/home', '/settings', '/analytics', '/ranking', '/profile', '/profile/badges', '/commuter-pass'].includes(location.pathname) && !isNewsPath && !monthlyBadgeMatch && !publicProfileMatch && !publicConnectionsMatch && !myConnectionsMatch && !isAdminAnnouncementsPath) {
     return <Navigate to="/home" replace />;
   }
 
@@ -352,6 +356,25 @@ function App() {
           onClose={() => navigate('/home')}
           onSave={updateSettings}
         />
+        <Analytics />
+      </LegalConsentGate>
+    );
+  }
+
+  if (location.pathname === '/commuter-pass') {
+    if (settings.commuterPassSuggestionEnabled !== true) {
+      return <Navigate to="/home" replace />;
+    }
+
+    return (
+      <LegalConsentGate user={user}>
+        <Suspense fallback={<LoadingScreen />}>
+          <CommuterPassSuggestionPage
+            entries={entries}
+            defaultCampus={settings.defaultCampus}
+            onClose={() => navigate('/home')}
+          />
+        </Suspense>
         <Analytics />
       </LegalConsentGate>
     );
@@ -884,6 +907,14 @@ function App() {
           selectedDates={selectedDates}
         />
       </div>
+
+      {settings.commuterPassSuggestionEnabled === true && (
+        <CommuterPassSuggestionCard
+          entries={entries}
+          defaultCampus={settings.defaultCampus}
+          onOpenDetails={() => navigate('/commuter-pass')}
+        />
+      )}
 
       {/* 扶養管理ゲージ（カレンダーの下） */}
       <div style={{ padding: '16px 8px 0' }}>
