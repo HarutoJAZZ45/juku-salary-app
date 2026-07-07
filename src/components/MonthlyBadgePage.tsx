@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ArrowLeft, CalendarDays, Flame, Sparkles, Trophy } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Flame, Sparkles, Sun, Trophy } from 'lucide-react';
 import { format } from 'date-fns';
 import type { UserSettings, WorkEntry } from '../types';
 import { getBadgesForPeriod, type Badge } from '../utils/badges';
@@ -16,6 +16,12 @@ interface MonthlyBadgePageProps {
 
 export function MonthlyBadgePage({ entries, settings, monthKey, onClose }: MonthlyBadgePageProps) {
     const { t } = useTranslation();
+    const tierLabels = {
+        bronze: 'ブロンズ',
+        silver: 'シルバー',
+        gold: 'ゴールド',
+        platinum: 'プラチナ',
+    } as const;
     const [year, month] = monthKey.split('-').map(Number);
     const currentDate = useMemo(() => new Date(year, month - 1, 1), [year, month]);
     const period = useMemo(
@@ -69,18 +75,25 @@ export function MonthlyBadgePage({ entries, settings, monthKey, onClose }: Month
                         const labelKey = badge.labelKey.split('.')[1] as keyof typeof t.badges;
                         const descriptionKey = badge.descriptionKey.split('.')[1] as keyof typeof t.badges;
                         const baseLabel = t.badges[labelKey] || badge.labelKey;
-                        const label = badge.type === 'earnings' ? `給与 ${baseLabel}` : baseLabel;
+                        const tierLabel = tierLabels[badge.tier];
+                        const label = badge.type === 'earnings'
+                            ? `給与 ${baseLabel}`
+                            : badge.type === 'event'
+                                ? `${baseLabel}（${tierLabel}）`
+                                : baseLabel;
                         const description = t.badges[descriptionKey] || badge.descriptionKey;
                         const Icon = badge.type === 'streak'
                             ? Flame
                             : badge.type === 'event'
-                                ? CalendarDays
+                                ? badge.icon === 'sun'
+                                    ? Sun
+                                    : CalendarDays
                                 : badge.icon === 'sparkles'
                                     ? Sparkles
                                     : Trophy;
 
                         return (
-                            <article key={id} className={`monthly-badge-card monthly-badge-card--${badge.type} monthly-badge-card--${badge.tier}`}>
+                            <article key={id} className={`monthly-badge-card monthly-badge-card--${badge.type} monthly-badge-card--${badge.tier} monthly-badge-card--icon-${badge.icon}`}>
                                 <span className="monthly-badge-card__icon"><Icon size={23} /></span>
                                 <div>
                                     <span>{badge.type === 'event' ? 'イベント限定' : badge.type === 'streak' ? '連勤' : '給与達成'}</span>

@@ -1,5 +1,5 @@
 import { useMemo, type CSSProperties } from 'react';
-import { CalendarDays, Flame, Sparkles, Trophy } from 'lucide-react';
+import { CalendarDays, Flame, Sparkles, Sun, Trophy } from 'lucide-react';
 import type { Badge } from '../utils/badges';
 import { useTranslation } from '../contexts/LanguageContext';
 import './BadgeDisplay.css';
@@ -10,7 +10,7 @@ interface BadgeDisplayProps {
 }
 
 const getBadgeColors = (badge: Badge) => {
-    if (badge.type === 'event') {
+    if (badge.type === 'event' && badge.icon !== 'sun') {
         return { color: '#be185d', background: '#fdf2f8', border: '#fbcfe8' };
     }
     switch (badge.tier) {
@@ -45,7 +45,9 @@ export const BadgeDisplay = ({ badges, onClick }: BadgeDisplayProps) => {
                 const Icon = badge.type === 'streak'
                     ? Flame
                     : badge.type === 'event'
-                        ? CalendarDays
+                        ? badge.icon === 'sun'
+                            ? Sun
+                            : CalendarDays
                         : badge.icon === 'sparkles'
                             ? Sparkles
                             : Trophy;

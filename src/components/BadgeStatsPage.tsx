@@ -7,7 +7,7 @@ import {
     Trophy,
 } from 'lucide-react';
 import type { UserSettings, WorkEntry } from '../types';
-import { calculateBadgeStatistics, type BadgeTier } from '../utils/badges';
+import { calculateBadgeStatistics, getEventBadges, type BadgeTier } from '../utils/badges';
 import './BadgeStatsPage.css';
 
 interface BadgeStatsPageProps {
@@ -29,6 +29,17 @@ export function BadgeStatsPage({ entries, settings, onClose }: BadgeStatsPagePro
         () => calculateBadgeStatistics(entries, settings),
         [entries, settings],
     );
+    const eventBadges = useMemo(
+        () => getEventBadges(entries),
+        [entries],
+    );
+    const summerCourseBadge = eventBadges.find(badge => badge.id === 'event-summer-course-2026');
+    const tierLabels = {
+        bronze: 'ブロンズ',
+        silver: 'シルバー',
+        gold: 'ゴールド',
+        platinum: 'プラチナ',
+    } as const;
     const counts = statistics.totals;
     const total = counts.streak + counts.earnings + counts.event;
     const streakConditions: BadgeCondition[] = [
@@ -49,6 +60,13 @@ export function BadgeStatsPage({ entries, settings, onClose }: BadgeStatsPagePro
             description: '対象期間の特別勤務に参加する',
             tier: 'special',
             count: statistics.events['event-newyear-2026'] ?? 0,
+        },
+        {
+            id: 'event-summer-course-2026',
+            label: summerCourseBadge ? `夏期講習 2026（${tierLabels[summerCourseBadge.tier]}）` : '夏期講習 2026',
+            description: '対象日に実勤務入力がある日数に応じて獲得（1日以上: ブロンズ、7日以上: シルバー、10日以上: ゴールド、12日以上: プラチナ）',
+            tier: summerCourseBadge?.tier ?? 'special',
+            count: statistics.events['event-summer-course-2026'] ?? 0,
         },
     ];
     const categoryStats = [

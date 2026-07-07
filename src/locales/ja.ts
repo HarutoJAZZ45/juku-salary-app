@@ -126,6 +126,8 @@ export const ja: Translation = {
         earnPlatinumDesc: '月収16万円達成！おめでとうございます！',
         eventNewYear: '正月特訓 2026',
         eventNewYearDesc: '2026年の正月特訓に参加した特別なバッジです。',
+        eventSummerCourse2026: '夏期講習 2026',
+        eventSummerCourse2026Desc: '対象日の参加日数に応じて獲得できます。1日以上でブロンズ、7日以上でシルバー、10日以上でゴールド、12日以上でプラチナです。',
         modalTitle: '獲得バッジ一覧',
         modalDesc: 'その月に獲得したバッジが表示されます。',
     },

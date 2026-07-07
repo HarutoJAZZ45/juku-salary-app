@@ -127,6 +127,8 @@ export interface Translation {
         earnPlatinumDesc: string;
         eventNewYear: string;
         eventNewYearDesc: string;
+        eventSummerCourse2026: string;
+        eventSummerCourse2026Desc: string;
         modalTitle: string;
         modalDesc: string;
     };

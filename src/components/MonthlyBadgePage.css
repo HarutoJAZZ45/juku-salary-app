@@ -119,7 +119,7 @@
     background: #f5f3ff;
 }
 
-.monthly-badge-card--event .monthly-badge-card__icon {
+.monthly-badge-card--event:not(.monthly-badge-card--icon-sun) .monthly-badge-card__icon {
     color: #be185d;
     background: #fdf2f8;
 }

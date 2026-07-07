@@ -32,6 +32,58 @@ const createEmptyTierCounts = (): Record<BadgeTier, number> => ({
     platinum: 0,
 });
 
+const SUMMER_COURSE_2026_DATES = [
+    '2026-07-19',
+    '2026-07-25',
+    '2026-07-26',
+    '2026-07-27',
+    '2026-07-28',
+    '2026-07-29',
+    '2026-07-30',
+    '2026-08-01',
+    '2026-08-02',
+    '2026-08-03',
+    '2026-08-04',
+    '2026-08-05',
+    '2026-08-06',
+    '2026-08-08',
+    '2026-08-09',
+    '2026-08-10',
+    '2026-08-11',
+];
+
+const SUMMER_COURSE_2026_DATE_SET = new Set(SUMMER_COURSE_2026_DATES);
+
+const hasActualWork = (entry: WorkEntry): boolean => (
+    (entry.selectedBlocks?.length ?? 0) > 0
+    || (entry.supportMinutes ?? 0) > 0
+);
+
+const getSummerCourse2026Tier = (attendanceDays: number): BadgeTier | null => {
+    if (attendanceDays >= 12) return 'platinum';
+    if (attendanceDays >= 10) return 'gold';
+    if (attendanceDays >= 7) return 'silver';
+    if (attendanceDays >= 1) return 'bronze';
+    return null;
+};
+
+export const getSummerCourse2026AttendanceDays = (entries: Record<string, WorkEntry>): number => {
+    const attendedDates = new Set<string>();
+    Object.values(entries).forEach(entry => {
+        if (SUMMER_COURSE_2026_DATE_SET.has(entry.date) && hasActualWork(entry)) {
+            attendedDates.add(entry.date);
+        }
+    });
+    return attendedDates.size;
+};
+
+const isSummerCourse2026InPeriod = (periodStart: Date, periodEnd: Date): boolean => (
+    SUMMER_COURSE_2026_DATES.some(date => {
+        const eventDate = parseLocalDate(date);
+        return eventDate >= periodStart && eventDate <= periodEnd;
+    })
+);
+
 /**
  * 期間内の勤務データから「連勤バッジ（Streak Badges）」を判定してリストにして返します。
  * 連続して勤務した日付を判定し、3日・4日・5日以上の連続勤務に対して異なるTierのバッジを付与します。
@@ -121,6 +173,19 @@ export const getEventBadges = (entries: Record<string, WorkEntry>): Badge[] => {
         });
     }
 
+    const summerCourseAttendanceDays = getSummerCourse2026AttendanceDays(entries);
+    const summerCourseTier = getSummerCourse2026Tier(summerCourseAttendanceDays);
+    if (summerCourseTier) {
+        foundBadges.push({
+            id: 'event-summer-course-2026',
+            type: 'event',
+            tier: summerCourseTier,
+            labelKey: 'badges.eventSummerCourse2026',
+            descriptionKey: 'badges.eventSummerCourse2026Desc',
+            icon: 'sun',
+        });
+    }
+
     return foundBadges;
 };
 
@@ -148,6 +213,9 @@ export const getBadgesForPeriod = (
         if (badge.id === 'event-newyear-2026') {
             const eventDate = parseLocalDate('2026-01-02');
             return eventDate >= period.start && eventDate <= period.end;
+        }
+        if (badge.id === 'event-summer-course-2026') {
+            return isSummerCourse2026InPeriod(period.start, period.end);
         }
         return false;
     });
