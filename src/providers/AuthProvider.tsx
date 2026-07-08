@@ -3,17 +3,65 @@ import type { ReactNode } from 'react';
 import type { User } from 'firebase/auth';
 import {
     createUserWithEmailAndPassword,
+    deleteUser,
+    EmailAuthProvider,
     GoogleAuthProvider,
     onAuthStateChanged,
+    reauthenticateWithCredential,
+    reauthenticateWithPopup,
     sendEmailVerification,
+    sendPasswordResetEmail,
     signInWithEmailAndPassword,
     signInWithPopup,
     signOut as firebaseSignOut,
+    updatePassword,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { AuthContext } from '../contexts/auth-context';
 import type { WorkEntry, UserSettings } from '../types';
+import { deleteAccountFirestoreData } from '../services/accountDeletion';
+
+const clearLocalAccountData = () => {
+    localStorage.removeItem('juku_salary_entries');
+    localStorage.removeItem('juku_salary_config');
+    localStorage.removeItem('lastSeenTitles');
+};
+
+const reauthenticateForAccountDeletion = async (currentUser: User, password?: string) => {
+    const providerIds = currentUser.providerData.map(provider => provider.providerId);
+
+    if (providerIds.includes(GoogleAuthProvider.PROVIDER_ID)) {
+        await reauthenticateWithPopup(currentUser, new GoogleAuthProvider());
+        return;
+    }
+
+    if (providerIds.includes(EmailAuthProvider.PROVIDER_ID)) {
+        if (!currentUser.email || !password) {
+            const error = new Error('Password is required to delete this account.');
+            error.name = 'auth/password-required';
+            throw error;
+        }
+        const credential = EmailAuthProvider.credential(currentUser.email, password);
+        await reauthenticateWithCredential(currentUser, credential);
+        return;
+    }
+
+    const error = new Error('Unsupported authentication provider.');
+    error.name = 'auth/unsupported-provider';
+    throw error;
+};
+
+const reauthenticateEmailUser = async (currentUser: User, password: string) => {
+    if (!currentUser.email) {
+        const error = new Error('Email is required to reauthenticate this account.');
+        error.name = 'auth/email-required';
+        throw error;
+    }
+
+    const credential = EmailAuthProvider.credential(currentUser.email, password);
+    await reauthenticateWithCredential(currentUser, credential);
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
@@ -39,6 +87,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             return credential;
         },
         signOut: () => firebaseSignOut(auth),
+        sendPasswordReset: (email: string) =>
+            sendPasswordResetEmail(auth, email),
+        changePassword: async (currentPassword: string, newPassword: string) => {
+            const currentUser = auth.currentUser || user;
+            if (!currentUser) throw new Error('No signed-in user.');
+
+            const providerIds = currentUser.providerData.map(provider => provider.providerId);
+            if (!providerIds.includes(EmailAuthProvider.PROVIDER_ID)) {
+                const error = new Error('Password change is only available for email/password accounts.');
+                error.name = 'auth/unsupported-provider';
+                throw error;
+            }
+
+            await reauthenticateEmailUser(currentUser, currentPassword);
+            await updatePassword(currentUser, newPassword);
+        },
+        deleteAccount: async (password?: string) => {
+            const currentUser = auth.currentUser || user;
+            if (!currentUser) throw new Error('No signed-in user.');
+
+            await reauthenticateForAccountDeletion(currentUser, password);
+            await deleteAccountFirestoreData(currentUser.uid);
+            await deleteUser(currentUser);
+            clearLocalAccountData();
+        },
         syncDataToCloud: async (
             entries: Record<string, WorkEntry>,
             config: UserSettings,

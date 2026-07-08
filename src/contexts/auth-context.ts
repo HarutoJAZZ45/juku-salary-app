@@ -9,6 +9,9 @@ export interface AuthContextValue {
     loginWithEmail: (email: string, password: string) => Promise<UserCredential>;
     signUpWithEmail: (email: string, password: string) => Promise<UserCredential>;
     signOut: () => Promise<void>;
+    sendPasswordReset: (email: string) => Promise<void>;
+    changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+    deleteAccount: (password?: string) => Promise<void>;
     syncDataToCloud: (
         entries: Record<string, WorkEntry>,
         config: UserSettings,

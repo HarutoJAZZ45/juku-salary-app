@@ -13,7 +13,7 @@ import { LegalConsentGate } from './components/LegalConsentGate';
 import { LegalDocumentModal } from './components/LegalDocumentModal';
 import { LoadingScreen } from './components/LoadingScreen';
 import { useAuth } from './hooks/useAuth';
-import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, User, LogOut, Trophy, CalendarDays, ShieldCheck, FileText, Megaphone, X } from 'lucide-react';
+import { Settings, Info, ChevronLeft, ChevronRight, MessageSquare, Bell, TrendingUp, Menu, User, LogOut, Trophy, CalendarDays, ShieldCheck, FileText, Megaphone, X, KeyRound, Trash2 } from 'lucide-react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { fetchLatestAnnouncement, isAnnouncementAdmin } from './services/announcements';
 import type { WorkEntry } from './types';
@@ -115,7 +115,7 @@ function App() {
   const { entries, settings, migrationNotice, updateEntry, deleteEntry, updateSettings, clearMigrationNotice, isLoaded } = useSalaryData();
 
   // 認証のカスタムフック
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut, changePassword, deleteAccount } = useAuth();
 
   const [currentViewDate, setCurrentViewDate] = useState(new Date());
 
@@ -331,6 +331,86 @@ function App() {
     } catch (error) {
       console.error('Logout failed:', error);
       window.alert('ログアウトできませんでした。時間をおいてもう一度お試しください。');
+    }
+  };
+
+  const isPasswordAccount = user.providerData.some(provider => provider.providerId === 'password');
+
+  const handleChangePassword = async () => {
+    if (!isPasswordAccount) {
+      window.alert('パスワード変更は、メールアドレスとパスワードで登録したアカウントで利用できます。');
+      return;
+    }
+
+    const currentPassword = window.prompt('現在のパスワードを入力してください。');
+    if (!currentPassword) return;
+
+    const newPassword = window.prompt('新しいパスワードを入力してください。（6文字以上）');
+    if (!newPassword) return;
+
+    if (newPassword.length < 6) {
+      window.alert('新しいパスワードは6文字以上にしてください。');
+      return;
+    }
+
+    const confirmation = window.prompt('確認のため、新しいパスワードをもう一度入力してください。');
+    if (confirmation !== newPassword) {
+      window.alert('新しいパスワードが一致しません。');
+      return;
+    }
+
+    setIsMenuOpen(false);
+    try {
+      await changePassword(currentPassword, newPassword);
+      window.alert('パスワードを変更しました。');
+    } catch (error) {
+      console.error('Password change failed:', error);
+      const code = typeof error === 'object' && error !== null && 'code' in error
+        ? String((error as { code?: unknown }).code)
+        : '';
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        window.alert('現在のパスワードが正しくありません。');
+      } else if (code === 'auth/weak-password') {
+        window.alert('新しいパスワードが弱すぎます。6文字以上で設定してください。');
+      } else if (code === 'auth/requires-recent-login') {
+        window.alert('安全のため、もう一度ログインしてからパスワード変更をお試しください。');
+      } else {
+        window.alert('パスワードを変更できませんでした。時間をおいてもう一度お試しください。');
+      }
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmation = window.prompt(
+      'アカウントを削除すると、勤務データ、給与設定、ランキング、公開プロフィール、フォロー情報を削除します。この操作は元に戻せません。\n削除する場合は「削除」と入力してください。',
+    );
+    if (confirmation !== '削除') return;
+
+    let password: string | undefined;
+    if (isPasswordAccount) {
+      const input = window.prompt('本人確認のため、現在のパスワードを入力してください。');
+      if (!input) return;
+      password = input;
+    }
+
+    setIsMenuOpen(false);
+    try {
+      await deleteAccount(password);
+      window.alert('アカウントを削除しました。');
+    } catch (error) {
+      console.error('Account deletion failed:', error);
+      const code = typeof error === 'object' && error !== null && 'code' in error
+        ? String((error as { code?: unknown }).code)
+        : '';
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        window.alert('パスワードが正しくありません。');
+      } else if (code === 'auth/requires-recent-login' || code === 'auth/popup-closed-by-user') {
+        window.alert('本人確認が完了しませんでした。もう一度ログインしてから、アカウント削除をお試しください。');
+      } else if (code === 'permission-denied' || code === 'firestore/permission-denied') {
+        window.alert('関連データを削除できませんでした。Firestore セキュリティルールの確認が必要です。');
+      } else {
+        window.alert('アカウント削除に失敗しました。通信状況を確認して、もう一度お試しください。');
+      }
     }
   };
 
@@ -678,6 +758,26 @@ function App() {
             >
               <MessageSquare size={18} />
               Feedback
+            </button>
+
+            {isPasswordAccount && (
+              <button
+                onClick={() => void handleChangePassword()}
+                className="menu-item"
+                style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', borderTop: '1px solid #e2e8f0', width: '100%', textAlign: 'left', borderRadius: '8px 8px 0 0', cursor: 'pointer', fontSize: '14px', color: '#334155', marginTop: '4px' }}
+              >
+                <KeyRound size={18} />
+                パスワード変更
+              </button>
+            )}
+
+            <button
+              onClick={() => void handleDeleteAccount()}
+              className="menu-item"
+              style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', borderTop: isPasswordAccount ? 'none' : '1px solid #e2e8f0', width: '100%', textAlign: 'left', borderRadius: isPasswordAccount ? '0' : '8px 8px 0 0', cursor: 'pointer', fontSize: '14px', color: '#be123c', fontWeight: 600, marginTop: isPasswordAccount ? 0 : '4px' }}
+            >
+              <Trash2 size={18} />
+              アカウント削除
             </button>
 
             <button
