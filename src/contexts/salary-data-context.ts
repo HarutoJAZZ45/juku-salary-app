@@ -13,6 +13,7 @@ export interface SalaryDataContextValue {
     updateSettings: (newSettings: UserSettings) => Promise<void>;
     clearMigrationNotice: () => void;
     isLoaded: boolean;
+    dataLoadError: string | null;
 }
 
 export const SalaryDataContext = createContext<SalaryDataContextValue | undefined>(undefined);

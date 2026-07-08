@@ -98,6 +98,53 @@ function LoginRequiredScreen() {
   );
 }
 
+function DataLoadErrorScreen({ message }: { message: string }) {
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)',
+      color: '#334155',
+      textAlign: 'center'
+    }}>
+      <div style={{
+        maxWidth: '420px',
+        padding: '28px',
+        borderRadius: '24px',
+        background: 'white',
+        boxShadow: '0 24px 60px rgba(15, 23, 42, 0.12)',
+        border: '1px solid #e2e8f0'
+      }}>
+        <h1 style={{ margin: '0 0 10px', fontSize: '20px', color: '#0f172a' }}>データを読み込めませんでした</h1>
+        <p style={{ margin: '0 0 18px', fontSize: '14px', lineHeight: 1.7, color: '#64748b' }}>
+          {message}
+        </p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          style={{
+            width: '100%',
+            minHeight: '44px',
+            border: 0,
+            borderRadius: '12px',
+            background: '#334155',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: 700,
+            cursor: 'pointer'
+          }}
+        >
+          再読み込みする
+        </button>
+      </div>
+      <Analytics />
+    </div>
+  );
+}
+
 /**
  * メインアプリケーションコンポーネント (SPAのルートレイアウト)
  * 
@@ -112,7 +159,7 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
   // 給与データのカスタムフック（読み込み、更新、削除、設定）
-  const { entries, settings, migrationNotice, updateEntry, deleteEntry, updateSettings, clearMigrationNotice, isLoaded } = useSalaryData();
+  const { entries, settings, migrationNotice, updateEntry, deleteEntry, updateSettings, clearMigrationNotice, isLoaded, dataLoadError } = useSalaryData();
 
   // 認証のカスタムフック
   const { user, loading: authLoading, signOut, changePassword, deleteAccount } = useAuth();
@@ -265,6 +312,8 @@ function App() {
 
   // 未ログイン時はホーム画面を表示しない
   if (!user) return <LoginRequiredScreen />;
+
+  if (dataLoadError) return <DataLoadErrorScreen message={dataLoadError} />;
 
   // データの読み込み完了までローディング表示
   if (!isLoaded) return <LoadingScreen />;

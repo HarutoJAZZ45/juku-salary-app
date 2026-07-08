@@ -9,6 +9,11 @@ import type { WorkEntry, UserSettings } from '../types';
 const STORAGE_KEY_ENTRIES = 'juku_salary_entries';
 const STORAGE_KEY_CONFIG = 'juku_salary_config';
 
+const clearSalaryLocalData = () => {
+    localStorage.removeItem(STORAGE_KEY_ENTRIES);
+    localStorage.removeItem(STORAGE_KEY_CONFIG);
+};
+
 const DEFAULT_SETTINGS: UserSettings = {
     teachingHourlyRate: 1380,
     hourlyRate: 1075,
@@ -50,6 +55,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
     const [entries, setEntries] = useState<Record<string, WorkEntry>>({});
     const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [dataLoadError, setDataLoadError] = useState<string | null>(null);
     const [migrationNotice, setMigrationNotice] = useState<string | null>(null);
     const isLoadingRef = useRef(true);
     const entriesRef = useRef(entries);
@@ -70,6 +76,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
 
         const loadInitialData = async () => {
             setIsLoaded(false);
+            setDataLoadError(null);
             if (user) {
                 try {
                     const userRef = doc(db, 'users', user.uid);
@@ -79,48 +86,37 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
                         const cloudData = snapshot.data();
                         const cloudEntries = cloudData.entries || {};
                         setEntries(cloudEntries);
-                        localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(cloudEntries));
 
                         if (cloudData.config) {
                             const mergedConfig = mergeSettings(cloudData.config);
                             setSettings(mergedConfig);
-                            localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(mergedConfig));
+                        } else {
+                            setSettings(DEFAULT_SETTINGS);
                         }
+                        clearSalaryLocalData();
                     } else {
-                        const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
-                        const storedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
-                        const localEntries = storedEntries ? JSON.parse(storedEntries) : {};
-                        const localConfig = storedConfig ? mergeSettings(JSON.parse(storedConfig)) : DEFAULT_SETTINGS;
-                        setEntries(localEntries);
-                        setSettings(localConfig);
+                        setEntries({});
+                        setSettings(DEFAULT_SETTINGS);
+                        clearSalaryLocalData();
 
                         await setDoc(userRef, {
-                            entries: localEntries,
-                            config: localConfig,
-                            migration: {
-                                localStorageImportedAt: new Date().toISOString(),
-                            },
+                            entries: {},
+                            config: DEFAULT_SETTINGS,
                             updatedAt: new Date().toISOString(),
                         }, { merge: true });
-
-                        if (storedEntries || storedConfig) {
-                            setMigrationNotice('端末内に保存されていたデータをアカウントに移行しました。念のため、この端末内のデータはまだ残しています。');
-                        }
                     }
                 } catch (error) {
                     console.error('Cloud data load error:', error);
-                    const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
-                    if (storedEntries) setEntries(JSON.parse(storedEntries));
+                    clearSalaryLocalData();
+                    isLoadingRef.current = true;
+                    setIsLoaded(false);
+                    setDataLoadError('データを読み込めませんでした。通信状況を確認して、再読み込みしてください。');
+                    return;
                 }
             } else {
-                try {
-                    const storedEntries = localStorage.getItem(STORAGE_KEY_ENTRIES);
-                    const storedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
-                    if (storedEntries) setEntries(JSON.parse(storedEntries));
-                    if (storedConfig) setSettings(mergeSettings(JSON.parse(storedConfig)));
-                } catch (error) {
-                    console.error('Failed to load local data', error);
-                }
+                setEntries({});
+                setSettings(DEFAULT_SETTINGS);
+                clearSalaryLocalData();
             }
 
             isLoadingRef.current = false;
@@ -132,7 +128,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (isLoadingRef.current || !isLoaded) return;
-        localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+        clearSalaryLocalData();
 
         if (user) {
             const saveToFirestore = async () => {
@@ -148,7 +144,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         if (isLoadingRef.current || !isLoaded) return;
-        localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(settings));
+        clearSalaryLocalData();
 
         if (user) {
             const saveToFirestore = async () => {
@@ -191,7 +187,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
 
     const updateSettings = useCallback(async (newSettings: UserSettings) => {
         setSettings(newSettings);
-        localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(newSettings));
+        clearSalaryLocalData();
 
         if (user) {
             try {
@@ -222,7 +218,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
 
         entriesRef.current = rest;
         setEntries(rest);
-        localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(rest));
+        clearSalaryLocalData();
 
         if (user) {
             try {
@@ -240,6 +236,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
         entries,
         settings,
         migrationNotice,
+        dataLoadError,
         updateEntry,
         deleteEntry,
         getEntry,
@@ -247,7 +244,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
         updateSettings,
         clearMigrationNotice,
         isLoaded,
-    }), [clearMigrationNotice, deleteEntry, entries, getEntry, isLoaded, migrationNotice, settings, updateEntry, updateSettings]);
+    }), [clearMigrationNotice, dataLoadError, deleteEntry, entries, getEntry, isLoaded, migrationNotice, settings, updateEntry, updateSettings]);
 
     return <SalaryDataContext.Provider value={value}>{children}</SalaryDataContext.Provider>;
 };

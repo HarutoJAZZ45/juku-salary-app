@@ -16,10 +16,8 @@ import {
     signOut as firebaseSignOut,
     updatePassword,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { auth } from '../lib/firebase';
 import { AuthContext } from '../contexts/auth-context';
-import type { WorkEntry, UserSettings } from '../types';
 import { deleteAccountFirestoreData } from '../services/accountDeletion';
 
 const clearLocalAccountData = () => {
@@ -68,6 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => onAuthStateChanged(auth, currentUser => {
+        if (!currentUser) clearLocalAccountData();
         setUser(currentUser);
         setLoading(false);
     }), []);
@@ -86,7 +85,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             await sendEmailVerification(credential.user);
             return credential;
         },
-        signOut: () => firebaseSignOut(auth),
+        signOut: async () => {
+            await firebaseSignOut(auth);
+            clearLocalAccountData();
+        },
         sendPasswordReset: (email: string) =>
             sendPasswordResetEmail(auth, email),
         changePassword: async (currentPassword: string, newPassword: string) => {
@@ -111,31 +113,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             await deleteAccountFirestoreData(currentUser.uid);
             await deleteUser(currentUser);
             clearLocalAccountData();
-        },
-        syncDataToCloud: async (
-            entries: Record<string, WorkEntry>,
-            config: UserSettings,
-            targetUser?: User | null
-        ) => {
-            const currentUser = targetUser || user;
-            if (!currentUser) return;
-            const userRef = doc(db, 'users', currentUser.uid);
-            await setDoc(userRef, {
-                entries,
-                config,
-                updatedAt: new Date().toISOString(),
-            }, { mergeFields: ['entries', 'config', 'updatedAt'] });
-        },
-        loadDataFromCloud: async (targetUser?: User | null) => {
-            const currentUser = targetUser || user;
-            if (!currentUser) return null;
-            const userRef = doc(db, 'users', currentUser.uid);
-            const snapshot = await getDoc(userRef);
-            if (!snapshot.exists()) return null;
-            return snapshot.data() as {
-                entries: Record<string, WorkEntry>;
-                config: UserSettings;
-            };
         },
         resendVerification: async () => {
             if (user) await sendEmailVerification(user);

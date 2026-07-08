@@ -1,6 +1,5 @@
 import { createContext } from 'react';
 import type { User, UserCredential } from 'firebase/auth';
-import type { WorkEntry, UserSettings } from '../types';
 
 export interface AuthContextValue {
     user: User | null;
@@ -12,15 +11,6 @@ export interface AuthContextValue {
     sendPasswordReset: (email: string) => Promise<void>;
     changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
     deleteAccount: (password?: string) => Promise<void>;
-    syncDataToCloud: (
-        entries: Record<string, WorkEntry>,
-        config: UserSettings,
-        targetUser?: User | null
-    ) => Promise<void>;
-    loadDataFromCloud: (targetUser?: User | null) => Promise<{
-        entries: Record<string, WorkEntry>;
-        config: UserSettings;
-    } | null>;
     resendVerification: () => Promise<void>;
 }
 

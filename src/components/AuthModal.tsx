@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import type { User as FirebaseUser } from 'firebase/auth';
 import { X, LogOut, User, Cloud, Mail, ArrowLeft, UserPlus, KeyRound } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../contexts/LanguageContext';
@@ -58,8 +57,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         signUpWithEmail,
         loginWithEmail,
         signOut,
-        syncDataToCloud,
-        loadDataFromCloud,
         resendVerification,
         sendPasswordReset,
     } = useAuth();
@@ -77,51 +74,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         setPasswordConfirmation('');
     };
 
-    const handleSync = async (targetUser?: FirebaseUser) => {
-        const currentUser = targetUser || user;
-        if (!currentUser) return;
-
-        try {
-            const entriesStr = localStorage.getItem('juku_salary_entries');
-            const configStr = localStorage.getItem('juku_salary_config');
-            const entries = entriesStr ? JSON.parse(entriesStr) : {};
-            const config = configStr ? JSON.parse(configStr) : {};
-
-            await syncDataToCloud(entries, config, currentUser);
-            window.location.reload();
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const handleDownload = async (targetUser?: FirebaseUser) => {
-        const currentUser = targetUser || user;
-        if (!currentUser) return;
-
-        try {
-            const data = await loadDataFromCloud(currentUser);
-            if (data) {
-                localStorage.removeItem('juku_salary_entries');
-                localStorage.removeItem('juku_salary_config');
-                localStorage.setItem('juku_salary_entries', JSON.stringify(data.entries || {}));
-                localStorage.setItem('juku_salary_config', JSON.stringify(data.config || {}));
-                window.location.reload();
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
     const handleGoogleLogin = async () => {
         try {
-            const result = await signInWithGoogle();
-            const cloudData = await loadDataFromCloud(result.user);
-
-            if (cloudData) {
-                await handleDownload(result.user);
-            } else {
-                await handleSync(result.user);
-            }
+            await signInWithGoogle();
         } catch (error) {
             console.error('Login failed:', error);
             alert('ログインできませんでした。時間をおいてもう一度お試しください。');
@@ -139,19 +94,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         setAuthLoading(true);
         try {
             if (mode === 'register') {
-                const result = await signUpWithEmail(email, password);
+                await signUpWithEmail(email, password);
                 alert('確認メールを送信しました。迷惑メールフォルダに入る場合があります。メール内の案内を確認してください。');
-                await handleSync(result.user);
                 return;
             }
 
-            const result = await loginWithEmail(email, password);
-            const cloudData = await loadDataFromCloud(result.user);
-            if (cloudData) {
-                await handleDownload(result.user);
-            } else {
-                await handleSync(result.user);
-            }
+            await loginWithEmail(email, password);
         } catch (error) {
             console.error('Email auth failed:', error);
             alert(mode === 'register'
