@@ -78,7 +78,7 @@ export function MonthlyBadgePage({ entries, settings, monthKey, onClose }: Month
                         const tierLabel = tierLabels[badge.tier];
                         const label = badge.type === 'earnings'
                             ? `給与 ${baseLabel}`
-                            : badge.type === 'event'
+                            : badge.id === 'event-summer-course-2026'
                                 ? `${baseLabel}（${tierLabel}）`
                                 : baseLabel;
                         const description = t.badges[descriptionKey] || badge.descriptionKey;
@@ -87,13 +87,15 @@ export function MonthlyBadgePage({ entries, settings, monthKey, onClose }: Month
                             : badge.type === 'event'
                                 ? badge.icon === 'sun'
                                     ? Sun
-                                    : CalendarDays
+                                    : badge.icon === 'sparkles'
+                                        ? Sparkles
+                                        : CalendarDays
                                 : badge.icon === 'sparkles'
                                     ? Sparkles
                                     : Trophy;
 
                         return (
-                            <article key={id} className={`monthly-badge-card monthly-badge-card--${badge.type} monthly-badge-card--${badge.tier} monthly-badge-card--icon-${badge.icon}`}>
+                            <article key={id} className={`monthly-badge-card monthly-badge-card--${badge.type} monthly-badge-card--${badge.tier} monthly-badge-card--${badge.id}`}>
                                 <span className="monthly-badge-card__icon"><Icon size={23} /></span>
                                 <div>
                                     <span>{badge.type === 'event' ? 'イベント限定' : badge.type === 'streak' ? '連勤' : '給与達成'}</span>

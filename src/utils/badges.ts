@@ -169,7 +169,7 @@ export const getEventBadges = (entries: Record<string, WorkEntry>): Badge[] => {
             tier: 'gold', // 特別にゴールド級
             labelKey: 'badges.eventNewYear',
             descriptionKey: 'badges.eventNewYearDesc',
-            icon: 'sun'
+            icon: 'sparkles'
         });
     }
 

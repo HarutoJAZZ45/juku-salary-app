@@ -91,6 +91,7 @@ test('イベントバッジをID別に集計し、従来の総数と一致する
   const totals = calculateTotalBadges(entries, settings);
 
   assert.equal(statistics.events['event-newyear-2026'], 1);
+  assert.equal(getEventBadges(entries).find(badge => badge.id === 'event-newyear-2026')?.icon, 'sparkles');
   assert.deepEqual(totals, statistics.totals);
 });
 

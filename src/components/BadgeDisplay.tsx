@@ -10,7 +10,7 @@ interface BadgeDisplayProps {
 }
 
 const getBadgeColors = (badge: Badge) => {
-    if (badge.type === 'event' && badge.icon !== 'sun') {
+    if (badge.type === 'event' && badge.id !== 'event-summer-course-2026') {
         return { color: '#be185d', background: '#fdf2f8', border: '#fbcfe8' };
     }
     switch (badge.tier) {
@@ -47,7 +47,9 @@ export const BadgeDisplay = ({ badges, onClick }: BadgeDisplayProps) => {
                     : badge.type === 'event'
                         ? badge.icon === 'sun'
                             ? Sun
-                            : CalendarDays
+                            : badge.icon === 'sparkles'
+                                ? Sparkles
+                                : CalendarDays
                         : badge.icon === 'sparkles'
                             ? Sparkles
                             : Trophy;
