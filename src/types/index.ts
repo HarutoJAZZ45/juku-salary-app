@@ -57,6 +57,12 @@ export interface UserSettings {
   annualLimit: number; // 年収の壁（デフォルト: 103万）
 }
 
+export interface UiState {
+  lastReadNewsId?: string;
+  hasSeenHelp: boolean;
+  lastSeenTitles: string[];
+}
+
 /**
  * 日次サマリー（計算用）
  */

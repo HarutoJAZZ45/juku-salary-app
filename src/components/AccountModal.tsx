@@ -19,7 +19,7 @@ import {
     X,
     Zap,
 } from 'lucide-react';
-import type { UserProfile, UserSettings, WorkEntry } from '../types';
+import type { UiState, UserProfile, UserSettings, WorkEntry } from '../types';
 import { calculateLevelData } from '../utils/levelSystem';
 import { calculateTotalBadges } from '../utils/badges';
 import { useTranslation } from '../contexts/LanguageContext';
@@ -38,7 +38,9 @@ interface AccountModalProps {
     onClose: () => void;
     entries: Record<string, WorkEntry>;
     settings: UserSettings;
+    uiState: UiState;
     onUpdateSettings: (settings: UserSettings) => void | Promise<void>;
+    onUpdateUiState: (updates: Partial<UiState>) => void | Promise<void>;
     onOpenBadgeStats?: () => void;
     onOpenConnections?: (kind: FollowListKind) => void;
     displayMode?: 'modal' | 'page';
@@ -84,7 +86,9 @@ export const AccountModal = ({
     onClose,
     entries,
     settings,
+    uiState,
     onUpdateSettings,
+    onUpdateUiState,
     onOpenBadgeStats,
     onOpenConnections,
     displayMode = 'modal',
@@ -108,9 +112,6 @@ export const AccountModal = ({
     const [editTheme, setEditTheme] = useState(profile?.themeColor || 'indigo');
     const [editAvatar, setEditAvatar] = useState(profile?.avatarId || 'user');
     const [editTitle, setEditTitle] = useState(profile?.activeTitle);
-    const [lastSeenTitles, setLastSeenTitles] = useState<string[]>(() => (
-        JSON.parse(localStorage.getItem('lastSeenTitles') || '[]')
-    ));
     const [isUpdatingParticipation, setIsUpdatingParticipation] = useState(false);
     const [followCounts, setFollowCounts] = useState<FollowCounts | null>(null);
 
@@ -142,7 +143,7 @@ export const AccountModal = ({
     const currentTheme = THEME_COLORS.find(item => item.id === profile?.themeColor) ?? THEME_COLORS[0];
     const CurrentAvatar = AVATARS.find(item => item.id === profile?.avatarId)?.icon ?? User;
     const unlockedTitles = profile?.unlockedTitles ?? [];
-    const hasNewTitles = unlockedTitles.some(title => !lastSeenTitles.includes(title));
+    const hasNewTitles = unlockedTitles.some(title => !uiState.lastSeenTitles.includes(title));
     const totalBadgeCount = badgeCounts.streak + badgeCounts.earnings + badgeCounts.event;
     const titleLabel = profile?.activeTitle
         ? t.titles[profile.activeTitle as keyof typeof t.titles] || profile.activeTitle
@@ -166,8 +167,7 @@ export const AccountModal = ({
         setEditAvatar(profile?.avatarId || 'user');
         setEditTitle(profile?.activeTitle);
         setIsEditing(true);
-        localStorage.setItem('lastSeenTitles', JSON.stringify(unlockedTitles));
-        setLastSeenTitles(unlockedTitles);
+        void onUpdateUiState({ lastSeenTitles: unlockedTitles });
     };
 
     const saveProfile = () => {

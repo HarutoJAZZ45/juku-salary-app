@@ -5,7 +5,7 @@ This document records the safety rules and implementation direction for the majo
 ## Safety principles
 
 - Protect active users' data first.
-- Do not delete or rename existing Firestore/localStorage fields without a compatible migration.
+- Do not delete or rename existing Firestore fields without a compatible migration.
 - Prefer additive schema changes.
 - Keep private salary data separate from public profile/ranking data.
 - Run tests, lint, type-check, and build before publishing meaningful changes.
@@ -17,20 +17,19 @@ This document records the safety rules and implementation direction for the majo
 - Firestore `users/{uid}.entries`
 - Firestore `users/{uid}.config`
 - Firestore `rankings/{uid}`
-- localStorage `juku_salary_entries`
-- localStorage `juku_salary_config`
+- Firestore `users/{uid}.uiState`
 
-## Login-required migration policy
+## Login-required data policy
 
-The app will move toward requiring login before entering the main app.
+The app requires login before entering the main app.
 
-To avoid data loss for existing users who used the app without logging in:
+Current policy after the cloud-first cleanup:
 
-1. Detect existing localStorage data after login.
-2. If the user's Firestore account does not already have salary data, import localStorage data into Firestore.
-3. Do not immediately delete localStorage data after import.
-4. Save migration flags such as `localStorageImportedAt`.
-5. Show a clear message when local data has been imported or when migration needs attention.
+1. Treat Firestore as the source of truth after login.
+2. Do not import browser-local data into a user account automatically.
+3. If `users/{uid}` already exists, load `entries`, `config`, and `uiState` from Firestore.
+4. If `users/{uid}` does not exist, create a clean default account document.
+5. Remove legacy browser-local keys only as cleanup; do not read or reuse them.
 
 ## Public and private data boundary
 
@@ -62,8 +61,8 @@ Recommended Firestore separation:
 users/{uid}
   entries
   config
+  uiState
   private settings
-  migration flags
 
 publicProfiles/{uid}
   displayName
@@ -100,7 +99,7 @@ publicProfiles/{uid}
 
 ## Suggested implementation order
 
-1. Login-required shell and localStorage-to-Firestore migration.
+1. Login-required shell and cloud-first Firestore data loading.
 2. Terms/privacy pages and first-login consent.
 3. Route-based page structure.
 4. Firestore-backed announcements.

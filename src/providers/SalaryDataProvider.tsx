@@ -4,7 +4,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { SalaryDataContext } from '../contexts/salary-data-context';
 import { useAuth } from '../hooks/useAuth';
 import { db } from '../lib/firebase';
-import type { WorkEntry, UserSettings } from '../types';
+import type { UiState, WorkEntry, UserSettings } from '../types';
 
 const STORAGE_KEY_ENTRIES = 'juku_salary_entries';
 const STORAGE_KEY_CONFIG = 'juku_salary_config';
@@ -12,6 +12,12 @@ const STORAGE_KEY_CONFIG = 'juku_salary_config';
 const clearSalaryLocalData = () => {
     localStorage.removeItem(STORAGE_KEY_ENTRIES);
     localStorage.removeItem(STORAGE_KEY_CONFIG);
+};
+
+const clearLegacyUiLocalData = () => {
+    localStorage.removeItem('lastReadNewsId');
+    localStorage.removeItem('hasSeenHelp');
+    localStorage.removeItem('lastSeenTitles');
 };
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -38,6 +44,11 @@ const DEFAULT_SETTINGS: UserSettings = {
     },
 };
 
+const DEFAULT_UI_STATE: UiState = {
+    hasSeenHelp: false,
+    lastSeenTitles: [],
+};
+
 const mergeSettings = (stored: Partial<UserSettings>): UserSettings => ({
     ...DEFAULT_SETTINGS,
     ...stored,
@@ -51,24 +62,33 @@ const mergeSettings = (stored: Partial<UserSettings>): UserSettings => ({
     },
 });
 
+const mergeUiState = (stored?: Partial<UiState>): UiState => ({
+    ...DEFAULT_UI_STATE,
+    ...(stored || {}),
+    lastSeenTitles: Array.isArray(stored?.lastSeenTitles) ? stored.lastSeenTitles : [],
+});
+
 export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
     const [entries, setEntries] = useState<Record<string, WorkEntry>>({});
     const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
+    const [uiState, setUiState] = useState<UiState>(DEFAULT_UI_STATE);
     const [isLoaded, setIsLoaded] = useState(false);
     const [dataLoadError, setDataLoadError] = useState<string | null>(null);
     const [migrationNotice, setMigrationNotice] = useState<string | null>(null);
     const isLoadingRef = useRef(true);
     const entriesRef = useRef(entries);
     const settingsRef = useRef(settings);
+    const uiStateRef = useRef(uiState);
     const { user, loading: authLoading } = useAuth();
 
     entriesRef.current = entries;
     settingsRef.current = settings;
+    uiStateRef.current = uiState;
 
     useEffect(() => {
-        if (authLoading) {
-            isLoadingRef.current = true;
-            setIsLoaded(false);
+            if (authLoading) {
+                isLoadingRef.current = true;
+                setIsLoaded(false);
             return;
         }
 
@@ -77,6 +97,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
         const loadInitialData = async () => {
             setIsLoaded(false);
             setDataLoadError(null);
+            clearLegacyUiLocalData();
             if (user) {
                 try {
                     const userRef = doc(db, 'users', user.uid);
@@ -93,15 +114,18 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
                         } else {
                             setSettings(DEFAULT_SETTINGS);
                         }
+                        setUiState(mergeUiState(cloudData.uiState));
                         clearSalaryLocalData();
                     } else {
                         setEntries({});
                         setSettings(DEFAULT_SETTINGS);
+                        setUiState(DEFAULT_UI_STATE);
                         clearSalaryLocalData();
 
                         await setDoc(userRef, {
                             entries: {},
                             config: DEFAULT_SETTINGS,
+                            uiState: DEFAULT_UI_STATE,
                             updatedAt: new Date().toISOString(),
                         }, { merge: true });
                     }
@@ -116,6 +140,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
             } else {
                 setEntries({});
                 setSettings(DEFAULT_SETTINGS);
+                setUiState(DEFAULT_UI_STATE);
                 clearSalaryLocalData();
             }
 
@@ -129,6 +154,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (isLoadingRef.current || !isLoaded) return;
         clearSalaryLocalData();
+        clearLegacyUiLocalData();
 
         if (user) {
             const saveToFirestore = async () => {
@@ -145,6 +171,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if (isLoadingRef.current || !isLoaded) return;
         clearSalaryLocalData();
+        clearLegacyUiLocalData();
 
         if (user) {
             const saveToFirestore = async () => {
@@ -201,6 +228,27 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [user]);
 
+    const updateUiState = useCallback(async (updates: Partial<UiState>) => {
+        const nextUiState = mergeUiState({
+            ...uiStateRef.current,
+            ...updates,
+        });
+        if (JSON.stringify(nextUiState) === JSON.stringify(uiStateRef.current)) return;
+
+        uiStateRef.current = nextUiState;
+        setUiState(nextUiState);
+        clearLegacyUiLocalData();
+
+        if (user) {
+            try {
+                const userRef = doc(db, 'users', user.uid);
+                await setDoc(userRef, { uiState: nextUiState }, { mergeFields: ['uiState'] });
+            } catch (error) {
+                console.error('UI state sync failed:', error);
+            }
+        }
+    }, [user]);
+
     const getEntry = useCallback((date: string) => entries[date], [entries]);
 
     const deleteEntry = useCallback(async (date: string) => {
@@ -235,6 +283,7 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
     const value = useMemo(() => ({
         entries,
         settings,
+        uiState,
         migrationNotice,
         dataLoadError,
         updateEntry,
@@ -242,9 +291,10 @@ export const SalaryDataProvider = ({ children }: { children: ReactNode }) => {
         getEntry,
         setSettings,
         updateSettings,
+        updateUiState,
         clearMigrationNotice,
         isLoaded,
-    }), [clearMigrationNotice, dataLoadError, deleteEntry, entries, getEntry, isLoaded, migrationNotice, settings, updateEntry, updateSettings]);
+    }), [clearMigrationNotice, dataLoadError, deleteEntry, entries, getEntry, isLoaded, migrationNotice, settings, uiState, updateEntry, updateSettings, updateUiState]);
 
     return <SalaryDataContext.Provider value={value}>{children}</SalaryDataContext.Provider>;
 };

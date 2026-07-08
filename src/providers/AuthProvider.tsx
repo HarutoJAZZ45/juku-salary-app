@@ -23,6 +23,8 @@ import { deleteAccountFirestoreData } from '../services/accountDeletion';
 const clearLocalAccountData = () => {
     localStorage.removeItem('juku_salary_entries');
     localStorage.removeItem('juku_salary_config');
+    localStorage.removeItem('lastReadNewsId');
+    localStorage.removeItem('hasSeenHelp');
     localStorage.removeItem('lastSeenTitles');
 };
 

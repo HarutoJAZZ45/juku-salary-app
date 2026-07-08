@@ -159,7 +159,7 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
   // 給与データのカスタムフック（読み込み、更新、削除、設定）
-  const { entries, settings, migrationNotice, updateEntry, deleteEntry, updateSettings, clearMigrationNotice, isLoaded, dataLoadError } = useSalaryData();
+  const { entries, settings, uiState, migrationNotice, updateEntry, deleteEntry, updateSettings, updateUiState, clearMigrationNotice, isLoaded, dataLoadError } = useSalaryData();
 
   // 認証のカスタムフック
   const { user, loading: authLoading, signOut, changePassword, deleteAccount } = useAuth();
@@ -185,9 +185,9 @@ function App() {
   const hasUnreadNews = (
     latestNewsId !== null &&
     !location.pathname.startsWith('/news') &&
-    localStorage.getItem('lastReadNewsId') !== latestNewsId
+    uiState.lastReadNewsId !== latestNewsId
   );
-  const [showHelpHint, setShowHelpHint] = useState(() => !localStorage.getItem('hasSeenHelp'));
+  const showHelpHint = !uiState.hasSeenHelp;
 
   // 称号・バッジの獲得状況監視
   useEffect(() => {
@@ -223,7 +223,7 @@ function App() {
 
     if (changed) {
       // プロフィールの状態を更新
-      // （※バッジシステムやレベルは表示のみの導出データではなく、アバターや称号の設定値としてLocalStorage/Firestoreに永続化される）
+      // （※バッジシステムやレベルは表示のみの導出データではなく、アバターや称号の設定値としてFirestoreに永続化される）
       const activeTitle = settings.profile.activeTitle;
       const updates: Partial<typeof settings.profile> = { unlockedTitles: newUnlockedTitles };
       if (activeTitle && !newUnlockedTitles.includes(activeTitle)) {
@@ -286,10 +286,10 @@ function App() {
 
   useEffect(() => {
     if (!location.pathname.startsWith('/news')) return;
-    if (latestNewsId) {
-      localStorage.setItem('lastReadNewsId', latestNewsId);
+    if (latestNewsId && uiState.lastReadNewsId !== latestNewsId) {
+      void updateUiState({ lastReadNewsId: latestNewsId });
     }
-  }, [latestNewsId, location.pathname]);
+  }, [latestNewsId, location.pathname, uiState.lastReadNewsId, updateUiState]);
 
   const legalDocumentType = location.pathname === '/terms'
     ? 'terms'
@@ -562,7 +562,9 @@ function App() {
             onClose={() => navigate('/home')}
             entries={entries}
             settings={settings}
+            uiState={uiState}
             onUpdateSettings={updateSettings}
+            onUpdateUiState={updateUiState}
             onOpenBadgeStats={() => navigate('/profile/badges')}
             onOpenConnections={kind => navigate(`/profile/connections/${kind}`)}
           />
@@ -864,8 +866,7 @@ function App() {
           <button
             onClick={() => {
               setIsHelpOpen(!isHelpOpen);
-              setShowHelpHint(false);
-              localStorage.setItem('hasSeenHelp', 'true');
+              void updateUiState({ hasSeenHelp: true });
             }}
             className={`glass-btn ${showHelpHint ? 'pulse-hint' : ''}`}
             style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none' }}
@@ -878,9 +879,8 @@ function App() {
           <button onClick={() => navigate('/profile')} className="glass-btn" style={{ padding: '8px', background: 'rgba(255,255,255,0.5)', color: 'var(--text-main)', boxShadow: 'none', position: 'relative' }}>
             <User size={20} />
             {(() => {
-              const lastSeen = JSON.parse(localStorage.getItem('lastSeenTitles') || '[]');
               const current = settings.profile?.unlockedTitles || [];
-              const hasNew = current.some((t: string) => !lastSeen.includes(t));
+              const hasNew = current.some((t: string) => !uiState.lastSeenTitles.includes(t));
               return hasNew && (
                 <span style={{
                   position: 'absolute', top: '6px', right: '6px',
